@@ -1,0 +1,46 @@
+name: Disk Encryption - Bring your own Key
+description: This describes a scenario where a user brings his own key to encrypt volumes.
+components:
+  - cinder
+  - castellan
+  - barbican
+assumptions:
+  - Third-party library code is correctly implemented
+objectives:
+  - name: State-of-the-Art Encryption Algorithm
+    description: The block device encryption algorithm must be state of the art, e.g., refer to a TR.
+    statements:
+      - Given a block device encryption E, if an encryption algorithm A is employed, then A must be a state-of-the-art cryptographic algorithm (e.g., BSI TR-02102-1)
+      - A must support a minimum key length L with L >= 256
+    components:
+      - cinder
+  - name: Key must be input to disk encryption
+    description: The selected customer key must be the actual input to the block encryption
+    statements:
+      - Given a customer-managed key K stored in OpenStack's key management component Barbican, when K is selected as the encryption key for a block device encryption operation O, O must retrieve K from a Barbican API endpoint.
+      - Given a device encryption operation O, the key K used in O must be deleted from memory after the operation is completed.
+    components:
+      - cinder
+      - castellan
+      - barbican
+  - name: Transport Encryption of Key
+    description: The key must be protected when in transit.
+    statements:
+      - Given a client call C that retrieves a key K from the Barbican API, the transmission of K must utilize a secure, state-of-the-art, transport protocol (e.g., specified in BSI TR-02102-1).
+    restrictions:
+      - Only client calls from Cinder to Barbican are in scope.
+    components:
+      - barbican
+      - castellan
+      - cinder
+  - name: Key accessible only by valid user
+    description: The key must only be accessible by a valid user and through the REST API of barbican.
+    statements:
+      - Given a cryptographic key K stored in Barbican, access to K must be facilitated exclusively through the Barbican REST API.
+      - The REST API must implement strong authentication mechanisms (e.g., OAuth) to verify the identity of users before granting access to K.
+      - Access to K must be restricted to authenticated users through authentication, i.e., each Barbican endpoint E must implement a strong authentication mechanism. 
+      - Access to K must be restricted to authenticated users through authorization, i.e., authorization checks must be performed on the user to ensure that the user's permissions P ⊇ {read_access(K)}.
+    restrictions:
+      - No authorization check are in scope in the initial version of the use case.
+    components:
+      - barbican

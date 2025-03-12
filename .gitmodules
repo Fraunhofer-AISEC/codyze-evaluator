@@ -1,0 +1,40 @@
+[submodule "external/nova"]
+	path = external/nova
+	url = https://github.com/openstack/nova.git
+	branch = stable/2024.2
+[submodule "external/cinder"]
+	path = external/cinder
+	url = https://github.com/openstack/cinder.git
+	branch = stable/2024.2
+[submodule "external/keystone"]
+	path = external/keystone
+	url = https://github.com/openstack/keystone.git
+	branch = stable/2024.2
+[submodule "external/barbican"]
+	path = external/barbican
+	url = https://github.com/openstack/barbican.git
+	branch = stable/2024.2
+[submodule "external/typeshed"]
+	path = external/typeshed
+	url = https://github.com/python/typeshed.git
+	branch = main
+[submodule "external/castellan"]
+	path = external/castellan
+	url = https://github.com/openstack/castellan.git
+    branch = stable/2024.2
+[submodule "external/oslo.log"]
+	path = external/oslo.log
+	url = https://github.com/openstack/oslo.log.git
+	branch = stable/2024.2
+[submodule "external/oslo.config"]
+	path = external/oslo.config
+	url = https://github.com/openstack/oslo.config.git
+	branch = stable/2024.2
+[submodule "external/python-cinderclient"]
+	path = external/python-cinderclient
+	url = https://github.com/openstack/python-cinderclient
+    branch = stable/2024.2
+[submodule "external/stevedore"]
+	path = external/stevedore
+	url = https://github.com/openstack/stevedore.git
+	branch = stable/2024.2
