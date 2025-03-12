@@ -8,6 +8,7 @@ import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.NodeBuilder
 import de.fraunhofer.aisec.cpg.graph.codeAndLocationFrom
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
@@ -38,7 +39,7 @@ fun MetadataProvider.newHttpEndpoint(
     httpMethod: String,
     arguments: List<Node>,
     path: String,
-    supportedAuthentications: MutableList<String> = mutableListOf(),
+    authentication: Authentication? = null,
 ): HttpEndpoint {
     val endpoint =
         HttpEndpoint(
@@ -46,7 +47,7 @@ fun MetadataProvider.newHttpEndpoint(
             httpMethod = mapHttpMethod(httpMethod),
             path = path,
             arguments = arguments,
-            supportedAuthentications = supportedAuthentications,
+            authentication = authentication,
         )
     endpoint.underlyingNode = underlyingNode
     endpoint.codeAndLocationFrom(underlyingNode)

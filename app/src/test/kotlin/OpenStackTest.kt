@@ -3,21 +3,21 @@
  */
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
-import de.fraunhofer.aisec.cpg.analysis.MultiValueEvaluator
+import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.Memory
 import de.fraunhofer.aisec.cpg.graph.edges.get
-import de.fraunhofer.aisec.cpg.graph.get
-import de.fraunhofer.aisec.cpg.graph.invoke
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
