@@ -31,9 +31,7 @@ import de.fraunhofer.aisec.openstack.concepts.newHttpRequest
  */
 @DependsOn(SymbolResolver::class)
 class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
-    override fun cleanup() {
-        // Nothing to do here
-    }
+    val apiVersionPath = "/v3"
 
     override fun accept(node: Node) {
         when (node) {
@@ -63,7 +61,8 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
             val httpClient =
                 record.conceptNodes.filterIsInstance<HttpClient>().singleOrNull()
                     ?: newHttpClient(record, isTLS = false)
-            val path = extractEndpointPath(memberCall.arguments.first()) ?: ""
+            val extractedPath = extractEndpointPath(memberCall.arguments.first())
+            val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
 
             newHttpRequest(
                 underlyingNode = memberCall,
@@ -118,5 +117,9 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 else -> null
             }
         return apiEndpoint
+    }
+
+    override fun cleanup() {
+        // Nothing to do here
     }
 }

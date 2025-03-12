@@ -78,10 +78,13 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                 ?.let { it.evaluate() as? String }
 
                         resourceKey?.let { key ->
-                            key to
-                                getControllerFromCreateResource(
-                                    assign.rhs.firstOrNull() as CallExpression
-                                )
+                            val callExpression = assign.rhs.firstOrNull() as? CallExpression
+                            if (callExpression != null) {
+                                val controller = getControllerFromCreateResource(callExpression)
+                                controller?.let { key to it }
+                            } else {
+                                null
+                            }
                         }
                     }
 
@@ -425,20 +428,14 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         }
     }
 
-    private fun getControllerFromCreateResource(call: CallExpression): RecordDeclaration {
+    private fun getControllerFromCreateResource(call: CallExpression): RecordDeclaration? {
+        val functionDeclaration = call.invokes.firstOrNull() as? FunctionDeclaration
         val returnValue =
-            (((call.invokes.firstOrNull() as? FunctionDeclaration)
-                ?.returns
-                ?.firstOrNull()
-                ?.returnValue)
-                as? ConstructExpression)
+            functionDeclaration?.returns?.firstOrNull()?.returnValue as? ConstructExpression
+        val argument = returnValue?.arguments?.firstOrNull()
+        val constructExpression = argument?.let { it as? ConstructExpression }
+        val record = constructExpression?.instantiates as? RecordDeclaration
 
-        val record =
-            returnValue
-                ?.arguments
-                ?.firstOrNull()
-                ?.let { (it as? ConstructExpression) }
-                ?.instantiates as RecordDeclaration
         return record
     }
 
