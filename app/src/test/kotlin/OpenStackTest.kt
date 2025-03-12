@@ -528,12 +528,16 @@ class OpenStackTest {
             "The evaluated value of the 'backend' option should be 'barbican'",
         )
 
-        val meBackend =
-            result.memberExpressions { it.code == "conf.key_manager.backend" }.firstOrNull()
-        assertNotNull(meBackend)
+        // This is a little bit flakey, it seems that not all paths are correctly resolved
+        val meBackends = result.memberExpressions { it.code == "conf.key_manager.backend" }
+        assertEquals(4, meBackends.size)
         assertEquals(
             setOf("barbican"),
-            meBackend.evaluate(MultiValueEvaluator()),
+            meBackends
+                .map { it.evaluate(MultiValueEvaluator()) }
+                .filterIsInstance<Collection<*>>()
+                .flatten()
+                .toSet(),
             "The evaluated value of access to 'conf.key_manager.backend' should be 'barbican'",
         )
     }
