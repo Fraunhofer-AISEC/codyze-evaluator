@@ -21,7 +21,7 @@
 [submodule "external/castellan"]
 	path = external/castellan
 	url = https://github.com/openstack/castellan.git
-    branch = stable/2024.2
+	branch = stable/2024.2
 [submodule "external/oslo.log"]
 	path = external/oslo.log
 	url = https://github.com/openstack/oslo.log.git
@@ -32,9 +32,13 @@
 	branch = stable/2024.2
 [submodule "external/python-cinderclient"]
 	path = external/python-cinderclient
-	url = https://github.com/openstack/python-cinderclient
-    branch = stable/2024.2
+	url = https://github.com/openstack/python-cinderclient.git
+	branch = stable/2024.2
 [submodule "external/stevedore"]
 	path = external/stevedore
 	url = https://github.com/openstack/stevedore.git
+	branch = stable/2024.2
+[submodule "external/python-barbicanclient"]
+	path = external/python-barbicanclient
+	url = https://github.com/openstack/python-barbicanclient.git
 	branch = stable/2024.2
