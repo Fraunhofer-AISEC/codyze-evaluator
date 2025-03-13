@@ -39,7 +39,7 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 val crudMethods = setOf("_create", "_get", "_update", "_delete")
                 if (
                     node.name.localName in crudMethods &&
-                        node.recordDeclaration?.name?.localName == "Manager"
+                    node.recordDeclaration?.name?.localName == "Manager"
                 ) {
                     // Get all calls that are invoked by the Manager.
                     for (memberCall in node.calledBy) {
@@ -88,14 +88,15 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
      */
     private fun registerActionRequests(method: MethodDeclaration, httpClient: HttpClient) {
         val postCall = method.calls["post"]
-        val path = postCall?.arguments?.firstOrNull()
-        if (path != null) {
-            val extractedPath = extractEndpointPath(path) ?: ""
+        val pathArg = postCall?.arguments?.firstOrNull()
+        if (pathArg != null) {
+            val extractedPath = extractEndpointPath(pathArg)
+            val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
             for (calls in method.calledBy) {
                 val httpMethod = HttpMethod.POST
                 newHttpRequest(
                     underlyingNode = calls,
-                    url = extractedPath,
+                    url = path,
                     httpMethod = httpMethod.toString(),
                     arguments = calls.arguments,
                     httpClient = httpClient,
