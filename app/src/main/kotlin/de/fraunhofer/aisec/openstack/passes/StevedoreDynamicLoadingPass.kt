@@ -12,6 +12,7 @@ import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoading
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoadingOperation
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.LoadSymbol
+import de.fraunhofer.aisec.cpg.graph.concepts.memory.newLoadSymbol
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.TranslationUnitDeclaration
 import de.fraunhofer.aisec.cpg.graph.edges.flows.CallingContextOut
@@ -162,21 +163,19 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
 
                 possibleTypes += constructExpr.type
 
-                val load =
-                    LoadSymbol<ConstructorDeclaration>(
-                        accessDriver,
-                        concept = concept,
-                        what = impl,
-                        loader = null,
-                    )
+                newLoadSymbol<ConstructorDeclaration>(
+                    accessDriver,
+                    concept = concept,
+                    what = impl,
+                    loader = null,
+                    os = null,
+                )
 
                 accessDriver.prevDFGEdges.addContextSensitive(
                     node = constructExpr,
                     granularity = FullDataflowGranularity,
                     callingContext = CallingContextOut(constructDriver),
                 )
-
-                ops += load
             } else {
                 warnWithFileLocation(
                     constructDriver,
