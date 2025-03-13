@@ -14,24 +14,20 @@ fun statement1(result: TranslationResult): QueryTree<Boolean> {
     fun HttpEndpoint.isSecureKeyProvider(): Boolean {
         return httpMethod == HttpMethod.GET &&
                 path == "/v1/secrets/{secret_id}/payload" &&
-                this.underlyingNode?.firstParentOrNull {
-                    it is Component && it.name.localName == "barbican"
+                this.underlyingNode?.firstParentOrNull<Component> {
+                    it.name.localName == "barbican"
                 } != null
     }
 
     val tree = result.allExtended<DiskEncryption> { encryption ->
         encryption.key?.let { key ->
-            result
-                .existsExtended<HttpEndpoint>(HttpEndpoint::isSecureKeyProvider) {
-                    dataFlow(
-                        it,
-                        encryption,
-                        useIndexStack = true,
-                        collectFailedPaths = false,
-                    )
-                }
-                .children
-                .firstOrNull() as? QueryTree<Boolean> ?: QueryTree(false)
+            dataFlow(
+                startNode = key,
+                type = Must,
+                direction = Backward(GraphToFollow.DFG),
+                scope = Interprocedural(),
+                predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
+            )
         }
             ?: QueryTree(
                 false,
@@ -50,11 +46,13 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
         if (processInput == null) {
             QueryTree(true)
         } else {
-            executionPath(it) { to ->
-                to is DeAllocate &&
+            executionPath(startNode = it,
+                type = Must,
+                predicate = { to ->
+                    to is DeAllocate &&
                         (to.what as? Reference)?.refersTo ==
                         (processInput as? Reference)?.refersTo
-            }
+            })
         }
     }
 
