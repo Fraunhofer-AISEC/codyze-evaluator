@@ -15,15 +15,12 @@ import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOperation
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption
-import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationGroup
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationOption
-import de.fraunhofer.aisec.cpg.graph.concepts.config.RegisterConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newLoadConfiguration
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newReadConfigurationGroup
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newReadConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.edges.flows.CallingContextOut
@@ -109,7 +106,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 is Configuration -> {
                     val group = last.groups.find { it.name.localName == me.name.localName }
                     if (group != null) {
-                        val op = ReadConfigurationGroup(underlyingNode = me, group = group)
+                        val op = newReadConfigurationGroup(underlyingNode = me, concept = group)
 
                         // Add an incoming DFG from the option group
                         me.prevDFGEdges.add(group)
@@ -122,7 +119,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 is ConfigurationGroup -> {
                     val option = last.options.find { it.name.localName == me.name.localName }
                     if (option != null) {
-                        val op = ReadConfigurationOption(underlyingNode = me, option = option)
+                        val op = newReadConfigurationOption(underlyingNode = me, concept = option)
 
                         // Add an incoming DFG from the option
                         me.prevDFGEdges.add(option)
