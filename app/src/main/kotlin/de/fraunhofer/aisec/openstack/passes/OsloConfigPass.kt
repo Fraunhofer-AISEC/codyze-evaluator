@@ -185,9 +185,9 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
             expr.prevDFGEdges.addContextSensitive(conf, callingContext = CallingContextOut(expr))
 
             val lit = newLiteral("${component?.name}.conf")
-            newLoadConfiguration(underlyingNode = expr, concept = conf, fileExpression = lit).also {
-                it.name = Name(lit.value.toString())
-            }
+            ops +=
+                newLoadConfiguration(underlyingNode = expr, concept = conf, fileExpression = lit)
+                    .also { it.name = Name(lit.value.toString()) }
         }
 
         return ops
@@ -271,11 +271,12 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     )
                     .also { it.name = group.name.fqn(keyArgument.evaluate().toString()) }
 
-            newRegisterConfigurationOption(
-                underlyingNode = optionCall,
-                concept = option,
-                defaultValue = null,
-            )
+            ops +=
+                newRegisterConfigurationOption(
+                    underlyingNode = optionCall,
+                    concept = option,
+                    defaultValue = null,
+                )
         }
 
         return ops
@@ -311,7 +312,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 newConfigurationGroup(underlyingNode = registerOptsCall, concept = conf).also {
                     it.name = groupName
                 }
-            newRegisterConfigurationGroup(underlyingNode = registerOptsCall, concept = group)
+            ops += newRegisterConfigurationGroup(underlyingNode = registerOptsCall, concept = group)
         }
 
         return group

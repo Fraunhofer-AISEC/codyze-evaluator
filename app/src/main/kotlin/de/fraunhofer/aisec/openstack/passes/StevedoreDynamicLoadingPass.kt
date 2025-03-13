@@ -164,19 +164,22 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
 
                 possibleTypes += constructExpr.type
 
-                newLoadSymbol<ConstructorDeclaration>(
-                    accessDriver,
-                    concept = concept,
-                    what = impl,
-                    loader = null,
-                    os = null,
-                )
+                val load =
+                    newLoadSymbol<ConstructorDeclaration>(
+                        accessDriver,
+                        concept = concept,
+                        what = impl,
+                        loader = null,
+                        os = null,
+                    )
 
                 accessDriver.prevDFGEdges.addContextSensitive(
                     node = constructExpr,
                     granularity = FullDataflowGranularity,
                     callingContext = CallingContextOut(constructDriver),
                 )
+
+                ops += load
             } else {
                 warnWithFileLocation(
                     constructDriver,
