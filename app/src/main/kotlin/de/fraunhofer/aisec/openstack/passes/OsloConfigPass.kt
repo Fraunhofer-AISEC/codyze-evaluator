@@ -20,6 +20,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.RegisterConfigurationOption
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.newLoadConfiguration
@@ -181,7 +182,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // matches the originating component
         for (component in components) {
             val conf =
-                Configuration(underlyingNode = expr).also {
+                newConfiguration(underlyingNode = expr).also {
                     it.name = Name("conf", component?.name)
                 }
             expr.prevDFGEdges.addContextSensitive(conf, callingContext = CallingContextOut(expr))
