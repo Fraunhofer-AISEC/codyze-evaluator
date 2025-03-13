@@ -501,6 +501,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 httpMethod = httpMethod ?: method.name.localName,
                 path = path,
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 
