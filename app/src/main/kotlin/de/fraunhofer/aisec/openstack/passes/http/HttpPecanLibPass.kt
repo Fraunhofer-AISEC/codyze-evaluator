@@ -110,6 +110,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 httpMethod = "GET",
                 path = "${requestHandler.basePath}/$methodName",
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 
@@ -208,6 +209,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 httpMethod = httpMethod,
                 path = requestHandler.basePath,
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 

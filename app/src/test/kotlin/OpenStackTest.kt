@@ -3,7 +3,7 @@
  */
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
-import de.fraunhofer.aisec.cpg.analysis.MultiValueEvaluator
+import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
