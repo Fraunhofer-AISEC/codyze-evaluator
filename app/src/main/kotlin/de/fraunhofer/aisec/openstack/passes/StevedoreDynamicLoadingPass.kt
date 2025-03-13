@@ -12,6 +12,7 @@ import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoading
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoadingOperation
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.LoadSymbol
+import de.fraunhofer.aisec.cpg.graph.concepts.memory.newDynamicLoading
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.newLoadSymbol
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.TranslationUnitDeclaration
@@ -120,7 +121,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
         val possibleTypes = mutableListOf<Type>()
 
         // Create a new dynamic loading concept and associate it to the driver creation
-        val concept = DynamicLoading(constructDriver)
+        val concept = newDynamicLoading(constructDriver)
 
         assume(
             constructDriver,
