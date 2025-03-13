@@ -97,7 +97,7 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                     is FunctionDeclaration -> decl
                                     else ->
                                         TODO(
-                                            "Unhandled object reference for entry point: ${objRef}"
+                                            "Unhandled object reference for entry point: $objRef"
                                         ) // TODO: check OS packages of what else to expect
                                 }
 

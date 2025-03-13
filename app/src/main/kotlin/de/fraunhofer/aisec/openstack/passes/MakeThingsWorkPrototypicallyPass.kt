@@ -6,15 +6,17 @@ package de.fraunhofer.aisec.openstack.passes
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.CreateEncryptedDisk
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCipher
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCreateEncryptedDisk
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newDiskEncryption
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newGetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpClient
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequest
 import de.fraunhofer.aisec.cpg.graph.declarations.VariableDeclaration
 import de.fraunhofer.aisec.cpg.graph.edges.*
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -51,9 +53,11 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
             t.mcalls({
                 it.name.localName == "get_secret" && it.base?.name?.localName == "retrieve_plugin"
             })) {
-            val secret = Secret(getSecretCall).codeAndLocationFrom(getSecretCall)
-            val getSecret = GetSecret(getSecretCall, secret).codeAndLocationFrom(getSecretCall)
-            getSecret.nextDFG += getSecretCall
+            val secret = newSecret(underlyingNode = getSecretCall)
+            val getSecret =
+                newGetSecret(underlyingNode = getSecretCall, concept = secret).apply {
+                    this.nextDFG += getSecretCall
+                }
         }
     }
 
@@ -83,13 +87,13 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                 val key = secrets?.firstOrNull() { it.name.localName == "Key[new_key]" }
 
                 // This call creates a new encrypted block storage
-                val diskEncryption = DiskEncryption(executeCall).codeAndLocationFrom(executeCall)
-                diskEncryption.key = key
                 val argumentOfCipher =
                     executeCall.arguments[arguments.indexOfFirst { it == "--cipher" } + 1]
-                val cipher = Cipher(argumentOfCipher).codeAndLocationFrom(argumentOfCipher)
                 // TODO: Fill the properties of cipher
-                diskEncryption.cipher = cipher
+                val cipher = newCipher(argumentOfCipher)
+                val diskEncryption =
+                    newDiskEncryption(underlyingNode = executeCall, cipher = cipher, key = key)
+                        .apply { this.prevDFG += executeCall }
 
                 // val secretInput = executeCall.arguments[arguments.indexOfFirst { "--key-file" in
                 // ((it as? String) ?: "") } + 1]
@@ -102,14 +106,12 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                     secret.prevDFG += secretInput
                 }*/
 
-                val op =
-                    CreateEncryptedDisk(executeCall, diskEncryption)
-                        .codeAndLocationFrom(executeCall)
-                // This probably makes it "too" easy?
-                // diskEncryption.key?.let { op.prevDFG += it }
-                op.prevDFG += executeCall
-                op.prevEOG += executeCall
-                op.nextEOG += executeCall
+                newCreateEncryptedDisk(underlyingNode = executeCall, concept = diskEncryption)
+                    .apply {
+                        // This probably makes it "too" easy?
+                        // diskEncryption.key?.let { this.prevDFG += it }
+                        this.prevDFG += executeCall
+                    }
             }
         }
     }
@@ -128,7 +130,11 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
         val clientRequests =
             baseObjects.flatMap {
                 // This call generates a new HttpClient
-                val httpClient = HttpClient(it, false).codeAndLocationFrom(it)
+                val httpClient =
+                    newHttpClient(underlyingNode = it, isTLS = false, authentication = null).apply {
+                        this.nextDFG += it
+                        this.prevDFG += it
+                    }
                 // Find usage of the object as a base for a HttpRequest. Heuristics: The object
                 // refersTo the same declaration
                 val getCalls =
@@ -142,14 +148,13 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                     // Create the HttpRequest operation for each of these calls.
                     // We "know" that all calls end up in /v1/secrets/{encryption_key_id}/payload
                     val request =
-                        HttpRequest(
-                                it,
-                                "/v1/secrets/{secret_id}/payload",
-                                it.arguments,
-                                HttpMethod.GET,
-                                httpClient,
-                            )
-                            .codeAndLocationFrom(it)
+                        newHttpRequest(
+                            underlyingNode = it,
+                            url = "/v1/secrets/{secret_id}/payload",
+                            arguments = it.arguments,
+                            httpMethod = HttpMethod.GET,
+                            concept = httpClient,
+                        )
                     it.prevDFG += request
                     request
                 }

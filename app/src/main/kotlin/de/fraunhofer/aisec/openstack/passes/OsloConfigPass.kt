@@ -19,8 +19,12 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ReadConfigurationOption
-import de.fraunhofer.aisec.cpg.graph.concepts.config.RegisterConfigurationGroup
 import de.fraunhofer.aisec.cpg.graph.concepts.config.RegisterConfigurationOption
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationGroup
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationOption
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newLoadConfiguration
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationGroup
+import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationOption
 import de.fraunhofer.aisec.cpg.graph.edges.flows.CallingContextOut
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
@@ -183,10 +187,9 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
             expr.prevDFGEdges.addContextSensitive(conf, callingContext = CallingContextOut(expr))
 
             val lit = newLiteral("${component?.name}.conf")
-            ops +=
-                LoadConfiguration(underlyingNode = expr, conf = conf, fileExpression = lit).also {
-                    it.name = Name(lit.value.toString())
-                }
+            newLoadConfiguration(underlyingNode = expr, concept = conf, fileExpression = lit).also {
+                it.name = Name(lit.value.toString())
+            }
         }
 
         return ops
@@ -262,15 +265,19 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
             // Create a new ConfigurationOption for each option
             val option =
-                ConfigurationOption(
+                newConfigurationOption(
                         underlyingNode = optionCall,
-                        group = group,
+                        concept = group,
                         key = keyArgument,
                         value = defaultValueArgument,
                     )
                     .also { it.name = group.name.fqn(keyArgument.evaluate().toString()) }
 
-            ops += RegisterConfigurationOption(underlyingNode = optionCall, option = option)
+            newRegisterConfigurationOption(
+                underlyingNode = optionCall,
+                concept = option,
+                defaultValue = null,
+            )
         }
 
         return ops
@@ -303,10 +310,10 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
             // This is the first call we encounter that registers options to this group, so
             // we create it
             group =
-                ConfigurationGroup(underlyingNode = registerOptsCall, conf = conf).also {
+                newConfigurationGroup(underlyingNode = registerOptsCall, concept = conf).also {
                     it.name = groupName
                 }
-            ops += RegisterConfigurationGroup(underlyingNode = registerOptsCall, group = group)
+            newRegisterConfigurationGroup(underlyingNode = registerOptsCall, concept = group)
         }
 
         return group

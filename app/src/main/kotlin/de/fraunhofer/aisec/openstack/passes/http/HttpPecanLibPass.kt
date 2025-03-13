@@ -109,12 +109,16 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val methodName = method.name.localName
         val httpEndpoint =
             newHttpEndpoint(
-                underlyingNode = method,
-                httpMethod = mapHttpMethod("GET"),
-                path = "${requestHandler.basePath}/$methodName",
-                arguments = method.parameters,
-                authentication = null,
-            )
+                    underlyingNode = method,
+                    httpMethod = mapHttpMethod("GET"),
+                    path = "${requestHandler.basePath}/$methodName",
+                    arguments = method.parameters,
+                    authentication = null,
+                )
+                .apply {
+                    this.nextDFG += method
+                    this.prevDFG += method
+                }
         requestHandler.endpoints.add(httpEndpoint)
 
         newRegisterHttpEndpoint(
@@ -208,12 +212,16 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
         val httpEndpoint =
             newHttpEndpoint(
-                underlyingNode = method,
-                httpMethod = mapHttpMethod(httpMethod),
-                path = requestHandler.basePath,
-                arguments = method.parameters,
-                authentication = null,
-            )
+                    underlyingNode = method,
+                    httpMethod = mapHttpMethod(httpMethod),
+                    path = requestHandler.basePath,
+                    arguments = method.parameters,
+                    authentication = null,
+                )
+                .apply {
+                    this.nextDFG += method
+                    this.prevDFG += method
+                }
         requestHandler.endpoints.add(httpEndpoint)
 
         newRegisterHttpEndpoint(

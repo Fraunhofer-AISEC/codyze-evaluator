@@ -505,12 +505,16 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     ) {
         val httpEndpoint =
             newHttpEndpoint(
-                underlyingNode = method,
-                httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
-                path = path,
-                arguments = method.parameters,
-                authentication = null,
-            )
+                    underlyingNode = method,
+                    httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
+                    path = path,
+                    arguments = method.parameters,
+                    authentication = null,
+                )
+                .apply {
+                    this.nextDFG += method
+                    this.prevDFG += method
+                }
         requestHandler.endpoints.add(httpEndpoint)
 
         newRegisterHttpEndpoint(

@@ -6,9 +6,12 @@ package de.fraunhofer.aisec.openstack.passes
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.Component
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newGetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newSecret
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
+import kotlin.collections.plusAssign
 
 /**
  * Adds [de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret] concept nodes to the
@@ -34,14 +37,17 @@ class SecretPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     val concept =
                         when (nextDFG) {
                             is Reference -> {
-                                newSecret(underlyingNode = nextDFG)
+                                newSecret(underlyingNode = nextDFG).apply {
+                                    this.prevDFG += nextDFG
+                                }
                             }
                             else -> {
                                 TODO("Expected to find a Reference")
                             }
                         }
-                    val getSecretOp = newGetSecret(underlyingNode = call, concept = concept)
-                    getSecretOp.nextEOGEdges += call // TODO: Set the overlaying property
+                    newGetSecret(underlyingNode = call, concept = concept).apply {
+                        this.nextDFG += call.nextDFG
+                    }
                 }
             }
     }
