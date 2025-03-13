@@ -168,6 +168,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                         concept = concept,
                         what = impl,
                         loader = null,
+                        os = null,
                     )
 
                 accessDriver.prevDFGEdges.addContextSensitive(

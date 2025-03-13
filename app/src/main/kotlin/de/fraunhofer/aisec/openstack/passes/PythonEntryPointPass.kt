@@ -95,13 +95,14 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                             it.name.localName == "__init__" || it.name == decl.name
                                         }
                                     is FunctionDeclaration -> decl
-                                    else ->
-                                        TODO(
-                                            "Unhandled object reference for entry point: ${objRef}"
-                                        ) // TODO: check OS packages of what else to expect
+                                    else -> {
+                                        log.error(
+                                            "Unhandled object reference for entry point: $objRef"
+                                        )
+                                    }
                                 }
 
-                            if (funDecl != null) {
+                            if (funDecl is FunctionDeclaration) {
                                 component.incomingInteractions +=
                                     PythonEntryPoint(
                                             underlyingNode = funDecl,

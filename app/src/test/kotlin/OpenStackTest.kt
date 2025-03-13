@@ -10,6 +10,8 @@ import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
+import de.fraunhofer.aisec.cpg.graph.concepts.file.SetFileMask
+import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
@@ -23,6 +25,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.query.*
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
@@ -344,16 +347,13 @@ class OpenStackTest {
         // through a DeAllocate operation of the respective value
 
         val queryTreeResult =
-            result.allExtended<GetSecret>(
-                null,
-                { secret ->
-                    secret.alwaysFlowsTo(
-                        scope = Interprocedural(),
-                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                        predicate = { it is DeAllocate },
-                    )
-                },
-            )
+            result.allExtended<GetSecret>(null) { secret ->
+                secret.alwaysFlowsTo(
+                    scope = Interprocedural(),
+                    sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
+                    predicate = { it is DeAllocate },
+                )
+            }
 
         println(queryTreeResult.printNicely())
         assertFalse(queryTreeResult.value)
@@ -540,5 +540,52 @@ class OpenStackTest {
                 .toSet(),
             "The evaluated value of access to 'conf.key_manager.backend' should be 'barbican'",
         )
+    }
+
+    @Test
+    fun testBadFile() {
+        val topLevel = Path("../external")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<OsloConfigPass>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<ProvideConfigPass>()
+                it.registerPass<PythonFileConceptPass>()
+                it.exclusionPatterns("tests")
+                it.includePath("../external/oslo.config")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "magnum" to listOf(topLevel.resolve("magnum/magnum").toFile()),
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "magnum" to topLevel.resolve("magnum").toFile(),
+                        "conf" to topLevel.resolve("conf").toFile(),
+                    )
+                )
+            }
+        assertNotNull(result)
+
+        val paths =
+            result.allExtended<de.fraunhofer.aisec.cpg.graph.concepts.file.File> { file ->
+                not(
+                    file.existsExtended<WriteFile>(
+                        sel = { it in file.ops },
+                        mustSatisfy = { write ->
+                            executionPath(
+                                startNode = write,
+                                direction = Forward(GraphToFollow.EOG),
+                            ) {
+                                it is SetFileMask && it.file == write.file
+                            }
+                        },
+                    )
+                )
+            }
+        assertNotNull(paths)
     }
 }

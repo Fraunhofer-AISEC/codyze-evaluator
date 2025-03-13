@@ -42,3 +42,6 @@
 	path = external/python-barbicanclient
 	url = https://github.com/openstack/python-barbicanclient.git
 	branch = stable/2024.2
+[submodule "external/magnum"]
+	path = external/magnum
+	url = http://github.com/openstack/magnum.git
