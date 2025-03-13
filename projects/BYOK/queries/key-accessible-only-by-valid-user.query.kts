@@ -17,8 +17,15 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
 
     val noKeyLeakResult =
         tr.allExtended<GetSecret> { secret ->
-            not(dataFlow(from = secret, predicate = { it.dataLeavesComponent() }))
-        }
+            not(
+                dataFlow(
+                    startNode = secret,
+                    type = May,
+                    scope = Interprocedural(),
+                    predicate = { it.dataLeavesComponent() },
+                )
+            )
+       }
 
     return noKeyLeakResult
 }
