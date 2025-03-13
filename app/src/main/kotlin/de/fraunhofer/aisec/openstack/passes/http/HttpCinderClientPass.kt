@@ -39,7 +39,7 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 val crudMethods = setOf("_create", "_get", "_update", "_delete")
                 if (
                     node.name.localName in crudMethods &&
-                    node.recordDeclaration?.name?.localName == "Manager"
+                        node.recordDeclaration?.name?.localName == "Manager"
                 ) {
                     // Get all calls that are invoked by the Manager.
                     for (memberCall in node.calledBy) {

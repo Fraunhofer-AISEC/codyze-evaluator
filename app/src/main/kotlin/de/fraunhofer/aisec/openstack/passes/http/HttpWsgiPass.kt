@@ -74,7 +74,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 router.assigns
                     .filter { assign ->
                         (assign.rhs.firstOrNull() as? CallExpression)?.name?.localName ==
-                                "create_resource"
+                            "create_resource"
                     }
                     .mapNotNull { assign ->
                         val resourceKey =
@@ -116,7 +116,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                         when (controllerArg) {
                             is SubscriptExpression -> {
                                 (controllerArg.subscriptExpression.evaluate() as? String) ==
-                                        resourceKey
+                                    resourceKey
                             }
 
                             is Reference -> {
@@ -135,8 +135,8 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             val resourceExtensionCalls =
                 component.calls.filter {
                     (it.name.localName == "ResourceExtension" ||
-                            it.name.localName == "ControllerExtension") &&
-                            it.name.parent?.localName == "extensions"
+                        it.name.localName == "ControllerExtension") &&
+                        it.name.parent?.localName == "extensions"
                 }
             val resourceControllers = resourceCalls.map { it.second }
             handleExtensionRoutes(resourceExtensionCalls, resourceControllers)
@@ -176,7 +176,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             .forEach { method ->
                 val member =
                     method.getAnnotation("action")?.members?.firstOrNull()?.value?.evaluate()
-                            as? String
+                        as? String
                 val isCrudMethod = member in crudMethods
                 val isAction = !isCrudMethod // If it's not a CRUD method, then it's an action
                 val fullPath = buildPath(path = basePath, method = method, isAction = isAction)
@@ -247,7 +247,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             is Reference -> {
                 val construct =
                     controllerArg.followPrevDFG { it is ConstructExpression }?.lastOrNull()
-                            as? ConstructExpression
+                        as? ConstructExpression
 
                 if (construct != null) {
                     listOfNotNull(construct.instantiates as? RecordDeclaration)
@@ -263,7 +263,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
                     initializerList?.initializers?.filterIsInstance<Reference>()?.mapNotNull {
                         it.followPrevDFG { node -> node is RecordDeclaration }?.lastOrNull()
-                                as? RecordDeclaration
+                            as? RecordDeclaration
                     } ?: emptyList()
                 }
             }
@@ -491,7 +491,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 // Ignore base controllers
                 if (
                     !superClass.name.localName.contains("wsgi.Controller") &&
-                    superClass.name.localName.endsWith("Controller")
+                        superClass.name.localName.endsWith("Controller")
                 ) {
                     method = superClass.methods.find { it.name.localName == methodName }
                     // Stop searching once found

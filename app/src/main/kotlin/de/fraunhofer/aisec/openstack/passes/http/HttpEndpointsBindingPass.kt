@@ -28,7 +28,7 @@ class HttpEndpointsBindingPass(ctx: TranslationContext) : TranslationResultPass(
             val matchingEndpoints =
                 endpoints.filter { endpoint ->
                     request.httpMethod == endpoint.httpMethod &&
-                            compareApiEndpoints(request.url, endpoint.path)
+                        compareApiEndpoints(request.url, endpoint.path)
                 }
 
             for (endpoint in matchingEndpoints) {
@@ -45,13 +45,13 @@ class HttpEndpointsBindingPass(ctx: TranslationContext) : TranslationResultPass(
                     val method = endpoint.underlyingNode as? MethodDeclaration ?: continue
                     val actionName =
                         method.getAnnotation("action")?.members?.firstOrNull()?.value?.evaluate()
-                                as? String
+                            as? String
 
                     // Compare the request body with
                     // either the method name or the action annotation.
                     if (
                         actionName != null &&
-                        (requestBodyValue == method.name.localName ||
+                            (requestBodyValue == method.name.localName ||
                                 requestBodyValue == actionName)
                     ) {
                         request.to.add(endpoint)
@@ -61,13 +61,12 @@ class HttpEndpointsBindingPass(ctx: TranslationContext) : TranslationResultPass(
                     request.to.add(endpoint)
                 }
             }
-
         }
     }
 
     /**
-     * Compares two API endpoints by ignoring the content of path parameters
-     * (e.g., `{any_id}`) and checking their structure.
+     * Compares two API endpoints by ignoring the content of path parameters (e.g., `{any_id}`) and
+     * checking their structure.
      */
     private fun compareApiEndpoints(apiEndpoint1: String, apiEndpoint2: String): Boolean {
         // Return true if the endpoints are exactly the same
