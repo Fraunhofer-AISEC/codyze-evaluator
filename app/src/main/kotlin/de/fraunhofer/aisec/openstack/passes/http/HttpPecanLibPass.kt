@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Annotation
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.get
@@ -22,9 +22,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.openstack.concepts.newHttpEndpoint
-import de.fraunhofer.aisec.openstack.concepts.newHttpRequestHandler
-import de.fraunhofer.aisec.openstack.concepts.newRegisterHttpEndpoint
+import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 @DependsOn(SymbolResolver::class)
 class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
@@ -68,7 +66,12 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
     }
 
     private fun registerEndpointsFromController(controller: RecordDeclaration, basePath: String) {
-        val requestHandler = newHttpRequestHandler(underlyingNode = controller, basePath = basePath)
+        val requestHandler =
+            newHttpRequestHandler(
+                underlyingNode = controller,
+                basePath = basePath,
+                endpoints = mutableListOf(),
+            )
 
         val annotatedMethods = controller.methods.filter { it.annotations.isNotEmpty() }
 
@@ -107,9 +110,10 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val httpEndpoint =
             newHttpEndpoint(
                 underlyingNode = method,
-                httpMethod = "GET",
+                httpMethod = mapHttpMethod("GET"),
                 path = "${requestHandler.basePath}/$methodName",
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 
@@ -205,9 +209,10 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val httpEndpoint =
             newHttpEndpoint(
                 underlyingNode = method,
-                httpMethod = httpMethod,
+                httpMethod = mapHttpMethod(httpMethod),
                 path = requestHandler.basePath,
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 

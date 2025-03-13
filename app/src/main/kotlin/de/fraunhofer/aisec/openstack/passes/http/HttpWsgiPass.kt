@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.assigns
 import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
@@ -30,9 +30,7 @@ import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
-import de.fraunhofer.aisec.openstack.concepts.newHttpEndpoint
-import de.fraunhofer.aisec.openstack.concepts.newHttpRequestHandler
-import de.fraunhofer.aisec.openstack.concepts.newRegisterHttpEndpoint
+import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 @DependsOn(SymbolResolver::class)
 @ExecuteLate
@@ -194,7 +192,12 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             } else {
                 apiVersionPath
             }
-        val requestHandler = newHttpRequestHandler(controller, basePath)
+        val requestHandler =
+            newHttpRequestHandler(
+                underlyingNode = controller,
+                basePath = basePath,
+                endpoints = mutableListOf(),
+            )
 
         calls.forEach { call ->
             when (call.name.localName) {
@@ -481,7 +484,12 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             }
         }
 
-        val requestHandler = newHttpRequestHandler(underlyingNode = controller, basePath = path)
+        val requestHandler =
+            newHttpRequestHandler(
+                underlyingNode = controller,
+                basePath = path,
+                endpoints = mutableListOf(),
+            )
         registerEndpointsOfCrudMethods(
             methods = controller.methods,
             requestHandler = requestHandler,
@@ -498,9 +506,10 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val httpEndpoint =
             newHttpEndpoint(
                 underlyingNode = method,
-                httpMethod = httpMethod ?: method.name.localName,
+                httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
                 path = path,
                 arguments = method.parameters,
+                authentication = null,
             )
         requestHandler.endpoints.add(httpEndpoint)
 
@@ -519,11 +528,9 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     val path = (endpoint.lhs as Literal<*>).value
                     // TODO(lshala): Do we want the parameter project_id in the endpoint or not?
                     //  https://docs.openstack.org/api-ref/block-storage/v3/. Check how it is handed
-                    //  over on the
-                    //  client side. In cinder its the lib python-cinderclient. In ProjectMapper
-                    //  resource()
-                    //  (openstack/__init__.py) the project_id will already be retrieved from the
-                    //  CONF
+                    //  over on the client side. In cinder its the lib python-cinderclient. In
+                    // ProjectMapper.resource() (openstack/__init__.py), the project_id will already
+                    // be retrieved from the CONF.
 
                     // replace for now
                     return path.toString().replace("%s/", "")
