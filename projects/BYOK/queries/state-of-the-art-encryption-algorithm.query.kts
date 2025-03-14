@@ -4,7 +4,7 @@ import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.const
 import de.fraunhofer.aisec.cpg.query.ge
 
-val SYM_KEYLENGTH = 256
+val SYM_KEYLENGTH: Int = 256
 
 /**
  * This query enforces the following statement: "Given a block device encryption E, if an encryption algorithm A is employed, then A must be a state-of-the-art cryptographic algorithm (e.g., BSI TR-02102-1)"

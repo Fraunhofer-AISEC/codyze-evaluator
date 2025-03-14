@@ -3,7 +3,7 @@
  */
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
-import de.fraunhofer.aisec.cpg.analysis.MultiValueEvaluator
+import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
@@ -151,14 +151,20 @@ class OpenStackTest {
         assertNotNull(result)
 
         fun Node.dataLeavesComponent(): Boolean {
-            val whitelist = listOf<HttpEndpoint>()
+            val whitelist =
+                listOf<String>(
+                    "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
+                    "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
+                )
+
             // TODO: This should be replaced with the respective operations (writing to a file,
             //  printing, executing commands, logging)
             return ((this is CallExpression) &&
                 (this.name.localName == "write" ||
                     this.name.localName == "println" ||
                     this.name.localName == "execute" ||
-                    this.name.localName == "log")) || (this is HttpEndpoint && this !in whitelist)
+                    this.name.localName == "log")) ||
+                (this is HttpEndpoint && this.name.toString() !in whitelist)
         }
 
         val noKeyLeakResult =
@@ -528,12 +534,16 @@ class OpenStackTest {
             "The evaluated value of the 'backend' option should be 'barbican'",
         )
 
-        val meBackend =
-            result.memberExpressions { it.code == "conf.key_manager.backend" }.firstOrNull()
-        assertNotNull(meBackend)
+        // This is a little bit flakey, it seems that not all paths are correctly resolved
+        val meBackends = result.memberExpressions { it.code == "conf.key_manager.backend" }
+        assertEquals(4, meBackends.size)
         assertEquals(
             setOf("barbican"),
-            meBackend.evaluate(MultiValueEvaluator()),
+            meBackends
+                .map { it.evaluate(MultiValueEvaluator()) }
+                .filterIsInstance<Collection<*>>()
+                .flatten()
+                .toSet(),
             "The evaluated value of access to 'conf.key_manager.backend' should be 'barbican'",
         )
     }

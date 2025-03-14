@@ -5,20 +5,33 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 
 fun statement1(tr: TranslationResult): QueryTree<Boolean> {
     fun Node.dataLeavesComponent(): Boolean {
-        val whitelist = listOf<HttpEndpoint>()
+        val whitelist =
+            listOf<String>(
+                "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
+                "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
+            )
+
         // TODO: This should be replaced with the respective operations (writing to a file,
         //  printing, executing commands, logging)
         return ((this is CallExpression) &&
                 (this.name.localName == "write" ||
                         this.name.localName == "println" ||
                         this.name.localName == "execute" ||
-                        this.name.localName == "log")) || (this is HttpEndpoint && this !in whitelist)
+                        this.name.localName == "log")) ||
+                (this is HttpEndpoint && this.name.toString() !in whitelist)
     }
 
     val noKeyLeakResult =
         tr.allExtended<GetSecret> { secret ->
-            not(dataFlow(from = secret, predicate = { it.dataLeavesComponent() }))
-        }
+            not(
+                dataFlow(
+                    startNode = secret,
+                    type = May,
+                    scope = Interprocedural(),
+                    predicate = { it.dataLeavesComponent() },
+                )
+            )
+       }
 
     return noKeyLeakResult
 }

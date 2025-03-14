@@ -10,6 +10,8 @@ import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.calls
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCipher
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newDiskEncryption
 import de.fraunhofer.aisec.cpg.graph.edges.*
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
@@ -80,12 +82,12 @@ class DiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 ?.firstOrNull() ?: TODO("Expected to find exactly one matching GetSecret node.")
 
         val cipher = cipherArg?.let { newCipher(underlyingNode = it) }
-        val concept =
-            newDiskEncryption(
+        newDiskEncryption(
                 underlyingNode = call,
                 cipher = cipher,
                 key = (key as? GetSecret)?.concept,
             )
+            .apply { this.prevDFG += call }
     }
 
     /**

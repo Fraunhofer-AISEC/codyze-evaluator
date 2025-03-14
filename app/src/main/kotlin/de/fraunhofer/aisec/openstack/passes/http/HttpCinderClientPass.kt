@@ -7,8 +7,7 @@ import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.calls
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
@@ -21,8 +20,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.EOGStarterPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.openstack.concepts.newHttpClient
-import de.fraunhofer.aisec.openstack.concepts.newHttpRequest
+import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 /**
  * Pass for analyzing `python-cinderclient` to extract and register HTTP requests. It identifies the
@@ -60,16 +58,16 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
         if (record != null) {
             val httpClient =
                 record.conceptNodes.filterIsInstance<HttpClient>().singleOrNull()
-                    ?: newHttpClient(record, isTLS = false)
+                    ?: newHttpClient(record, isTLS = false, authentication = null)
             val extractedPath = extractEndpointPath(memberCall.arguments.first())
             val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
 
             newHttpRequest(
                 underlyingNode = memberCall,
                 url = path,
-                httpMethod = memberCall.name.localName,
+                httpMethod = mapHttpMethod(memberCall.name.localName),
                 arguments = memberCall.arguments,
-                httpClient = httpClient,
+                concept = httpClient,
             )
 
             val actionMethod = record.methods.firstOrNull() { it.name.localName == "_action" }
@@ -97,9 +95,9 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 newHttpRequest(
                     underlyingNode = calls,
                     url = path,
-                    httpMethod = httpMethod.toString(),
+                    httpMethod = mapHttpMethod(httpMethod.toString()),
                     arguments = calls.arguments,
-                    httpClient = httpClient,
+                    concept = httpClient,
                 )
             }
         }

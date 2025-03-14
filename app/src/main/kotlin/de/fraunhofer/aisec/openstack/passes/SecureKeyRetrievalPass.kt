@@ -6,10 +6,10 @@ package de.fraunhofer.aisec.openstack.passes
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpClient
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequest
 import de.fraunhofer.aisec.cpg.graph.declarations.VariableDeclaration
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -62,7 +62,7 @@ class SecureKeyRetrievalPass(ctx: TranslationContext) : TranslationResultPass(ct
             baseObjects.flatMap {
                 // This call generates a new HttpClient
                 val httpClient =
-                    HttpClient(underlyingNode = it, isTLS = isTLS).codeAndLocationFrom(it)
+                    newHttpClient(underlyingNode = it, isTLS = isTLS, authentication = null)
                 // Find usage of the object as a base for a HttpRequest. Heuristics: The object
                 // refersTo the same declaration
                 val getCalls =
@@ -76,14 +76,13 @@ class SecureKeyRetrievalPass(ctx: TranslationContext) : TranslationResultPass(ct
                     // Create the HttpRequest operation for each of these calls.
                     // We "know" that all calls end up in /v1/secrets/{encryption_key_id}/payload
                     val request =
-                        HttpRequest(
-                                it,
-                                "/v1/secrets/{secret_id}/payload",
-                                it.arguments,
-                                HttpMethod.GET,
-                                httpClient,
-                            )
-                            .codeAndLocationFrom(it)
+                        newHttpRequest(
+                            underlyingNode = it,
+                            url = "/v1/secrets/{secret_id}/payload",
+                            arguments = it.arguments,
+                            httpMethod = HttpMethod.GET,
+                            concept = httpClient,
+                        )
                     it.prevDFG += request
                     request
                 }
