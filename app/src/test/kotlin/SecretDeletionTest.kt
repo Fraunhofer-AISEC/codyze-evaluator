@@ -10,9 +10,14 @@ import de.fraunhofer.aisec.cpg.graph.FilterUnreachableEOG
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
+import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
+import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
+import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
+import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
 import de.fraunhofer.aisec.openstack.passes.PythonMemoryPass
 import de.fraunhofer.aisec.openstack.passes.SecureKeyRetrievalPass
 import io.github.detekt.sarif4k.Run
@@ -29,6 +34,43 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SecretDeletionTest {
+
+    @Test
+    fun testMagnumKeyDelete() {
+        val topLevel = Path("../external/magnum")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<OsloConfigPass>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<ProvideConfigPass>()
+                it.registerPass<PythonFileConceptPass>()
+                it.registerPass<MakeThingsWorkPrototypicallyPass>()
+                it.registerPass<PythonMemoryPass>()
+                it.exclusionPatterns("tests")
+                it.softwareComponents(
+                    mutableMapOf("magnum" to listOf(topLevel.resolve("magnum").toFile()))
+                )
+                it.topLevels(mapOf("magnum" to topLevel.resolve("magnum").toFile()))
+            }
+        assertNotNull(result)
+
+        // Checks that before each file write operation, there is an operation setting the correct
+        // access rights to write only.
+        val deleteSecrets =
+            result.allExtended<GetSecret>(
+                sel = null,
+                mustSatisfy = { secret ->
+                    secret.alwaysFlowsTo(
+                        scope = Interprocedural(maxSteps = 100),
+                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
+                        predicate = { it is DeAllocate }, // Anforderung: de-allocate the data
+                    )
+                },
+            )
+        println(deleteSecrets.printNicely())
+    }
 
     @Test
     fun testEverythingDerivedFromSecretMustBeDeletedOnAllPaths() {
