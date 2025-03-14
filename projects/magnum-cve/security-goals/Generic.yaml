@@ -1,0 +1,9 @@
+name: Generic Security Requirements
+description: This describes generic security requirements for all OpenStack components.
+assumptions:
+  - Third-party library code is correctly implemented
+objectives:
+  - name: Apply Restrictive File Permissions
+    description: See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html.
+    statements:
+      - Restrictive file permissions should be set.
