@@ -6,8 +6,6 @@ import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.concepts.file.FileAccessModeFlags
-import de.fraunhofer.aisec.cpg.graph.concepts.file.SetFileFlags
 import de.fraunhofer.aisec.cpg.graph.concepts.file.SetFileMask
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
@@ -53,11 +51,9 @@ class FileTest {
                         direction = Backward(GraphToFollow.EOG),
                         scope = Interprocedural(),
                         predicate = {
-                            it is SetFileMask && it.mask == 0x180L /* 0x180 == 0o600 */ ||
-                                it is SetFileFlags &&
-                                    it.flags.singleOrNull() ==
-                                        FileAccessModeFlags
-                                            .O_WRONLY /* TODO: How to use the SetFileFlags properly for the required test? */
+                            it is SetFileMask && it.mask == 0x180L /* 0x180 == 0o600 */
+                            /* || it is SetFileFlags && it.flags.singleOrNull() == FileAccessModeFlags.O_WRONLY*/
+                            /* TODO: How to use the SetFileFlags properly for the required test? */
                         },
                     )
                 }
