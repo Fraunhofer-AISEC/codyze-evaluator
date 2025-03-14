@@ -12,6 +12,8 @@ import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoading
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DynamicLoadingOperation
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.LoadSymbol
+import de.fraunhofer.aisec.cpg.graph.concepts.memory.newDynamicLoading
+import de.fraunhofer.aisec.cpg.graph.concepts.memory.newLoadSymbol
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.TranslationUnitDeclaration
 import de.fraunhofer.aisec.cpg.graph.edges.flows.CallingContextOut
@@ -119,7 +121,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
         val possibleTypes = mutableListOf<Type>()
 
         // Create a new dynamic loading concept and associate it to the driver creation
-        val concept = DynamicLoading(constructDriver)
+        val concept = newDynamicLoading(constructDriver)
 
         assume(
             constructDriver,
@@ -163,11 +165,12 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                 possibleTypes += constructExpr.type
 
                 val load =
-                    LoadSymbol<ConstructorDeclaration>(
+                    newLoadSymbol<ConstructorDeclaration>(
                         accessDriver,
                         concept = concept,
                         what = impl,
                         loader = null,
+                        os = null,
                     )
 
                 accessDriver.prevDFGEdges.addContextSensitive(

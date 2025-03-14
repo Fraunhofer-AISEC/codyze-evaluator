@@ -151,14 +151,20 @@ class OpenStackTest {
         assertNotNull(result)
 
         fun Node.dataLeavesComponent(): Boolean {
-            val whitelist = listOf<HttpEndpoint>()
+            val whitelist =
+                listOf<String>(
+                    "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
+                    "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
+                )
+
             // TODO: This should be replaced with the respective operations (writing to a file,
             //  printing, executing commands, logging)
             return ((this is CallExpression) &&
                 (this.name.localName == "write" ||
                     this.name.localName == "println" ||
                     this.name.localName == "execute" ||
-                    this.name.localName == "log")) || (this is HttpEndpoint && this !in whitelist)
+                    this.name.localName == "log")) ||
+                (this is HttpEndpoint && this.name.toString() !in whitelist)
         }
 
         val noKeyLeakResult =
