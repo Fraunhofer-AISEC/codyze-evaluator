@@ -21,7 +21,7 @@ To run it on the BYOK example (this might take a while):
 To run it on the magnum-cve example:
 ```
 ./gradlew installDist
-./app/build/install/app/bin/app --project-dir=projects/magnum-cve --components magnum
+./app/build/install/app/bin/app --project-dir=projects/magnum-cve --components magnum --exclusion-patterns tests
 ```
 
 ## Development
