@@ -121,8 +121,12 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     if (option != null) {
                         val op = newReadConfigurationOption(underlyingNode = me, concept = option)
 
+                        log.debug("Underlying node has {} DFG edges before", me.prevDFGEdges.size)
+
                         // Add an incoming DFG from the option
                         me.prevDFGEdges.add(option)
+
+                        log.debug("Underlying node has {} DFG edges after", me.prevDFGEdges.size)
 
                         // Add an incoming EOG from the option's default value (if specified)
                         option.value?.let { me.prevEOGEdges.add(it) }
