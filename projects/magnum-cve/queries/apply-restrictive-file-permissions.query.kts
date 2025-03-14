@@ -1,4 +1,6 @@
-fun statement1(tr: TranslationResult) {
+import de.fraunhofer.aisec.cpg.graph.concepts.file.*
+
+fun statement1(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<WriteFile>(
         mustSatisfy = { writeOp ->
             executionPath(

@@ -18,6 +18,12 @@ To run it on the BYOK example (this might take a while):
 ./app/build/install/app/bin/app --project-dir=projects/BYOK --components barbican --components castellan --components cinder --components conf --exclusion-patterns tests --exclusion-patterns drivers
 ```
 
+To run it on the magnum-cve example:
+```
+./gradlew installDist
+./app/build/install/app/bin/app --project-dir=projects/magnum-cve --components magnum
+```
+
 ## Development
 
 We are using git submodules to include OpenStack repositories. To clone the submodules, use the following command:
