@@ -39,9 +39,28 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
     }
 
     override fun accept(t: TranslationResult) {
+        decryptedCertToSecret(t)
         identifyBarbicanGetSecretCall(t)
         // findDiskEncryptionOperations(t)
         getSecretPluginCall(t)
+    }
+
+    /**
+     * Identifies the call to retrieve_plugin.get_secret() in barbican because this is where the key
+     * is read e.g. from an HSM or something else (depending on the configuration).
+     */
+    fun decryptedCertToSecret(t: TranslationResult) {
+        for (getSecretCall in
+            t.mcalls({
+                it.name.localName == "get_decrypted_private_key" &&
+                    it.base?.name?.localName == "magnum_cert"
+            })) {
+            val secret = newSecret(underlyingNode = getSecretCall)
+            val getSecret =
+                newGetSecret(underlyingNode = getSecretCall, concept = secret).apply {
+                    this.nextDFG += getSecretCall
+                }
+        }
     }
 
     /**
