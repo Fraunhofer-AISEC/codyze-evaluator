@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Checker BYOK (with Server)" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="de.fraunhofer.aisec.openstack.CheckerKt" />
+    <module name="openstack-checker.app.main" />
+    <option name="PROGRAM_PARAMETERS" value="--server=true --project-dir=projects/BYOK --components barbican --components castellan --components cinder --components conf --exclusion-patterns tests --exclusion-patterns drivers --exclusion-patterns keymgr" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

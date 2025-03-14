@@ -10,7 +10,10 @@ import com.github.ajalt.clikt.parameters.types.boolean
 import de.fraunhofer.aisec.codyze.AnalysisProject
 import de.fraunhofer.aisec.codyze.compliance.*
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.persistence.persist
+import de.fraunhofer.aisec.cpg.webconsole.CPGService
+import de.fraunhofer.aisec.cpg.webconsole.startServer
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import java.io.File
@@ -33,13 +36,19 @@ class OpenstackCheckerCommand : ProjectCommand() {
                     it.registerPass<OsloConfigPass>()
                     it.registerPass<IniFileConfigurationSourcePass>()
                     it.registerPass<PythonEntryPointPass>()
-                    // TODO: Add include path for libraries
+                    if (!projectOptions.directory.endsWith("BYOK")) {
+                        it.registerPass<PythonFileConceptPass>()
+                    }
                     it.registerPass<StevedoreDynamicLoadingPass>()
                     // Causes problems with python in general and with the include loading feature
                     it.useParallelFrontends(false)
                 }
                 .analyzeWithGoals()
         result.writeSarifJson(File("findings.sarif"))
+
+        if (projectOptions.startServer) {
+            CPGService.fromAnalysisResult(result).startServer()
+        }
 
         if (neo4j) {
             println("Connecting to Neo4J")

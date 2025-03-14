@@ -19,22 +19,24 @@ fun statement1(result: TranslationResult): QueryTree<Boolean> {
                 } != null
     }
 
-    val tree = result.allExtended<DiskEncryption> { encryption ->
-        encryption.key?.let { key ->
-            dataFlow(
-                startNode = key,
-                type = Must,
-                direction = Backward(GraphToFollow.DFG),
-                scope = Interprocedural(),
-                predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
-            )
+    val tree =
+        result.allExtended<DiskEncryption> { encryption ->
+            encryption.key?.let { key ->
+                dataFlow(
+                    startNode = encryption,
+                    type = May,
+                    direction = Backward(GraphToFollow.DFG),
+                    sensitivities = FieldSensitive + ContextSensitive,
+                    scope = Interprocedural(),
+                    predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
+                )
+            }
+                ?: QueryTree(
+                    false,
+                    mutableListOf(QueryTree(encryption)),
+                    "encryptionOp.concept.key is null",
+                )
         }
-            ?: QueryTree(
-                false,
-                mutableListOf(QueryTree(encryption)),
-                "encryptionOp.concept.key is null",
-            )
-    }
 
     return tree
 }
@@ -46,13 +48,11 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
         if (processInput == null) {
             QueryTree(true)
         } else {
-            executionPath(startNode = it,
-                type = Must,
-                predicate = { to ->
-                    to is DeAllocate &&
+            executionPath(it) { to ->
+                to is DeAllocate &&
                         (to.what as? Reference)?.refersTo ==
                         (processInput as? Reference)?.refersTo
-            })
+            }
         }
     }
 
