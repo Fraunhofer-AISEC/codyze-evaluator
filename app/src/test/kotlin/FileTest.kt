@@ -20,8 +20,8 @@ import de.fraunhofer.aisec.cpg.query.executionPath
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
 import kotlin.io.path.Path
+import kotlin.test.Test
 import kotlin.test.assertNotNull
-import org.junit.jupiter.api.Test
 
 class FileTest {
 
