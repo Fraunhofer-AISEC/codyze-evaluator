@@ -7,3 +7,7 @@ objectives:
     description: See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html.
     statements:
       - Restrictive file permissions should be set.
+  - name: Delete Secrets
+    description: Secret data should be deleted from memory, ideally right after usage.
+    statements:
+      - Delete secret data.
