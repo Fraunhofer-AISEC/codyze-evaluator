@@ -14,11 +14,10 @@ repositories {
         url = uri("https://oss.sonatype.org/content/groups/public")
     }
     maven {
-        name = "GitHubPackages"
-        url = uri("https://maven.pkg.github.com/Fraunhofer-AISEC/cpg")
-        credentials {
-            username = providers.gradleProperty("gpr.user").orNull ?: System.getenv("GITHUB_USERNAME")
-            password = providers.gradleProperty("gpr.token").orNull ?: System.getenv("GITHUB_TOKEN")
+        name = "Central Portal Snapshots"
+        url = uri("https://central.sonatype.com/repository/maven-snapshots")
+        content {
+            includeGroup("de.fraunhofer.aisec.cpg")
         }
     }
 }
