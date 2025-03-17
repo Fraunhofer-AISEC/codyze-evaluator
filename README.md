@@ -1,5 +1,13 @@
 # openstack-checker
 
+## Requirements - Python JEP
+This project uses the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
+therefore requires [JEP](https://github.com/ninia/jep/) to analyze Python code.
+See the [CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
+for information on how to configure JEP.
+
+## Using the openstack-checker
+
 This is a specialized version of Codyze that checks OpenStack.
 
 It currently houses two "projects":
@@ -17,12 +25,6 @@ To run it on the BYOK example (this might take a while):
 ./gradlew installDist
 ./app/build/install/app/bin/app --project-dir=projects/BYOK --components barbican --components castellan --components cinder --components conf --exclusion-patterns tests --exclusion-patterns drivers
 ```
-
-## Python JEP
-This project uses the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
-therefore requires [JEP](https://github.com/ninia/jep/) to analyze Python code.
-See the [CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
-for information on how to configure JEP.
 
 ## Development
 
