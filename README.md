@@ -1,14 +1,14 @@
 # openstack-checker
 
+This is a specialized version of Codyze that checks OpenStack.
+
 ## Requirements - Python JEP
 This project uses the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
 therefore requires [JEP](https://github.com/ninia/jep/) to analyze Python code.
 See the [CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
 for information on how to configure JEP.
 
-## Using the openstack-checker
-
-This is a specialized version of Codyze that checks OpenStack.
+## Project Structure
 
 It currently houses two "projects":
 - `small-example`: A small example that demonstrates the checker's capabilities.
