@@ -2,7 +2,15 @@
 
 This is a specialized version of Codyze that checks OpenStack.
 
-It currently houses two "projects":
+## Requirements - Python JEP
+This project uses the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
+therefore requires [JEP](https://github.com/ninia/jep/) to analyze Python code.
+See the [CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
+for information on how to configure JEP.
+
+## Project Structure
+
+The openstack-checker currently houses two "projects":
 - `small-example`: A small example that demonstrates the checker's capabilities.
 - `BYOK`: An example of a Bring Your Own Key (BYOK) implementation in OpenStack. It currently includes one security goal for disk encryption
 
