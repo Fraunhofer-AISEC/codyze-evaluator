@@ -26,7 +26,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class FileTest {
-
     @Test
     fun testDuplicateOperationNodes() {
         val topLevel = Path("../external/magnum")
@@ -51,7 +50,7 @@ class FileTest {
         assertTrue(operationNode.isNotEmpty(), "Expected to find some `Operation` nodes.")
         assertTrue(
             operationNode.groupBy { it }.filter { it.value.size > 1 }.isEmpty(),
-            "Found at least two equal `Operation` nodes.",
+            "Found at least two equal `Operation` nodes. Expected to not find any duplicates.",
         )
     }
 
