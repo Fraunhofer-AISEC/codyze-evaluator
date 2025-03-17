@@ -19,10 +19,10 @@ To run it on the BYOK example (this might take a while):
 ```
 
 ## Python JEP
-This project makes use of the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
-thus needs [JEP](https://github.com/ninia/jep/) to analyze Python code. See the
-[CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
-on how to configure JEP.
+This project uses the [CPG](https://github.com/Fraunhofer-AISEC/cpg) and
+therefore requires [JEP](https://github.com/ninia/jep/) to analyze Python code.
+See the [CPG documentation](https://github.com/Fraunhofer-AISEC/cpg/?tab=readme-ov-file#python)
+for information on how to configure JEP.
 
 ## Development
 
