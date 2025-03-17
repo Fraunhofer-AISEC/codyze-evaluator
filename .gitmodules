@@ -42,3 +42,10 @@
 	path = external/python-barbicanclient
 	url = https://github.com/openstack/python-barbicanclient.git
 	branch = stable/2024.2
+[submodule "external/magnum"]
+	path = external/magnum
+	url = https://github.com/openstack/magnum.git
+[submodule "external/keystoneauth"]
+	path = external/keystoneauth
+	url = https://github.com/openstack/keystoneauth.git
+	branch = stable/2024.2
