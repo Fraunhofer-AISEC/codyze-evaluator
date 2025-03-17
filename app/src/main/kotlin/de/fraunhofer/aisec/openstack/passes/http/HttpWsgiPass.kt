@@ -39,27 +39,26 @@ import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
+/**
+ * Find API Router. For now, we assume that:
+ * - API version is v3
+ * - The entry point is 'router.py' - which is typically defined in the api-paste.ini file
+ *
+ * In the future, the implementation can also be extended to read out the values from the config
+ * files. See (Openstack
+ * Checker)[https://github.com/orgs/Fraunhofer-AISEC/projects/17/views/2?pane=issue&itemId=95467628&issue=Fraunhofer-AISEC%7Copenstack-checker%7C50]
+ *
+ * Reference how the routing is handled through the
+ * [WSGI Module](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.openstack.wsgi.html).
+ *
+ * See also the official [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
+ */
 @DependsOn(SymbolResolver::class)
 @ExecuteLate
 class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     val apiVersionPath = "/v3"
 
     override fun accept(component: Component) {
-        /**
-         * Find API Router. For now, we assume that:
-         * - API version is v3
-         * - The entry point is 'router.py' - which is typically defined in the api-paste.ini file
-         *
-         * In the future, the implementation can also be extended to read out the values from the
-         * config files. See (Openstack
-         * Checker)[https://github.com/orgs/Fraunhofer-AISEC/projects/17/views/2?pane=issue&itemId=95467628&issue=Fraunhofer-AISEC%7Copenstack-checker%7C50]
-         *
-         * Reference how the routing is handled through the
-         * [WSGI Module](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.openstack.wsgi.html).
-         *
-         * See also the official
-         * [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
-         */
         val apiRouter =
             component.translationUnits
                 .find { it.name.toString().contains("router.py") }
@@ -70,7 +69,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 router.assigns
                     .filter { assign ->
                         (assign.rhs.firstOrNull() as? CallExpression)?.name?.localName ==
-                                "create_resource"
+                            "create_resource"
                     }
                     .mapNotNull { assign ->
                         val resourceKey =
@@ -112,7 +111,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                         when (controllerArg) {
                             is SubscriptExpression -> {
                                 (controllerArg.subscriptExpression.evaluate() as? String) ==
-                                        resourceKey
+                                    resourceKey
                             }
 
                             is Reference -> {
@@ -131,8 +130,8 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             val resourceExtensionCalls =
                 component.calls.filter {
                     (it.name.localName == "ResourceExtension" ||
-                            it.name.localName == "ControllerExtension") &&
-                            it.name.parent?.localName == "extensions"
+                        it.name.localName == "ControllerExtension") &&
+                        it.name.parent?.localName == "extensions"
                 }
             val resourceControllers = resourceCalls.map { it.second }
             handleExtensionRoutes(resourceExtensionCalls, resourceControllers)
@@ -166,14 +165,18 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 }
         val basePath = buildPath(path)
         val requestHandler =
-            newHttpRequestHandler(underlyingNode = controller, basePath = basePath, endpoints = mutableListOf())
+            newHttpRequestHandler(
+                underlyingNode = controller,
+                basePath = basePath,
+                endpoints = mutableListOf(),
+            )
 
         controller.methods
             .filter { it.hasAnnotation("action") }
             .forEach { method ->
                 val member =
                     method.getAnnotation("action")?.members?.firstOrNull()?.value?.evaluate()
-                            as? String
+                        as? String
                 val isCrudMethod = member in crudMethods
                 val isAction = !isCrudMethod // If it's not a CRUD method, then it's an action
                 val fullPath = buildPath(path = basePath, method = method, isAction = isAction)
@@ -244,7 +247,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             is Reference -> {
                 val construct =
                     controllerArg.followPrevDFG { it is ConstructExpression }?.lastOrNull()
-                            as? ConstructExpression
+                        as? ConstructExpression
 
                 if (construct != null) {
                     listOfNotNull(construct.instantiates as? RecordDeclaration)
@@ -260,7 +263,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
                     initializerList?.initializers?.filterIsInstance<Reference>()?.mapNotNull {
                         it.followPrevDFG { node -> node is RecordDeclaration }?.lastOrNull()
-                                as? RecordDeclaration
+                            as? RecordDeclaration
                     } ?: emptyList()
                 }
             }
@@ -493,7 +496,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 // Ignore base controllers
                 if (
                     !superClass.name.localName.contains("wsgi.Controller") &&
-                    superClass.name.localName.endsWith("Controller")
+                        superClass.name.localName.endsWith("Controller")
                 ) {
                     method = superClass.methods.find { it.name.localName == methodName }
                     // Stop searching once found
@@ -564,12 +567,12 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     ) {
         val httpEndpoint =
             newHttpEndpoint(
-                underlyingNode = method,
-                httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
-                path = path,
-                arguments = method.parameters,
-                authentication = null,
-            )
+                    underlyingNode = method,
+                    httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
+                    path = path,
+                    arguments = method.parameters,
+                    authentication = null,
+                )
                 .apply {
                     this.nextDFG += method
                     this.prevDFG += method
@@ -592,7 +595,8 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     // TODO(lshala): Do we want the parameter project_id in the endpoint or not?
                     //  https://docs.openstack.org/api-ref/block-storage/v3/. Check how it is handed
                     //  over on the client side. In cinder its the lib python-cinderclient. In
-                    //  ProjectMapper.resource() (openstack/__init__.py), the project_id will already
+                    //  ProjectMapper.resource() (openstack/__init__.py), the project_id will
+                    // already
                     //  be retrieved from the CONF.
 
                     // replace for now
