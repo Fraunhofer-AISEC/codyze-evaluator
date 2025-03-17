@@ -26,7 +26,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.InitializerListExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
-import de.fraunhofer.aisec.cpg.graph.types.FunctionType
+import de.fraunhofer.aisec.cpg.graph.types.FunctionType.Companion.computeType
 import de.fraunhofer.aisec.cpg.graph.types.Type
 import de.fraunhofer.aisec.cpg.helpers.Util.debugWithFileLocation
 import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
@@ -213,7 +213,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                         .isNotEmpty()
             ) {
                 current.returnTypes = listOf(it)
-                current.type = FunctionType.computeType(current)
+                current.type = computeType(current)
                 debugWithFileLocation(
                     current,
                     log,

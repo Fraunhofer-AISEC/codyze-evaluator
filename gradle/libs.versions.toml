@@ -3,7 +3,7 @@
 
 [versions]
 kotlin-gradle-plugin = "2.0.20"
-cpg = "10.0.0-alpha6"
+cpg = "10.0.0-beta1"
 spotless = "7.0.1"
 
 [libraries]

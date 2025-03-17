@@ -14,6 +14,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.flows.LocalEntryPoint
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.parseName
+import de.fraunhofer.aisec.cpg.helpers.Util
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
 import de.fraunhofer.aisec.cpg.passes.EvaluationOrderGraphPass
@@ -65,7 +66,7 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
      * files.
      */
     private fun handle(component: Component, pythonLanguage: PythonLanguage) {
-        val componentRoot = component.topLevel
+        val componentRoot = component.topLevel()
         if (componentRoot == null) {
             log.debug("Component {} does not have a root directory. Skipping ...", component)
             return
@@ -74,10 +75,10 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // currently parse only `setup.cfg`
         val setupCfg = componentRoot.resolve("setup.cfg")
         if (setupCfg.exists() && setupCfg.isFile && setupCfg.canRead()) {
-            extractEntryPoints(setupCfg).forEach {
-                val group = it.key
+            extractEntryPoints(setupCfg).forEach { entryPoint ->
+                val group = entryPoint.key
                 val namedObjRefs =
-                    it.value // Format: `name = object reference`, where object reference is
+                    entryPoint.value // Format: `name = object reference`, where object reference is
                 // `importable.module:object.attr`
 
                 namedObjRefs.forEach {
@@ -95,13 +96,18 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                             it.name.localName == "__init__" || it.name == decl.name
                                         }
                                     is FunctionDeclaration -> decl
-                                    else ->
-                                        TODO(
-                                            "Unhandled object reference for entry point: $objRef"
-                                        ) // TODO: check OS packages of what else to expect
+                                    else -> {
+                                        Util.errorWithFileLocation(
+                                            decl,
+                                            log,
+                                            "Unhandled object reference for entry point: {}",
+                                            objRef,
+                                        )
+                                        null
+                                    }
                                 }
 
-                            if (funDecl != null) {
+                            if (funDecl is FunctionDeclaration) {
                                 component.incomingInteractions +=
                                     PythonEntryPoint(
                                             underlyingNode = funDecl,

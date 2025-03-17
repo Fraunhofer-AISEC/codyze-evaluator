@@ -79,7 +79,7 @@ class DiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                         .fulfilled
                         .map { it.last() }
                 }
-                ?.firstOrNull() ?: TODO("Expected to find exactly one matching GetSecret node.")
+                ?.firstOrNull()
 
         val cipher = cipherArg?.let { newCipher(underlyingNode = it) }
         newDiskEncryption(
