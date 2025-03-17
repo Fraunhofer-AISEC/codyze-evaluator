@@ -29,9 +29,7 @@ import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
  */
 @DependsOn(SymbolResolver::class)
 class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
-    override fun cleanup() {
-        // Nothing to do here
-    }
+    val apiVersionPath = "/v3"
 
     override fun accept(node: Node) {
         when (node) {
@@ -61,7 +59,8 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
             val httpClient =
                 record.conceptNodes.filterIsInstance<HttpClient>().singleOrNull()
                     ?: newHttpClient(record, isTLS = false, authentication = null)
-            val path = extractEndpointPath(memberCall.arguments.first()) ?: ""
+            val extractedPath = extractEndpointPath(memberCall.arguments.first())
+            val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
 
             newHttpRequest(
                 underlyingNode = memberCall,
@@ -87,14 +86,15 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
      */
     private fun registerActionRequests(method: MethodDeclaration, httpClient: HttpClient) {
         val postCall = method.calls["post"]
-        val path = postCall?.arguments?.firstOrNull()
-        if (path != null) {
-            val extractedPath = extractEndpointPath(path) ?: ""
+        val pathArg = postCall?.arguments?.firstOrNull()
+        if (pathArg != null) {
+            val extractedPath = extractEndpointPath(pathArg)
+            val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
             for (calls in method.calledBy) {
                 val httpMethod = HttpMethod.POST
                 newHttpRequest(
                     underlyingNode = calls,
-                    url = extractedPath,
+                    url = path,
                     httpMethod = mapHttpMethod(httpMethod.toString()),
                     arguments = calls.arguments,
                     concept = httpClient,
@@ -116,5 +116,9 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 else -> null
             }
         return apiEndpoint
+    }
+
+    override fun cleanup() {
+        // Nothing to do here
     }
 }
