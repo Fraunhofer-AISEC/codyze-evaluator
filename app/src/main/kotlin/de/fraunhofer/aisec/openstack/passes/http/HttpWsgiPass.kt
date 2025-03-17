@@ -4,7 +4,10 @@
 package de.fraunhofer.aisec.openstack.passes.http
 
 import de.fraunhofer.aisec.cpg.TranslationContext
+import de.fraunhofer.aisec.cpg.graph.Annotation
+import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.Component
+import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.assigns
 import de.fraunhofer.aisec.cpg.graph.calls
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
@@ -13,6 +16,9 @@ import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.edges.get
 import de.fraunhofer.aisec.cpg.graph.evaluate
+import de.fraunhofer.aisec.cpg.graph.followEOGEdgesUntilHit
+import de.fraunhofer.aisec.cpg.graph.followPrevDFG
+import de.fraunhofer.aisec.cpg.graph.methods
 import de.fraunhofer.aisec.cpg.graph.records
 import de.fraunhofer.aisec.cpg.graph.returns
 import de.fraunhofer.aisec.cpg.graph.statements
@@ -26,37 +32,33 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.SubscriptExpression
+import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
+/**
+ * Find API Router. For now, we assume that:
+ * - API version is v3
+ * - The entry point is 'router.py' - which is typically defined in the api-paste.ini file
+ *
+ * In the future, the implementation can also be extended to read out the values from the config
+ * files. See (Openstack
+ * Checker)[https://github.com/orgs/Fraunhofer-AISEC/projects/17/views/2?pane=issue&itemId=95467628&issue=Fraunhofer-AISEC%7Copenstack-checker%7C50]
+ *
+ * Reference how the routing is handled through the
+ * [WSGI Module](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.openstack.wsgi.html).
+ *
+ * See also the official [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
+ */
 @DependsOn(SymbolResolver::class)
 @ExecuteLate
 class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     val apiVersionPath = "/v3"
 
-    override fun cleanup() {
-        //
-    }
-
     override fun accept(component: Component) {
-        /**
-         * Find API Router. For now, we assume that:
-         * - API version is v3
-         * - The entry point is 'router.py' - which is typically defined in the api-paste.ini file
-         *
-         * In the future, the implementation can also be extended to read out the values from the
-         * config files. See (Openstack
-         * Checker)[https://github.com/orgs/Fraunhofer-AISEC/projects/17/views/2?pane=issue&itemId=95467628&issue=Fraunhofer-AISEC%7Copenstack-checker%7C50]
-         *
-         * Reference how the routing is handled through the
-         * [WSGI Module](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.openstack.wsgi.html).
-         *
-         * See also the official
-         * [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
-         */
         val apiRouter =
             component.translationUnits
                 .find { it.name.toString().contains("router.py") }
@@ -76,10 +78,13 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                 ?.let { it.evaluate() as? String }
 
                         resourceKey?.let { key ->
-                            key to
-                                getControllerFromCreateResource(
-                                    assign.rhs.firstOrNull() as CallExpression
-                                )
+                            val callExpression = assign.rhs.firstOrNull() as? CallExpression
+                            if (callExpression != null) {
+                                val controller = getControllerFromCreateResource(callExpression)
+                                controller?.let { key to it }
+                            } else {
+                                null
+                            }
                         }
                     }
 
@@ -124,12 +129,66 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             // For some endpoints there are Extensions defined which extend the endpoints
             val resourceExtensionCalls =
                 component.calls.filter {
-                    it.name.localName == "ResourceExtension" &&
+                    (it.name.localName == "ResourceExtension" ||
+                        it.name.localName == "ControllerExtension") &&
                         it.name.parent?.localName == "extensions"
                 }
             val resourceControllers = resourceCalls.map { it.second }
             handleExtensionRoutes(resourceExtensionCalls, resourceControllers)
         }
+    }
+
+    private val crudMethods = setOf("create", "update", "delete", "show", "index")
+
+    /**
+     * Handles the registration of controller extension routes, specifically for methods annotated
+     * with `@action`.
+     *
+     * See
+     * [OpenStack ExtensionsModule](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.extensions.html)
+     */
+    private fun handleControllerExtension(node: CallExpression, controller: RecordDeclaration) {
+        val path =
+            extractEndpointPath(call = node, argumentIndex = 1)
+                ?: run {
+                    // Hacky workaround: The CallExpression occurs inside a loop and the value we
+                    // need here depends on a
+                    // class variable. We extract the value by comparing the name of the
+                    // MemberExpression with
+                    // the FieldDeclaration.
+                    val memberExpression = node.arguments.getOrNull(1) as? MemberExpression
+                    val fieldDecl =
+                        controller.fields.firstOrNull {
+                            it.name.localName == memberExpression?.name?.localName
+                        }
+                    fieldDecl?.evaluate() as? String ?: ""
+                }
+        val basePath = buildPath(path)
+        val requestHandler =
+            newHttpRequestHandler(
+                underlyingNode = controller,
+                basePath = basePath,
+                endpoints = mutableListOf(),
+            )
+
+        controller.methods
+            .filter { it.hasAnnotation("action") }
+            .forEach { method ->
+                val member =
+                    method.getAnnotation("action")?.members?.firstOrNull()?.value?.evaluate()
+                        as? String
+                val isCrudMethod = member in crudMethods
+                val isAction = !isCrudMethod // If it's not a CRUD method, then it's an action
+                val fullPath = buildPath(path = basePath, method = method, isAction = isAction)
+                val httpMethod = if (isCrudMethod) member else "POST" // Default to POST for actions
+
+                registerHttpEndpoints(
+                    method = method,
+                    requestHandler = requestHandler,
+                    path = fullPath,
+                    httpMethod = httpMethod,
+                )
+            }
     }
 
     /**
@@ -142,20 +201,31 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         resourceControllers: List<RecordDeclaration>,
     ) {
         for (resourceExtensionCall in resourceExtensionCalls) {
-            val extensionController = getControllerFromResourceExtension(resourceExtensionCall)
-            if (extensionController != null) {
+            val extensionControllers = getControllersFromResourceExtension(resourceExtensionCall)
+            for (extensionController in extensionControllers) {
                 // Check if controller is already registered
-                val isAlreadyRegistered =
-                    resourceControllers.any { registeredController ->
-                        registeredController.name.localName == extensionController.name.localName
+                if (
+                    resourceControllers.any {
+                        it.name.localName == extensionController.name.localName
                     }
-                if (isAlreadyRegistered) {
+                ) {
                     continue
                 }
-                handleResourceExtension(
-                    node = resourceExtensionCall,
-                    controller = extensionController,
-                )
+                when (resourceExtensionCall.name.localName) {
+                    "ResourceExtension" -> {
+                        handleResourceExtension(
+                            node = resourceExtensionCall,
+                            controller = extensionController,
+                        )
+                    }
+
+                    "ControllerExtension" -> {
+                        handleControllerExtension(
+                            node = resourceExtensionCall,
+                            controller = extensionController,
+                        )
+                    }
+                }
             }
         }
     }
@@ -163,21 +233,45 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     /**
      * Second argument of
      * [`ResourceExtension`](https://docs.openstack.org/cinder/latest/contributor/api/cinder.api.extensions.html#cinder.api.extensions.ResourceExtension)
-     * is always the referenced Controller *
+     * is always the referenced Controller
      */
-    private fun getControllerFromResourceExtension(call: CallExpression): RecordDeclaration? {
-        val controllerArg = call.arguments.getOrNull(1)
-        return when (controllerArg) {
-            is Reference -> {
-                val ref = controllerArg.refersTo
-                val construct =
-                    (ref?.astParent as? AssignExpression)?.rhs?.firstOrNull()
-                        as? ConstructExpression
-                construct?.instantiates as? RecordDeclaration
+    private fun getControllersFromResourceExtension(call: CallExpression): List<RecordDeclaration> {
+        val controllerArg =
+            when (call.name.localName) {
+                "ControllerExtension" -> call.arguments.getOrNull(2)
+                "ResourceExtension" -> call.arguments.getOrNull(1)
+                else -> null
             }
 
-            is ConstructExpression -> controllerArg.instantiates as? RecordDeclaration
-            else -> null
+        return when (controllerArg) {
+            is Reference -> {
+                val construct =
+                    controllerArg.followPrevDFG { it is ConstructExpression }?.lastOrNull()
+                        as? ConstructExpression
+
+                if (construct != null) {
+                    listOfNotNull(construct.instantiates as? RecordDeclaration)
+                } else {
+                    val initializerList =
+                        controllerArg
+                            .followEOGEdgesUntilHit(direction = Backward(GraphToFollow.EOG)) {
+                                it is InitializerListExpression
+                            }
+                            .fulfilled
+                            .firstOrNull()
+                            ?.lastOrNull() as? InitializerListExpression
+
+                    initializerList?.initializers?.filterIsInstance<Reference>()?.mapNotNull {
+                        it.followPrevDFG { node -> node is RecordDeclaration }?.lastOrNull()
+                            as? RecordDeclaration
+                    } ?: emptyList()
+                }
+            }
+
+            is ConstructExpression ->
+                listOfNotNull(controllerArg.instantiates as? RecordDeclaration)
+
+            else -> emptyList()
         }
     }
 
@@ -238,20 +332,17 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // We need to extract the HTTP Method from the conditions, e.g. `conditions={"method":
         // ['PUT']}`
         val conditions = call.argumentEdges["conditions"]?.end as? InitializerListExpression
-        val httpMethod =
+        val initializerList =
             conditions
                 ?.initializers
                 ?.filterIsInstance<KeyValueExpression>()
-                ?.firstOrNull { (it.key as? Literal<*>)?.value?.toString() == "method" }
-                ?.value
-                ?.let { it as? InitializerListExpression }
-                ?.initializers
-                ?.single()
-                ?.let { it.evaluate() as? String }
+                ?.firstOrNull { it.key.evaluate() == "method" }
+                ?.value as? InitializerListExpression
+        val httpMethod = initializerList?.initializers?.singleOrNull()?.evaluate() as? String
 
         // Extract the name of the action which is usually also the name of the method itself, e.g.
         // `action='update_all'`.
-        val methodName = (call.argumentEdges["action"]?.end as? Literal<*>)?.value?.toString()
+        val methodName = call.argumentEdges["action"]?.end?.evaluate() as? String
         if (methodName != "action") {
             controller.methods
                 .find { it.name.localName == methodName }
@@ -267,32 +358,18 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             // In some cases, when only `action` is defined,
             // multiple endpoints are registered through the `action` annotation, and they all point
             // to the same URL.
-            val annotatedMethods =
-                controller.methods.filter { method ->
-                    method.annotations.any { it.name.localName == methodName }
-                }
-            if (annotatedMethods.isNotEmpty()) {
-                annotatedMethods.forEach { method ->
-                    if (
-                        endpoint.contains("id", ignoreCase = true) &&
-                            method.parameters.any {
-                                it.name.localName.equals("id", ignoreCase = true)
-                            }
-                    ) {
-                        registerHttpEndpoints(
-                            method = method,
-                            requestHandler = requestHandler,
-                            path = endpoint,
-                            httpMethod = httpMethod,
-                        )
-                    } else {
-                        registerHttpEndpoints(
-                            method = method,
-                            requestHandler = requestHandler,
-                            path = endpoint,
-                            httpMethod = httpMethod,
-                        )
-                    }
+            val annotatedMethods = controller.methods.filter { it.hasAnnotation(methodName) }
+            annotatedMethods.forEach { method ->
+                val endpointWithId = endpoint.contains("id", ignoreCase = true)
+                val methodWithId = method.hasIdParameter()
+
+                if (endpointWithId && methodWithId || !endpointWithId && !methodWithId) {
+                    registerHttpEndpoints(
+                        method = method,
+                        requestHandler = requestHandler,
+                        path = endpoint,
+                        httpMethod = httpMethod,
+                    )
                 }
             }
         }
@@ -316,12 +393,10 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val parentResourcePath =
             parentResource?.let {
                 val memberName =
-                    it.argumentEdges["member_name"]?.end.let { arg ->
-                        (arg as? Literal<*>)?.value?.toString()
-                    }
+                    it.argumentEdges["member_name"]?.end.let { arg -> arg?.evaluate() as? String }
                 val collectionName =
                     it.argumentEdges["collection_name"]?.end.let { arg ->
-                        (arg as? Literal<*>)?.value?.toString()
+                        arg?.evaluate() as? String
                     }
                 if (memberName != null && collectionName != null) {
                     "$collectionName/{${memberName}_id}/$apiEndpoint"
@@ -347,28 +422,11 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // `collection = {'detail': 'GET'}` means the "detail" action is accessed via a GET request.
         val collection = call.argumentEdges["collection"]?.end as? InitializerListExpression
         collection?.initializers?.filterIsInstance<KeyValueExpression>()?.forEach { keyValue ->
-            val methodName = (keyValue.key as? Literal<*>)?.value?.toString()
-            val httpMethod = (keyValue.value as? Literal<*>)?.value?.toString()
+            val methodName = keyValue.key.evaluate() as? String
+            val httpMethod = keyValue.value.evaluate() as? String
 
             if (methodName != null && httpMethod != null) {
-                // Try to find the method in the current controller
-                var method = controller.methods.find { it.name.localName == methodName }
-
-                // If not found, check in the superclasses
-                if (method == null) {
-                    for (superClass in
-                        controller.superClasses.filterIsInstance<RecordDeclaration>()) {
-                        // Ignore base controllers
-                        if (
-                            !superClass.name.localName.contains("wsgi.Controller") &&
-                                superClass.name.localName.endsWith("Controller")
-                        ) {
-                            method = superClass.methods.find { it.name.localName == methodName }
-                            // Stop searching once found
-                            if (method != null) break
-                        }
-                    }
-                }
+                var method = findMethodInControllerAndSuperClasses(controller, methodName)
 
                 // Register the found method
                 method?.let {
@@ -387,61 +445,75 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // request.
         val member = call.argumentEdges["member"]?.end as? InitializerListExpression
         member?.initializers?.filterIsInstance<KeyValueExpression>()?.forEach { keyValue ->
-            val key = (keyValue.key as? Literal<*>)?.value?.toString()
-            val httpMethod = (keyValue.value as? Literal<*>)?.value?.toString()
-            val annotatedMethods =
-                controller.methods.filter { method ->
-                    method.annotations.any { it.name.localName == key }
-                }
-            // The endpoints are annotated with the action decorator (=`@wsgi.action(<key>)`)
-            if (annotatedMethods.isNotEmpty()) {
-                annotatedMethods.forEach { method ->
-                    if (method.parameters.any { it.name.localName == "id" }) {
+            val key = keyValue.key.evaluate() as? String
+            val httpMethod = keyValue.value.evaluate() as? String
+
+            if (key != null && httpMethod != null) {
+                // The endpoints are annotated with the action decorator (=`@wsgi.action(<key>)`)
+                val annotatedMethods = controller.methods.filter { it.hasAnnotation(key) }
+                if (annotatedMethods.isNotEmpty()) {
+                    annotatedMethods.forEach { method ->
+                        val path = buildPath(path = basePath, method = method, isAction = true)
                         registerHttpEndpoints(
                             method = method,
                             requestHandler = requestHandler,
-                            path = "${basePath}/{id}/action",
-                            httpMethod = httpMethod,
-                        )
-                    } else {
-                        registerHttpEndpoints(
-                            method = method,
-                            requestHandler = requestHandler,
-                            path = "${basePath}/action",
+                            path = path,
                             httpMethod = httpMethod,
                         )
                     }
-                }
-            } else {
-                // If the action is 'registered' but not with the annotation, then search by name
-                controller.methods
-                    .find { it.name.localName == key }
-                    ?.let {
+                } else {
+                    // If the action is 'registered' but not with the annotation, then search by
+                    // name
+                    var method = findMethodInControllerAndSuperClasses(controller, methodName = key)
+
+                    // If method is found, register the endpoint
+                    method?.let {
+                        val path =
+                            buildPath(path = basePath, method = it, methodName = it.name.localName)
                         registerHttpEndpoints(
                             method = it,
                             requestHandler = requestHandler,
-                            path = basePath,
+                            path = path,
                             httpMethod = httpMethod,
                         )
                     }
+                }
             }
         }
     }
 
-    private fun getControllerFromCreateResource(call: CallExpression): RecordDeclaration {
-        val returnValue =
-            (((call.invokes.firstOrNull() as? FunctionDeclaration)
-                ?.returns
-                ?.firstOrNull()
-                ?.returnValue)
-                as? ConstructExpression)
+    /** Tries to find a method in the current controller or its superclasses. */
+    fun findMethodInControllerAndSuperClasses(
+        controller: RecordDeclaration,
+        methodName: String,
+    ): MethodDeclaration? {
+        // Search in the current controller
+        var method = controller.methods.find { it.name.localName == methodName }
 
-        val record =
-            returnValue
-                ?.arguments
-                ?.firstOrNull()
-                ?.let { (it as? ConstructExpression) }
-                ?.instantiates as RecordDeclaration
+        // If not found, check in the superclasses
+        if (method == null) {
+            for (superClass in controller.superClasses.mapNotNull { it.recordDeclaration }) {
+                // Ignore base controllers
+                if (
+                    !superClass.name.localName.contains("wsgi.Controller") &&
+                        superClass.name.localName.endsWith("Controller")
+                ) {
+                    method = superClass.methods.find { it.name.localName == methodName }
+                    // Stop searching once found
+                    if (method != null) break
+                }
+            }
+        }
+        return method
+    }
+
+    private fun getControllerFromCreateResource(call: CallExpression): RecordDeclaration? {
+        val functionDeclaration = call.invokes.firstOrNull() as? FunctionDeclaration
+        val returnValue =
+            functionDeclaration?.returns?.firstOrNull()?.returnValue as? ConstructExpression
+        val argument = returnValue?.arguments?.firstOrNull()
+        val constructExpression = argument?.let { it as? ConstructExpression }
+        val record = constructExpression?.instantiates as? RecordDeclaration
         return record
     }
 
@@ -450,23 +522,11 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         requestHandler: HttpRequestHandler,
         basePath: String,
     ) {
-        val crudMethods = setOf("create", "update", "delete", "show", "index")
         methods
             .filter { it.name.localName in crudMethods }
             .forEach { method ->
-                if (method.parameters.any { it.name.localName == "id" }) {
-                    registerHttpEndpoints(
-                        method = method,
-                        requestHandler = requestHandler,
-                        path = "${basePath}/{id}",
-                    )
-                } else {
-                    registerHttpEndpoints(
-                        method = method,
-                        requestHandler = requestHandler,
-                        path = basePath,
-                    )
-                }
+                val path = buildPath(path = basePath, method = method)
+                registerHttpEndpoints(method = method, requestHandler = requestHandler, path = path)
             }
     }
 
@@ -477,10 +537,12 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // Check if the resource has a parent
         val parentDict = node.argumentEdges["parent"]?.end as? ConstructExpression
         if (parentDict != null) {
-            val memberName = parentDict.arguments.getOrNull(0) as? Literal<*>
-            val collectionName = parentDict.arguments.getOrNull(1) as? Literal<*>
+            val memberName =
+                parentDict.arguments.getOrNull(0).let { arg -> arg?.evaluate() as? String }
+            val collectionName =
+                parentDict.arguments.getOrNull(1).let { arg -> arg?.evaluate() as? String }
             if (memberName != null && collectionName != null) {
-                path = "$apiVersionPath/${collectionName.value}/{${memberName.value}}/$alias"
+                path = "$apiVersionPath/${collectionName}/{${memberName}}/$alias"
             }
         }
 
@@ -527,14 +589,15 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     private fun extractEndpointPath(call: CallExpression, argumentIndex: Int): String? {
         val apiEndpoint =
             when (val endpoint = call.arguments.getOrNull(argumentIndex)) {
-                is Literal<*> -> endpoint.value.toString()
+                is Literal<*> -> endpoint.evaluate() as? String
                 is BinaryOperator -> {
-                    val path = (endpoint.lhs as Literal<*>).value
+                    val path = endpoint.lhs.evaluate() as? String
                     // TODO(lshala): Do we want the parameter project_id in the endpoint or not?
                     //  https://docs.openstack.org/api-ref/block-storage/v3/. Check how it is handed
                     //  over on the client side. In cinder its the lib python-cinderclient. In
-                    // ProjectMapper.resource() (openstack/__init__.py), the project_id will already
-                    // be retrieved from the CONF.
+                    //  ProjectMapper.resource() (openstack/__init__.py), the project_id will
+                    // already
+                    //  be retrieved from the CONF.
 
                     // replace for now
                     return path.toString().replace("%s/", "")
@@ -543,17 +606,55 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 is MemberExpression -> {
                     val baseReference = endpoint.base as? Reference
                     val record = baseReference?.refersTo as? RecordDeclaration
-
-                    val foundAlias =
-                        record.statements.filterIsInstance<AssignExpression>().find { assign ->
-                            val lhsRef = assign.lhs.firstOrNull() as? Reference
-                            lhsRef?.name?.localName == endpoint.name.localName
-                        }
-                    return (foundAlias?.rhs?.firstOrNull() as? Literal<*>)?.value.toString()
+                    if (record != null) {
+                        val alias =
+                            record.statements.filterIsInstance<AssignExpression>().find { assign ->
+                                val lhsRef = assign.lhs.firstOrNull() as? Reference
+                                lhsRef?.name?.localName == endpoint.name.localName
+                            }
+                        return alias?.rhs?.firstOrNull()?.evaluate() as? String
+                    } else {
+                        null
+                    }
                 }
 
                 else -> null
             }
         return apiEndpoint
     }
+
+    private fun buildPath(
+        path: String?,
+        method: MethodDeclaration? = null,
+        isAction: Boolean = false,
+        methodName: String? = null,
+    ): String {
+        var fullPath = path?.takeIf { it.startsWith(apiVersionPath) } ?: "$apiVersionPath/$path"
+        if (method != null && method.hasIdParameter()) {
+            fullPath += "/{id}"
+        }
+        if (isAction) {
+            fullPath += "/action"
+        }
+        if (methodName != null) {
+            fullPath += "/$methodName"
+        }
+        return fullPath
+    }
+
+    override fun cleanup() {
+        // Nothing to do here
+    }
+}
+
+fun MethodDeclaration.getAnnotation(annotationName: String): Annotation? {
+    return annotations.firstOrNull { it.name.localName == annotationName }
+}
+
+fun MethodDeclaration.hasIdParameter(): Boolean {
+    return parameters.any { it.name.localName.equals("id", ignoreCase = true) }
+}
+
+fun MethodDeclaration.hasAnnotation(annotationName: String): Boolean {
+    return annotations.any { it.name.localName == annotationName }
 }
