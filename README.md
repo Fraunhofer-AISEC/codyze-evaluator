@@ -10,7 +10,7 @@ for information on how to configure JEP.
 
 ## Project Structure
 
-It currently houses two "projects":
+The openstack-checker currently houses two "projects":
 - `small-example`: A small example that demonstrates the checker's capabilities.
 - `BYOK`: An example of a Bring Your Own Key (BYOK) implementation in OpenStack. It currently includes one security goal for disk encryption
 
