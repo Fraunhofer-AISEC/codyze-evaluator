@@ -18,7 +18,6 @@ cpg-analysis = { module = "de.fraunhofer.aisec:cpg-analysis", version.ref = "cpg
 cpg-concepts = { module = "de.fraunhofer.aisec:cpg-concepts", version.ref = "cpg" }
 codyze = { module = "de.fraunhofer.aisec:codyze", version.ref = "cpg" }
 codyze-compliance = { module = "de.fraunhofer.aisec:codyze-compliance", version.ref = "cpg" }
-codyze-server = { module = "de.fraunhofer.aisec:codyze-server", version.ref = "cpg" }
 
 # TODO: this may break, if version used by`cpg-language-python` and here diverge; can we infer the version?
 jep = { module = "black.ninia:jep", version = "4.2.0" }
@@ -34,6 +33,5 @@ cpg = [
     "cpg-concepts",
     "codyze",
     "codyze-compliance",
-    "codyze-server",
     "cpg-concepts"
 ]

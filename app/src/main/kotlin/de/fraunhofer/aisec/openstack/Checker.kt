@@ -12,8 +12,6 @@ import de.fraunhofer.aisec.codyze.compliance.*
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.persistence.persist
-import de.fraunhofer.aisec.cpg.webconsole.CPGService
-import de.fraunhofer.aisec.cpg.webconsole.startServer
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import java.io.File
@@ -46,9 +44,10 @@ class OpenstackCheckerCommand : ProjectCommand() {
                 .analyzeWithGoals()
         result.writeSarifJson(File("findings.sarif"))
 
-        if (projectOptions.startServer) {
+        // Re-Enable once https://github.com/Fraunhofer-AISEC/cpg/pull/2139 is merged
+        /*if (projectOptions.startServer) {
             CPGService.fromAnalysisResult(result).startServer()
-        }
+        }*/
 
         if (neo4j) {
             println("Connecting to Neo4J")

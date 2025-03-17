@@ -66,7 +66,7 @@ class PythonEntryPointPass(ctx: TranslationContext) : ComponentPass(ctx) {
      * files.
      */
     private fun handle(component: Component, pythonLanguage: PythonLanguage) {
-        val componentRoot = component.topLevel
+        val componentRoot = component.topLevel()
         if (componentRoot == null) {
             log.debug("Component {} does not have a root directory. Skipping ...", component)
             return
