@@ -13,7 +13,6 @@ import de.fraunhofer.aisec.cpg.graph.operationNodes
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
-import de.fraunhofer.aisec.cpg.persistence.persist
 import de.fraunhofer.aisec.cpg.query.May
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.allExtended
@@ -21,33 +20,15 @@ import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.executionPath
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import java.net.ConnectException
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
-import org.neo4j.driver.GraphDatabase
 
 class FileTest {
-    @Throws(InterruptedException::class, ConnectException::class)
-    fun connect(): org.neo4j.driver.Session {
-        val PROTOCOL = "neo4j://"
-
-        val DEFAULT_HOST = "localhost"
-        val DEFAULT_PORT = 7687
-        val DEFAULT_USER_NAME = "neo4j"
-        val DEFAULT_PASSWORD = "password"
-        val driver =
-            GraphDatabase.driver(
-                "$PROTOCOL$DEFAULT_HOST:$DEFAULT_PORT",
-                org.neo4j.driver.AuthTokens.basic(DEFAULT_USER_NAME, DEFAULT_PASSWORD),
-            )
-        driver.verifyConnectivity()
-        return driver.session()
-    }
 
     @Test
-    fun testDuplicateWriteFiles() {
+    fun testDuplicateOperationNodes() {
         val topLevel = Path("../external/magnum")
         val result =
             analyze(listOf(), topLevel, true) {
@@ -65,18 +46,12 @@ class FileTest {
                 it.topLevels(mapOf("magnum" to topLevel.resolve("magnum").toFile()))
             }
         assertNotNull(result)
-        val session = connect()
-        with(session) {
-            executeWrite { tx -> tx.run("MATCH (n) DETACH DELETE n").consume() }
-            result.persist()
-        }
-        session.close()
 
-        val writeFiles = result.operationNodes.filterIsInstance<WriteFile>()
-        assertTrue(writeFiles.isNotEmpty(), "Expected to find some `WriteFile` nodes.")
+        val operationNode = result.operationNodes
+        assertTrue(operationNode.isNotEmpty(), "Expected to find some `Operation` nodes.")
         assertTrue(
-            writeFiles.groupBy { it.underlyingNode }.filter { it.value.size > 1 }.isEmpty(),
-            "Found two `WriteFile` nodes with the same underlying node.",
+            operationNode.groupBy { it }.filter { it.value.size > 1 }.isEmpty(),
+            "Found at least two equal `Operation` nodes.",
         )
     }
 
