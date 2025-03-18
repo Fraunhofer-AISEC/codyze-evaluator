@@ -23,7 +23,6 @@ fun mapHttpMethod(methodName: String): HttpMethod {
         "HEAD" -> HttpMethod.HEAD
         "CONNECT" -> HttpMethod.CONNECT
         "TRACE" -> HttpMethod.TRACE
-        // TODO(lshala): Change this to unknown
         else -> HttpMethod.GET
     }
 }

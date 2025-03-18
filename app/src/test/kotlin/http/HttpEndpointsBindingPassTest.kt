@@ -1,18 +1,23 @@
 /*
  * This file is part of the OpenStack Checker
  */
+package http
+
+import analyze
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.operationNodes
 import de.fraunhofer.aisec.openstack.passes.http.HttpCinderClientPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpEndpointsBindingPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
-import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import org.junit.jupiter.api.Test
 
 class HttpEndpointsBindingPassTest {
     @Test
