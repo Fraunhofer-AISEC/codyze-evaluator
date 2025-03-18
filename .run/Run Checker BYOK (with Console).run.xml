@@ -1,8 +1,8 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="Run Checker BYOK (with Server)" type="JetRunConfigurationType">
+  <configuration default="false" name="Run Checker BYOK (with Console)" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="de.fraunhofer.aisec.openstack.CheckerKt" />
     <module name="openstack-checker.app.main" />
-    <option name="PROGRAM_PARAMETERS" value="--project-dir=projects/magnum-cve --components magnum --components cinder --components conf --exclusion-patterns tests" />
+    <option name="PROGRAM_PARAMETERS" value="--console=true --project-dir=projects/magnum-cve --components magnum --components cinder --components conf --exclusion-patterns tests" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />
