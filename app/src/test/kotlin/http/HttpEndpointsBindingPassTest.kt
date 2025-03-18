@@ -15,9 +15,9 @@ import de.fraunhofer.aisec.openstack.passes.http.HttpCinderClientPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpEndpointsBindingPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
+import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import org.junit.jupiter.api.Test
 
 class HttpEndpointsBindingPassTest {
     @Test

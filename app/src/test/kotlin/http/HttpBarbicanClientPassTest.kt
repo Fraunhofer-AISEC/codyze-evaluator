@@ -11,11 +11,10 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.graph.operationNodes
 import de.fraunhofer.aisec.openstack.passes.http.HttpBarbicanClientPass
 import kotlin.io.path.Path
+import kotlin.test.Test
 import kotlin.test.assertNotNull
-import org.junit.jupiter.api.Test
 
 class HttpBarbicanClientPassTest {
-
     @Test
     fun barbicanClientPassTest() {
         val topLevel = Path("../external")
