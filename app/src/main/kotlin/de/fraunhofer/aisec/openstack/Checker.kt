@@ -9,6 +9,8 @@ import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import de.fraunhofer.aisec.codyze.AnalysisProject
 import de.fraunhofer.aisec.codyze.compliance.*
+import de.fraunhofer.aisec.codyze.console.ConsoleService
+import de.fraunhofer.aisec.codyze.console.startConsole
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.persistence.persist
@@ -24,7 +26,11 @@ class OpenstackCheckerCommand : ProjectCommand() {
 
     override fun run() {
         val result =
-            AnalysisProject.fromOptions(projectOptions, translationOptions) {
+            AnalysisProject.fromOptions(
+                    projectOptions,
+                    translationOptions,
+                    postProcess = AnalysisProject::executeSecurityGoalsQueries,
+                ) {
                     it.registerPass<SecretPass>()
                     it.registerPass<DiskEncryptionPass>()
                     it.registerPass<PythonMemoryPass>()
@@ -41,13 +47,12 @@ class OpenstackCheckerCommand : ProjectCommand() {
                     // Causes problems with python in general and with the include loading feature
                     it.useParallelFrontends(false)
                 }
-                .analyzeWithGoals()
+                .analyze()
         result.writeSarifJson(File("findings.sarif"))
 
-        // Re-Enable once https://github.com/Fraunhofer-AISEC/cpg/pull/2139 is merged
-        /*if (projectOptions.startServer) {
-            CPGService.fromAnalysisResult(result).startServer()
-        }*/
+        if (projectOptions.startConsole) {
+            ConsoleService.fromAnalysisResult(result).startConsole()
+        }
 
         if (neo4j) {
             println("Connecting to Neo4J")
