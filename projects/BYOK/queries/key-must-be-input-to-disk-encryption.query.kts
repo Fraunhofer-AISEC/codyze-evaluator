@@ -70,7 +70,7 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
                     mutableListOf(QueryTree(encryption)),
                     "encryptionOp.concept.key is null",
                 )
-    }
+        }
 
     return tree
 }
