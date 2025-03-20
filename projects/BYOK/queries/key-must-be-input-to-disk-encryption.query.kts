@@ -76,19 +76,20 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
 }
 
 fun statement3(result: TranslationResult): QueryTree<Boolean> {
-    val tree = result.allExtended<DiskEncryption> {
-        val processInput =
-            (it.underlyingNode as? CallExpression)?.argumentEdges?.get("process_input")?.end
-        if (processInput == null) {
-            QueryTree(true)
-        } else {
-            executionPath(it) { to ->
-                to is DeAllocate &&
-                        (to.what as? Reference)?.refersTo ==
-                        (processInput as? Reference)?.refersTo
-            }
+    val tree = result.allExtended<DiskEncryption> { diskEncryption ->
+        val subQueries = diskEncryption.key?.ops?.filterIsInstance<GetSecret>()?.map { secret ->
+            secret.alwaysFlowsTo(
+                scope = Interprocedural(maxSteps = 100),
+                sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
+                predicate = { it is DeAllocate }, // Anforderung: de-allocate the data
+            )
         }
+        QueryTree(
+            subQueries?.all { it.value == true } ?: false,
+            subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
+            "All keys must be deleted",
+            diskEncryption
+        )
     }
-
     return tree
 }
