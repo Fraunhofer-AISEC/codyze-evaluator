@@ -2,6 +2,10 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
+import de.fraunhofer.aisec.cpg.query.*
+import de.fraunhofer.aisec.cpg.*
 
 /**
  * Access to Barbican keys must be restricted to authenticated
@@ -24,7 +28,8 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
             // There's some authentication for this endpoint
             QueryTree<Boolean>(
                 value = endpoint.authentication != null,
-                children = mutableListOf(QueryTree<Authentication>(value = endpoint.authentication!!)),
+                children = endpoint.authentication?.let { mutableListOf(QueryTree<Authentication>(value = it)) }
+                    ?: mutableListOf(),
                 stringRepresentation = "The endpoint $endpoint requires authentication by ${endpoint.authentication}",
                 node = endpoint
             )
