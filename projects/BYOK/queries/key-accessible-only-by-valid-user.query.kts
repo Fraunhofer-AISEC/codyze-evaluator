@@ -1,11 +1,11 @@
-import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
-import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
-import de.fraunhofer.aisec.cpg.query.*
 import de.fraunhofer.aisec.cpg.*
+import de.fraunhofer.aisec.cpg.query.*
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.graph.concepts.iam.*
 
 /**
  * Access to Barbican keys must be restricted to authenticated
@@ -28,7 +28,7 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
             // There's some authentication for this endpoint
             QueryTree<Boolean>(
                 value = endpoint.authentication != null,
-                children = endpoint.authentication?.let { mutableListOf(QueryTree<Authentication>(value = it)) }
+                children = endpoint.authentication?.let { mutableListOf(QueryTree<IdentityAccessManagement>(value = it)) }
                     ?: mutableListOf(),
                 stringRepresentation = "The endpoint $endpoint requires authentication by ${endpoint.authentication}",
                 node = endpoint
@@ -42,7 +42,46 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
  * be connected to an Authorization concept.
  */
 fun statement2(tr: TranslationResult): QueryTree<Boolean> {
-    return QueryTree(true)
+    return tr.allExtended<HttpEndpoint>(
+        // A secret reaches this endpoint.
+        sel = { endpoint ->
+            dataFlow(
+                startNode = endpoint,
+                type = May,
+                direction = Backward(GraphToFollow.DFG),
+                scope = Interprocedural(),
+                predicate = { it is GetSecret },
+            ).value
+        },
+        mustSatisfy = { endpoint ->
+            // There's some authentication for this endpoint
+            val authentication = endpoint.authentication
+            val authenticated = authentication != null
+            if (!authenticated) {
+                QueryTree<Boolean>(
+                    value = false,
+                    children = mutableListOf(),
+                    stringRepresentation = "The endpoint $endpoint does not even require authentication",
+                    node = endpoint,
+                )
+            } else {
+                endpoint.underlyingNode?.let { underlyingNode ->
+                    executionPath(
+                        startNode = underlyingNode,
+                        type = Must,
+                        direction = Forward(GraphToFollow.EOG),
+                        scope = Interprocedural(),
+                        earlyTermination = { it is GetSecret },
+                        predicate = { it is AuthorizeJwt },
+                    )
+                } ?: QueryTree<Boolean>(
+                    value = false,
+                    children = mutableListOf(),
+                    stringRepresentation = "The endpoint $endpoint does not have an underlying node which could serve us as a starting point for the EOG",
+                    node = endpoint,
+                )
+            }
+        })
 }
 
 /**
