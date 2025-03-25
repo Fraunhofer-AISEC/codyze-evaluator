@@ -34,6 +34,16 @@ git submodule update --init
 ./app/build/install/app/bin/app --project-dir=projects/magnum-cve --components magnum --exclusion-patterns tests
 ```
 
+## Web-UI
+
+To see the results in the web-UI, run the app with the flag `--console=true`, e.g. as follows:
+
+```
+./app/build/install/app/bin/app --project-dir=projects/magnum-cve --components magnum --exclusion-patterns tests --console=true
+```
+
+The Web-UI should be accessible on http://localhost:8080.
+
 ## Development
 
 We are using git submodules to include OpenStack repositories. To clone the submodules, use the following command:
