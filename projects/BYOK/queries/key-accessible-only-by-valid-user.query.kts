@@ -54,7 +54,7 @@ fun statement2(tr: TranslationResult): QueryTree<Boolean> {
             ).value
         },
         mustSatisfy = { endpoint ->
-            // There's some authentication for this endpoint
+            // There's some authorization decision before the secret is accessed
             val authentication = endpoint.authentication
             val authenticated = authentication != null
             if (!authenticated) {
