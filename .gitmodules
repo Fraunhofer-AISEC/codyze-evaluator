@@ -49,3 +49,6 @@
 	path = external/keystoneauth
 	url = https://github.com/openstack/keystoneauth.git
 	branch = stable/2024.2
+[submodule "external/keystonemiddleware"]
+	path = external/keystonemiddleware
+	url = https://github.com/openstack/keystonemiddleware.git

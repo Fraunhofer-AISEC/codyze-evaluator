@@ -36,7 +36,6 @@ import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 /**
@@ -54,7 +53,6 @@ import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
  * See also the official [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
  */
 @DependsOn(SymbolResolver::class)
-@ExecuteLate
 class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     val apiVersionPath = "/v3"
 
