@@ -27,7 +27,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 it.name.toString() == "cinder.conf"
             }
         if (cinderConf == null) {
-            log.warn("Configuration 'cinder.conf' not found: {}", cinderConf)
+            log.warn("Configuration 'cinder.conf' not found")
             return
         }
         val authStrategyField =
@@ -45,7 +45,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 ?.underlyingNode
 
         if (apiPasteConfigField == null) {
-            log.warn("No 'api_paste_config' defined: {}", cinderConf)
+            log.warn("No 'api_paste_config' defined")
             return
         }
         val apiPasteConfigPath = apiPasteConfigField.evaluate() as String
