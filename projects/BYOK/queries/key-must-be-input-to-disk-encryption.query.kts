@@ -74,26 +74,40 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
 }
 
 /**
- * Given a customer-managed key K stored in Barbican, K must only be accessible via the Barbican API endpoint.
+ * Given a customer-managed key K used for disk encryption, K must only be accessible via the Barbican API endpoint.
  */
 fun statement2(result: TranslationResult): QueryTree<Boolean> {
     val tree =
         result.allExtended<DiskEncryption> { encryption ->
+            // We start with a disk encryption operation and check if the key is present.
             encryption.key?.let { key ->
+                // This key must originate from a secure key provider. In our case, this is the Barbican API endpoint.
+                // We perform this check with a backward data flow analysis.
                 dataFlow(
+                    // We start our data flow analysis at the encryption operation.
                     startNode = encryption,
-                    type = May,
+                    // We want to make sure that each DFG-path leads us to the Barbican API endpoint, so we use a Must analysis.
+                    type = Must,
+                    // We want to follow the data flow in the backward direction.
                     direction = Backward(GraphToFollow.DFG),
+                    // These arguments tell that we want to perform a context- and field sensitive analysis.
+                    // This is actually the default setting, so it's optional to specify this.
                     sensitivities = FieldSensitive + ContextSensitive,
+                    // We want to consider all paths across functions, i.e., perform an interprocedural analysis.
                     scope = Interprocedural(),
+                    // The requirement is satisified if the key comes from a secure key provider.
+                    // We use the extension function `isSecureKeyProvider` defined above to perform this check.
                     predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
                 )
             }
+            // If there's no key present for the encryption, there's something wrong.
+            // In this case, we create a QueryTree with value `false` manually.
                 ?: QueryTree(
-                    false,
-                    mutableListOf(QueryTree(encryption)),
-                    "encryptionOp.concept.key is null",
-                ) // If there's no key present for the encryption, there's something wrong, so we create a QueryTree with value false manually.
+                    value = false,
+                    children = mutableListOf(QueryTree(encryption)),
+                    stringRepresentation = "encryptionOp.concept.key is null",
+                    node = encryption
+                )
         }
 
     return tree
@@ -104,18 +118,32 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
  */
 fun statement3(result: TranslationResult): QueryTree<Boolean> {
     val tree = result.allExtended<DiskEncryption> { diskEncryption ->
+        // We start with the disk encryption operation and check if the key is present.
+        // For this key, we get all `GetSecret` operations, i.e., all operations which
+        // may be used to generate the secret key.
         val subQueries = diskEncryption.key?.ops?.filterIsInstance<GetSecret>()?.map { secret ->
+            // For each secret, we check if it is de-allocated.
+            // The function `alwaysFlowsTo` checks if there's a data flow to a node fulfilling
+            // the predicate on every possible execution path starting at the node `secret`.
             secret.alwaysFlowsTo(
+                // We perform an interprocedural analysis but limit it to 100 steps after the `GetSecret` operation.
+                // TODO: Delete this threshold once issue #112 is fixed.
                 scope = Interprocedural(maxSteps = 100),
+                // We do not want to track unreachable EOG paths and we perform a context- and field-sensitive analysis.
                 sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                predicate = { it is DeAllocate }, // Anforderung: de-allocate the data
+                // We require a de-allocate operation to be present which affects the secret.
+                predicate = { it is DeAllocate },
             )
         }
+        // Since there might be multiple `GetSecret` operations, we need to check if all of them are de-allocated.
+        // We do so by creating a single QueryTree object with value `true` if the query above is fulfilled for all
+        // `GetSecret` operations. If the key was `null`, the result will be `false`.
         QueryTree(
-            subQueries?.all { it.value == true } ?: false,
-            subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
-            "All keys must be deleted",
-            diskEncryption
+            value = subQueries?.all { it.value == true } ?: false,
+            // Store the sub-queries into the list of children.
+            children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
+            stringRepresentation = "All keys must be deleted",
+            node = diskEncryption
         )
     }
     return tree
