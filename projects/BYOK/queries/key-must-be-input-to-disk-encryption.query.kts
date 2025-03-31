@@ -27,8 +27,8 @@ fun HttpEndpoint.isSecureKeyProvider(): Boolean {
 
 /**
  * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
- * checks if the [Node] is invoked on may be used to leak sensitive data outside of the component by
- * considering the following channels:
+ * checks if the [Node] it is invoked on may be used to leak sensitive data outside of the component
+ * by considering the following channels:
  * - Writing to a file
  * - Writing to a log
  * - Printing to the console (via a call expression `println`)
