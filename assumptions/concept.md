@@ -4,7 +4,7 @@ During the analysis of a program, different limitations and problems can appear.
 
 The purpose of categorizing assumptions is to reduce the mental load on the user who has to work with the analysis results and contained assumptions. Instead of unrelated assumption messages in a general assumption object, assumption categories allow a user to group assumptions when working with the results and make a quicker decision on the reliability of results based on the types of assumptions that are reported.
         
-## Assumptions are added ...
+## Assumptions are Added ...
 
  - As Nodes to the Graph provided as meta information in .yaml.
  - As Nodes to the Graph during regular translation.
@@ -22,11 +22,11 @@ Assumptions are added as overlay nodes connected to a graph node.
     - In case a single location is provided, the assumption is placed at the largest node starting at that location.
     - If a region is provided, the assumption is placed at the largest encapsulating location. 
 
-## Developers can manually add assumptions
+## Developers can Manually add Assumptions
  - During translation: `assume(ASSUMPTION_TYPE, NODE, SCOPE(LOCAL|GLOBAL), MESSAGE)
  - As consideration of a Query through the returned QueryTree object: `queryTree.addAssumption(ASSUMPTION_TYPE, SCOPE(LOCAL|GLOBAL), MESSAGE)`
 
-## Assumption collection
+## Assumption Collection
 Assumptions placed at CPG nodes are collected during evaluations that return a QueryTree object and placed in the QueryTree object. Assumptions are collected from nodes that are visited by the query tree evaluation or are attached to the AST-Ancestor of a visited node. Global assumptions are always included and summarized in the final result.
 
 When a QueryTree is returned as a result, it is printed into a SARIF output. The assumptions are placed in the same SARIF output for later printing to the end user. Assumptions are placed as attachment objects to the sarif output.
@@ -36,7 +36,9 @@ When a QueryTree is returned as a result, it is printed into a SARIF output. The
   - region: the code region of the associated node, or nothing if the location is a path instead of a file.
   - rectangle: unused.
 
-## Assumptions on analysis completeness and code availability
+## Assumption Categories
+
+### Assumptions on Analysis Completeness and Code Availability
 
 Examples:
  - Missing code
@@ -44,52 +46,52 @@ Examples:
  - Ambiguities
  - Languages that cannot be analyzed
  
-## Assumptions on language semantics and syntactic correctness
+### Assumptions on Language Semantics and Syntactic Correctness
 
 Examples:
  - Ambiguities, can be result of incomplete code (see above) or insufficient parser complexity.
    - e.g. Assuming the expressions `a(b)` is a call to function `a` with argument `b` and not a cast of `b` to type `a`. 
  - Warnings when we make nodes after finding a parser output that we did not expect.
 
-## Assumptions on program semantics
+### Assumptions on Program Semantics
 An assumption that we correctly caputed a program semantic, e.g. logging of data, crossing system boundaries, file operations.
 
  - When we place concepts in the graph, we assume that we correctly identified all necessary places.
  - When we check for white and blacklists in a query, we assume that these lists are complete.
 
-## Assumptions on soundness and completeness
+### Assumptions on Soundness and Completeness
 
 Examples:
  - If the same flow is at some point not sound and at some point not correct it is relaxed to a general approximation
 
-## Assumptions on data and control flow, approximations
+### Assumptions on Data and Control Flow Approximations
 
 Examples:
  - Try statements and their disruption of control flow
  - Assumptions on external input or labeling that an input is external
  - Assumptions on a config data point. Assumptions is e.g., that configs are saved, cannot be injected
 
-## Assumptions on runtime preconditions
+### Assumptions on Runtime Preconditions
 
 Examples:
  - Ressource assumptions: the file, that is opened here, exists; network connection is available; the database runs and is reachable.
  - Assumptions on the platform or the execution environment, e.g. runs on Linux, etc.
  - Assuming one behavior over another when our CPG representation does not contain or cannot know behavioral differences at runtime, e.g., different platform or execution environment.
 
-## Assumptions on sequentiality under parallel execution
+### Assumptions on Sequentiality under Parallel Execution
 
 Examples:
  - Assumption that a critical section is atomic, e.g. that the execution of a line of statements is not disrupted by other threads.
  - Just whether we assume that execution is sequential or if we know there is some parallel execution, and we assume that it does not influence sequentiality when reading data.
 
-## Assumptions on input data
+### Assumptions on Input Data
 
 Examples:
  - Assumption on entry points (or endpoints): Data coming from here are external to the application.
  - Data ranges on input that can be annotated
  - Assumption that data is trusted input
  
-## Problems and Limitations
+### Problems and Limitations
 
 Problems and limitations during analysis influence how trustworthy results of an evaluation can be. As such they should be reported to the user when they influence the queries. This is the same motivation we have with assumptions, and we therefore plan to make them part of the same feature. However, strictly speaking they are different from assumptions.
 
