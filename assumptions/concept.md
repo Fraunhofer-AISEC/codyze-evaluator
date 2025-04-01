@@ -17,6 +17,12 @@ Examples:
    - e.g. Assuming the expressions `a(b)` is a call to function `a` with argument `b` and not a cast of `b` to type `a`. 
  - Warnings when we make nodes after finding a parser output that we did not expect.
 
+## Assumptions on program semantics
+An assumption that we correctly caputed a program semantic, e.g. logging of data, crossing system boundaries, file operations.
+
+ - When we place concepts in the graph, we assume that we correctly identified all necessary places.
+ - When we check for white and blacklists in a query, we assume that these lists are complete.
+
 ## Assumptions on soundness and completeness
 
 Examples:
