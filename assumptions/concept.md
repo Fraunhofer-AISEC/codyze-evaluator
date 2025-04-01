@@ -13,7 +13,8 @@ Examples:
 ## Assumptions on language semantics and syntactic correctness
 
 Examples:
- - Ambiguities, we have them here too, although they are related to code completeness 
+ - Ambiguities, can be result of incomplete code (see above) or insufficient parser complexity.
+   - e.g. Assuming the expressions `a(b)` is a call to function `a` with argument `b` and not a cast of `b` to type `a`. 
  - Warnings when we make nodes after finding a parser output that we did not expect.
 
 ## Assumptions on soundness and completeness
@@ -66,3 +67,10 @@ Two solutions are possible in the categorization sense:
  2. Or can we restate problems and limitations as assumptions?
     - Assumptions
       - CanNotTranslateProblem as assumption: We assume that the remainder of the query is not impacted by this problem.
+        
+## Assumptions are added ...
+ - As Nodes to the Graph provided as meta information in .yaml.
+ - As Nodes to the Graph during regular translation.
+ - In the result, if a node with assumption was considered in a query.
+ - In the result, if a query specifies that it makes assumptions.
+ - In the result, if an analysis function in a query makes assumptions.
