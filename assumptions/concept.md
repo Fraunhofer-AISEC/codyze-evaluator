@@ -4,7 +4,7 @@ During the analysis of a program, different limitations and problems can appear.
 
 The purpose of categorizing assumptions is to reduce the mental load on the user who has to work with the analysis results and contained assumptions. Instead of unrelated assumption messages in a general assumption object, assumption categories allow a user to group assumptions when working with the results and make a quicker decision on the reliability of results based on the types of assumptions that are reported.
 
-## Assumptions on code completeness and availability
+## Assumptions on analysis completeness and code availability
 
 Examples:
  - Missing code
