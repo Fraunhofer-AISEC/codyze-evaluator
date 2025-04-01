@@ -40,6 +40,8 @@ When a QueryTree is returned as a result, it is printed into a SARIF output. The
 
 ### Assumptions on Analysis Completeness and Code Availability
 
+*InferenceAssumption*, *ClosedMacroAssumption*, *UnsupportedLanguageProblem*, *MissingCodeProblem*, ...
+
 Examples:
  - Missing code
  - Missing macros definitions: We have to assume that it is a closed subtree in the AST
@@ -47,6 +49,7 @@ Examples:
  - Languages that cannot be analyzed
  
 ### Assumptions on Language Semantics and Syntactic Correctness
+*AmbiguityAssumption*, ...
 
 Examples:
  - Ambiguities, can be result of incomplete code (see above) or insufficient parser complexity.
@@ -54,6 +57,9 @@ Examples:
  - Warnings when we make nodes after finding a parser output that we did not expect.
 
 ### Assumptions on Program Semantics
+
+*ConceptPlacementAssumption*, *ExhaustivEnumerationAssumption*, ...
+
 An assumption that we correctly caputed a program semantic, e.g. logging of data, crossing system boundaries, file operations.
 
  - When we place concepts in the graph, we assume that we correctly identified all necessary places.
@@ -61,10 +67,13 @@ An assumption that we correctly caputed a program semantic, e.g. logging of data
 
 ### Assumptions on Soundness and Completeness
 
+*CompletenessAssumption*, *SoundnessAssumption*, ...
+
 Examples:
  - If the same flow is at some point not sound and at some point not correct it is relaxed to a general approximation
 
 ### Assumptions on Data and Control Flow Approximations
+*CFIntegrityAssumption*, *NoExceptionsAssumption*, *CFAllOrNothingExecutesAssumption*, *TrustedConfigAssumption*, *ExternalDataAssumption*, ...
 
 Examples:
  - Try statements and their disruption of control flow
@@ -72,6 +81,7 @@ Examples:
  - Assumptions on a config data point. Assumptions is e.g., that configs are saved, cannot be injected
 
 ### Assumptions on Runtime Preconditions
+*NetworkAvailableAssumption*, *ResourceExistsAssumption*, *ServiceReachableAssumption*, ...
 
 Examples:
  - Ressource assumptions: the file, that is opened here, exists; network connection is available; the database runs and is reachable.
@@ -79,17 +89,19 @@ Examples:
  - Assuming one behavior over another when our CPG representation does not contain or cannot know behavioral differences at runtime, e.g., different platform or execution environment.
 
 ### Assumptions on Sequentiality under Parallel Execution
+*AtomicExecutionAssumption*, ... 
 
 Examples:
  - Assumption that a critical section is atomic, e.g. that the execution of a line of statements is not disrupted by other threads.
  - Just whether we assume that execution is sequential or if we know there is some parallel execution, and we assume that it does not influence sequentiality when reading data.
 
 ### Assumptions on Input Data
+*TrustBoundaryAssumption*, *DataRangeAssumption*, *TrustedInputAssumption*, ...
 
 Examples:
  - Assumption on entry points (or endpoints): Data coming from here are external to the application.
- - Data ranges on input that can be annotated
- - Assumption that data is trusted input
+ - Data ranges on input that can be specified.
+ - Assumption that data is trusted input.
  
 ### Problems and Limitations
 
