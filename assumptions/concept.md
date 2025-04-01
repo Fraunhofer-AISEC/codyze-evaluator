@@ -3,7 +3,7 @@
 During the analysis of a program, different limitations and problems can appear. Assumptions are necessary to provide any results, but are often not reported as part of the analysis result. This document is an initial idea on how to categorize assumptions, that can be added to the translation of a CPG, and finally collected and reported along with the results of a query.
 
 The purpose of categorizing assumptions is to reduce the mental load on the user who has to work with the analysis results and contained assumptions. Instead of unrelated assumption messages in a general assumption object, assumption categories allow a user to group assumptions when working with the results and make a quicker decision on the reliability of results based on the types of assumptions that are reported.
-        
+
 ## Assumptions are Added ...
 
  - As Nodes to the Graph provided as meta information in .yaml.
@@ -23,13 +23,13 @@ Assumptions are added as overlay nodes connected to a graph node.
     - If a region is provided, the assumption is placed at the largest encapsulating location. 
 
 ## Developers can Manually add Assumptions
- - During translation: `assume(ASSUMPTION_TYPE, NODE, SCOPE(LOCAL|GLOBAL), MESSAGE)
+ - During translation: `assume(ASSUMPTION_TYPE, NODE, SCOPE(LOCAL|GLOBAL), MESSAGE)`
  - As consideration of a Query through the returned QueryTree object: `queryTree.addAssumption(ASSUMPTION_TYPE, SCOPE(LOCAL|GLOBAL), MESSAGE)`
 
 ## Assumption Collection
-Assumptions placed at CPG nodes are collected during evaluations that return a QueryTree object and placed in the QueryTree object. Assumptions are collected from nodes that are visited by the query tree evaluation or are attached to the AST-Ancestor of a visited node. Global assumptions are always included and summarized in the final result.
+Assumptions placed at CPG nodes are collected during evaluations that return a `QueryTree` object and placed in the `QueryTree` object. Assumptions are collected from nodes that are visited by the query tree evaluation or are attached to the AST-Ancestor of a visited node. Global assumptions are always included and summarized in the final result.
 
-When a QueryTree is returned as a result, it is printed into a SARIF output. The assumptions are placed in the same SARIF output for later printing to the end user. Assumptions are placed as attachment objects to the sarif output.
+When a `QueryTree` is returned as a result, it is printed into a SARIF output. The assumptions are placed in the same SARIF output for later printing to the end user. Assumptions are placed as attachment objects to the SARIF output.
   
   - description: The assumptions message and the scope.
   - location: The file of the identified assumption or a path if the assumption was placed on a higher level, e.g., global or component.
@@ -58,9 +58,9 @@ Examples:
 
 ### Assumptions on Program Semantics
 
-*ConceptPlacementAssumption*, *ExhaustivEnumerationAssumption*, ...
+*ConceptPlacementAssumption*, *ExhaustiveEnumerationAssumption*, ...
 
-An assumption that we correctly caputed a program semantic, e.g. logging of data, crossing system boundaries, file operations.
+An assumption that we correctly captured a program semantic, e.g. logging of data, crossing system boundaries, file operations.
 
  - When we place concepts in the graph, we assume that we correctly identified all necessary places.
  - When we check for white and blacklists in a query, we assume that these lists are complete.
@@ -70,7 +70,7 @@ An assumption that we correctly caputed a program semantic, e.g. logging of data
 *CompletenessAssumption*, *SoundnessAssumption*, ...
 
 Examples:
- - If the same flow is at some point not sound and at some point not correct it is relaxed to a general approximation
+ - If the same flow is at some point not sound and at some point not correct, it is relaxed to a general approximation
 
 ### Assumptions on Data and Control Flow Approximations
 *CFIntegrityAssumption*, *NoExceptionsAssumption*, *CFAllOrNothingExecutesAssumption*, *TrustedConfigAssumption*, *ExternalDataAssumption*, ...
@@ -84,7 +84,7 @@ Examples:
 *NetworkAvailableAssumption*, *ResourceExistsAssumption*, *ServiceReachableAssumption*, ...
 
 Examples:
- - Ressource assumptions: the file, that is opened here, exists; network connection is available; the database runs and is reachable.
+ - Resource assumptions: the file, that is opened here, exists; network connection is available; the database runs and is reachable.
  - Assumptions on the platform or the execution environment, e.g. runs on Linux, etc.
  - Assuming one behavior over another when our CPG representation does not contain or cannot know behavioral differences at runtime, e.g., different platform or execution environment.
 
