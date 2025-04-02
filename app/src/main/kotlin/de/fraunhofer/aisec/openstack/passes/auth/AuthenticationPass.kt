@@ -37,26 +37,42 @@ import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 @DependsOn(HttpWsgiPass::class)
 class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
     override fun accept(t: TranslationResult) {
-        val cinderConfig = getConfigSourceByNameOrPath(t, "cinder.conf")
-        val barbicanConfig = getConfigSourceByNameOrPath(t, "barbican-api-paste.ini")
-        if (cinderConfig != null) {
-            val apiPasteConfigPath =
-                getConfigOptionValue(cinderConfig, "api_paste_config") ?: return
-            val authStrategyValue = getConfigOptionValue(cinderConfig, "auth_strategy") ?: return
-            val apiPasteConfig = getConfigSourceByNameOrPath(t, apiPasteConfigPath) ?: return
-            val authPipeline = getConfigOptionValue(apiPasteConfig, authStrategyValue) ?: return
-            applyAuthentication(t, apiPasteConfig, authPipeline, "cinder")
-        }
-        if (barbicanConfig != null) {
-            /**
-             * See
-             * [Using Keystone Middleware with Barbican](https://docs.openstack.org/barbican/latest/configuration/keystone.html)
-             */
-            val authStrategyValue = getConfigOptionValue(barbicanConfig, "/v1") ?: return
-            val authPipeline =
-                getConfigOptionValueByGroupName(barbicanConfig, authStrategyValue) ?: return
-            applyAuthentication(t, barbicanConfig, authPipeline, "barbican")
-        }
+        handleCinderConfig(t = t)
+        handleBarbicanConfig(t = t)
+    }
+
+    private fun handleCinderConfig(t: TranslationResult) {
+        val cinderConfig = getConfigSourceByNameOrPath(t = t, value = "cinder.conf") ?: return
+        val apiPasteConfigPath =
+            getConfigOptionValue(conf = cinderConfig, optionName = "api_paste_config") ?: return
+        val authStrategyValue =
+            getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
+        val apiPasteConfig =
+            getConfigSourceByNameOrPath(t = t, value = apiPasteConfigPath) ?: return
+        val authPipeline =
+            getConfigOptionValue(conf = apiPasteConfig, optionName = authStrategyValue) ?: return
+        applyAuthentication(
+            t = t,
+            configSource = apiPasteConfig,
+            authPipeline = authPipeline,
+            componentName = "cinder",
+        )
+    }
+
+    private fun handleBarbicanConfig(t: TranslationResult) {
+        val barbicanConfig =
+            getConfigSourceByNameOrPath(t = t, value = "barbican-api-paste.ini") ?: return
+        val authStrategyValue =
+            getConfigOptionValue(conf = barbicanConfig, optionName = "/v1") ?: return
+        val authPipeline =
+            getConfigOptionValueByGroupName(conf = barbicanConfig, groupName = authStrategyValue)
+                ?: return
+        applyAuthentication(
+            t = t,
+            configSource = barbicanConfig,
+            authPipeline = authPipeline,
+            componentName = "barbican",
+        )
     }
 
     /**
@@ -69,8 +85,13 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         authPipeline: String,
         componentName: String,
     ) {
-        val authProtocol = extractMiddlewareFromPipeline(t, configSource, authPipeline) ?: return
-        val tokenBasedAuth = registerTokenAuthentication(authProtocol, t)
+        val authProtocol =
+            extractMiddlewareFromPipeline(
+                t = t,
+                configSource = configSource,
+                authPipeline = authPipeline,
+            ) ?: return
+        val tokenBasedAuth = registerTokenAuthentication(authProtocol = authProtocol, t = t)
         if (tokenBasedAuth != null) {
             val component = t.components.singleOrNull { it.name.localName == componentName }
             component?.allChildrenWithOverlays<HttpEndpoint>()?.forEach {
@@ -108,7 +129,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val middlewareFilterFunction =
             t.functions.firstOrNull { it.name.toString() == middlewareFunctionName } ?: return null
 
-        return getAuthProtocol(middlewareFilterFunction)
+        return getAuthProtocol(middleWareFilterFunction = middlewareFilterFunction)
     }
 
     /**
