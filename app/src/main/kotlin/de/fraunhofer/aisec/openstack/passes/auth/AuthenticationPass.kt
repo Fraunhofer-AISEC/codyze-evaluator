@@ -48,6 +48,10 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             applyAuthentication(t, apiPasteConfig, authPipeline, "cinder")
         }
         if (barbicanConfig != null) {
+            /**
+             * See
+             * [Using Keystone Middleware with Barbican](https://docs.openstack.org/barbican/latest/configuration/keystone.html)
+             */
             val authStrategyValue = getConfigOptionValue(barbicanConfig, "/v1") ?: return
             val authPipeline =
                 getConfigOptionValueByGroupName(barbicanConfig, authStrategyValue) ?: return
@@ -176,9 +180,8 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         tokenProperty: MethodDeclaration,
     ): MemberCallExpression? {
         val tokenUsages =
-            callMethod.parameterEdges
+            callMethod.parameters
                 .firstOrNull()
-                ?.end
                 ?.followNextFullDFGEdgesUntilHit(
                     collectFailedPaths = false,
                     findAllPossiblePaths = false,
@@ -189,7 +192,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 ?.map { it.last() }
 
         return tokenUsages
-            ?.firstOrNull { it.astParent?.name?.localName?.contains("fetch_token") == true }
+            ?.singleOrNull() { it.astParent?.name?.localName?.contains("fetch_token") == true }
             ?.astParent as? MemberCallExpression
     }
 
@@ -199,10 +202,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
      */
     private fun getToken(t: TranslationResult, callMethod: MethodDeclaration): CallExpression? {
         // We need to extract the class from the method annotation:
-        // `@webob.dec.wsgify(RequestClass=_request._AuthTokenRequest)`.
-        // The @wsgify decorator converts the WSGI environ (a dict which holds the raw HTTP data)
-        // into a _AuthTokenRequest,
-        // which is passed as 'req' to handle the incoming request.
+        // `@webob.dec.wsgify(RequestClass=_request._AuthTokenRequest)`. The @wsgify decorator
+        // converts the WSGI environ (a dict which holds the raw HTTP data) into a
+        // _AuthTokenRequest, which is passed as 'req' to handle the incoming request.
         val annotation =
             callMethod.annotations
                 .firstOrNull { it.name.localName == "wsgify" }
@@ -210,8 +212,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 ?.firstOrNull { it.name.localName == "RequestClass" }
 
         // TODO: check why `_request._AuthTokenRequest` is a MemberExpression. For now extract the
-        //  name of the class and
-        //  do a manual search
+        // name of the class and do a manual search
         val authTokenRequestClass =
             t.records.firstOrNull { it.name.localName == annotation?.value?.name?.localName }
 
@@ -221,7 +222,10 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         }
     }
 
-    /** Retrieves the value of a specified option from a configuration source. */
+    /**
+     * Retrieves the value of a specified option with local name [optionName] from the
+     * [ConfigurationSource] [conf].
+     */
     private fun getConfigOptionValue(conf: ConfigurationSource, optionName: String): String? {
         val configOptionField =
             conf.groups
@@ -241,7 +245,10 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         }
     }
 
-    /** Retrieves the value of a specified option from a configuration source. */
+    /**
+     * Retrieves the value of a specified option with local name [groupName] from the
+     * [ConfigurationSource] [conf].
+     */
     private fun getConfigOptionValueByGroupName(
         conf: ConfigurationSource,
         groupName: String,
@@ -265,7 +272,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         }
     }
 
-    /** Finds a configuration source by name or path */
+    /** Finds a [ConfigurationSource] by (full) name or path matching [value] */
     private fun getConfigSourceByNameOrPath(
         t: TranslationResult,
         value: String,
