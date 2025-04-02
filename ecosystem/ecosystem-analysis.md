@@ -182,14 +182,16 @@ The criteria listed above are all fulfilled for OpenStack components.
 
 
 ### G3: Checking CII Best Practices
-The OpenSSF Best Practices Badge Program specifies best practices for open-source projects and assesses whether they follow the best practices. It is therefore a valuable starting point for checking the security and reliability of an open-source project (since it also comprises security requirments). The program awards passing, silver, or gold level badges. The automatic OSSF evaluation utilizes the Git repository URL along with the OpenSSF Best Practices badge API. 
+The OpenSSF Best Practices Badge Program specifies best practices for open-source projects and assesses whether they follow the best practices. It is therefore a valuable starting point for checking the security and reliability of an open-source project (since it also comprises security requirements). The program awards passing, silver, or gold level badges. The automatic OSSF evaluation utilizes the Git repository URL along with the OpenSSF Best Practices badge API. 
 
-OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=openstack), which is the lowest of three levels. Some of the criteria that are not fulfilled for the silver and gold badges, [include the following](https://www.bestpractices.dev/de/projects/246?criteria_level=2):
+OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=openstack), which is the lowest of three levels. Some of the criteria that are not fulfilled or are not clearly assessed for the silver and gold badges, [include the following](https://www.bestpractices.dev/de/projects/246?criteria_level=2):
 - The project website, the repository, and the downloaded pages (if separate) MUST include key-hardening headers with non-permeable values
 - The project MUST apply at least one dynamic analysis tool to each upcoming major production release of the software produced by the project before its release.
 
-Note that some criteria are not clearly documented, e.g. _The project SHOULD support multiple cryptographic algorithms so that users can quickly switch if one is compromised. Common symmetric key algorithms include AES, Twofish, and Serpent. Common cryptographic hash algorithm alternatives include SHA-2 (including SHA-224, SHA-256, SHA-384, and SHA-512) and SHA-3._ 
-- TODO: pick up the most relevant ones and analyze them manually
+Note that some criteria are not clearly documented, e.g. _The project SHOULD support multiple cryptographic algorithms so that users can quickly switch if one is compromised._ 
+
+Thus, the criteria that are explicitly _not fulfilled_ should be checked to see whether they present a significant security risk. 
+According to the CII assessment, there is one that is not fulfilled for Openstack, i.e. the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options should be set and maintained. These headers are used to prevent, e.g., cross-site scripting, man-in-the-middle, and clickjacking attacks. Since the headers CSP, HSTS, and X-Content-Type-Options are not set for opendev.org (see https://securityheaders.com/?q=opendev.org&followRedirects=on), they can present a security risk in the usage of the code repository.
 
 ### G4: Checking Continuous Testing
 #### CI Tests
