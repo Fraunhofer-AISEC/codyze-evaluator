@@ -170,7 +170,9 @@ class SecretDeletionTest {
         assertTrue(new_key.children.size > 2, "There should be multiple EOG paths")
         assertTrue(
             new_key.children.all {
-                (it.children.singleOrNull()?.value as? List<*>)?.isNotEmpty() == true
+                ((it.children.singleOrNull()?.value as? List<*>)
+                        ?: ((it.children.singleOrNull()?.value as? Pair<*, *>)?.second as? List<*>))
+                    ?.isNotEmpty() == true
             },
             "There should be some nodes in the path",
         )
