@@ -7,6 +7,8 @@ import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Annotation
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.calls
+import de.fraunhofer.aisec.cpg.graph.conceptNodes
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
@@ -19,18 +21,27 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.BinaryOperator
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
+import de.fraunhofer.aisec.cpg.graph.translationResult
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 @DependsOn(SymbolResolver::class)
+// @DependsOn(AuthenticationPass::class)
 class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
-    override fun cleanup() {
-        //
-    }
+    var authentication: Authentication? = null
 
     override fun accept(component: Component) {
+        // Set authentication if provided
+        val authenticationConcept =
+            component.translationResult
+                ?.conceptNodes
+                ?.filterIsInstance<Authentication>()
+                ?.singleOrNull()
+        if (authenticationConcept != null) {
+            authentication = authenticationConcept
+        }
         /**
          * Pecan application object, created using
          * (`pecan.Pecan`)(https://pecan.readthedocs.io/en/latest/pecan_core.html). *
@@ -113,7 +124,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     httpMethod = mapHttpMethod("GET"),
                     path = "${requestHandler.basePath}/$methodName",
                     arguments = method.parameters,
-                    authentication = null,
+                    authentication = authentication,
                 )
                 .apply {
                     this.nextDFG += method
@@ -216,7 +227,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     httpMethod = mapHttpMethod(httpMethod),
                     path = requestHandler.basePath,
                     arguments = method.parameters,
-                    authentication = null,
+                    authentication = authentication,
                 )
                 .apply {
                     this.nextDFG += method
@@ -237,5 +248,9 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
      */
     fun String.toKebabCase(): String {
         return this.replace("Controller", "").replace(Regex("([a-z])([A-Z])"), "$1-$2").lowercase()
+    }
+
+    override fun cleanup() {
+        // Nothing to do here
     }
 }

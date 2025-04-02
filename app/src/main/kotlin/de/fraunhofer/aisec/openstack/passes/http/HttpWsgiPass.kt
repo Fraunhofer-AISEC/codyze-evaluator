@@ -10,6 +10,8 @@ import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.assigns
 import de.fraunhofer.aisec.cpg.graph.calls
+import de.fraunhofer.aisec.cpg.graph.conceptNodes
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
@@ -32,6 +34,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.SubscriptExpression
+import de.fraunhofer.aisec.cpg.graph.translationResult
 import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
@@ -53,10 +56,22 @@ import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
  * See also the official [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
  */
 @DependsOn(SymbolResolver::class)
+// @DependsOn(AuthenticationPass::class)
 class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     val apiVersionPath = "/v3"
+    var authentication: Authentication? = null
 
     override fun accept(component: Component) {
+        // Set authentication if provided
+        val authenticationConcept =
+            component.translationResult
+                ?.conceptNodes
+                ?.filterIsInstance<Authentication>()
+                ?.singleOrNull()
+        if (authenticationConcept != null) {
+            authentication = authenticationConcept
+        }
+
         val apiRouter =
             component.translationUnits
                 .find { it.name.toString().contains("router.py") }
@@ -569,7 +584,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     httpMethod = mapHttpMethod(httpMethod ?: method.name.localName),
                     path = path,
                     arguments = method.parameters,
-                    authentication = null,
+                    authentication = authentication,
                 )
                 .apply {
                     this.nextDFG += method

@@ -52,3 +52,6 @@
 [submodule "external/keystonemiddleware"]
 	path = external/keystonemiddleware
 	url = https://github.com/openstack/keystonemiddleware.git
+[submodule "external/webob"]
+	path = external/webob
+	url = https://github.com/Pylons/webob
