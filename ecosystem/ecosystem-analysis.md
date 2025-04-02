@@ -213,7 +213,14 @@ The [OpenStack documentation](https://docs.openstack.org/security-guide/complian
 It is unclear, however, if it is mandatory to include SAST tools in the testing of OpenStack components.
 
 ### G5: Checking CI/CD Security
-TODO: KPIs
+WIP: KPIs
+* per project checks
+    * are there jobs defined?
+    * are jobs based on openstack templates?
+    * are `check` and `gate` pipeline populated with jobs?
+    * are `check` and `gate` jobs different (optional)?
+    * contains the `tox` file reasonable tests?
+    
 #### Branch Protection
 Branches, especially the main project branches (e.g. `main or master`, `release`), should be protected such that a defined workflow pattern for applying changes is enforced. This is necessary to prevent malicious code changes.
 Potential checks (OSSF groups these in different tiers) include:
@@ -236,7 +243,10 @@ Opendev Gerrit-Workflow ensures the following aspects:
 
 This corresponds to tier 4 according to ossf defintions.
 
-- TODO: idiomatic way to check repository settings for given openstack project
+- TODO: idiomatic way to check repository settings for given openstack project\
+ISSUE: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
+retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account 
+(s. https://review.opendev.org/admin/repos/All-Projects,access)
 
 
 #### Dangerous Workflows
@@ -248,7 +258,21 @@ Examples:
 * script injection via untrusted context variables
 
 Openstack uses the opendev infrastucture for code hosting and building. Thereby openstack components heavily rely on Zuul as
-CI/CD framework (s. [opendev workflow](https://docs.opendev.org/opendev/infra-manual/latest/gettingstarted.html#the-opendev-workflow)). OSSF scorecard currently has not build in support for Zuul-related configuration files. Therefore further analysis of Zuul configuration files and pipeline syntax is necessary.
+CI/CD framework (s. [opendev workflow](https://docs.opendev.org/opendev/infra-manual/latest/gettingstarted.html#the-opendev-workflow)). OSSF scorecard currently has no build-in support for Zuul-related configuration files. Therefore further analysis of Zuul configuration files and pipeline syntax is necessary.
+
+The CI/CD infrastructure in Openstack is managed globally for all core projects. Individual core projects only mantain a
+minimal zuul-config file containing job definitions. The sensitive configuration aspects, e.g. Secrets, Pipeline 
+definitions etc. are kept in separate repositories.
+Zuul differentiates between `config projects` containing Zuul-specific configurations and `untrusted projects` 
+containing jobs to be executed. These are restricted in their capabilities to alter Zuul configurations 
+(https://zuul-ci.org/docs/zuul/latest/configuration.html#trusted-and-untrusted-playbooks). The only pipeline which is 
+triggered on untrusted code is the `check` pipeline which should **not** be able to merge code. Code is merged via the 
+`gate` pipeline which is only executed on explicit approval of a human reviewer.
+
+WIP KPI:
+* check, that project is listed in `openstack/project-config/zuul/main.yaml` in `tenant: name: openstack` in the field 
+`untrusted-projects`
+* check, that pipeline definition of `check` has **no** `submit: true` field on success
 
 
 #### Token Permissions
@@ -259,8 +283,22 @@ repository content.
 
 OSSF scorecard currently is not capable of analysing Zuul related configuration files. Further investigation of the Zuul framework and its integration in opendev is necessary for understanding necessary access privileges. This is necessary in order to allow assessing whether pipeline scripts of a openstack component follow the principle of least privilege.
 
+See information in dangerous workflows above. Zuul pipeline should only have the privileges to merge code **after** 
+human review and approval.**TODO:** further investigation of Zuul access control and integration with gerrit. 
+
 
 ### G5: Checking Code Contributions and Reviews
+### Gerrit Settings
+KPIs:
+* `openstack/project-conifg`:
+    * check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml
+    * check if there exists `gerrit/acls/<group>/<project>.config`
+    * check access rights in `<project>.config`
+        * assure, that `label-code-Review = -2..+2` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`)
+        * assure, that `label-Workflow = -1..+1` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`)
+        
 #### Code Review
 Check whether code changes are reviewed by **humans** before they are added to the repository. Code reviews
 are crucial to ensure the quality of code and to prevent potential vulnerabilities or malicious code injections 
