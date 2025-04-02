@@ -4,44 +4,23 @@
 package de.fraunhofer.aisec.openstack.passes.http
 
 import de.fraunhofer.aisec.cpg.TranslationContext
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.Annotation
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
-import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newRegisterHttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
-import de.fraunhofer.aisec.cpg.graph.get
-import de.fraunhofer.aisec.cpg.graph.ifs
-import de.fraunhofer.aisec.cpg.graph.invoke
-import de.fraunhofer.aisec.cpg.graph.refs
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.AssignExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.BinaryOperator
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
-import de.fraunhofer.aisec.cpg.graph.translationResult
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 @DependsOn(SymbolResolver::class)
-// @DependsOn(AuthenticationPass::class)
 class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
-    var authentication: Authentication? = null
-
     override fun accept(component: Component) {
-        // Set authentication if provided
-        val authenticationConcept =
-            component.translationResult
-                ?.conceptNodes
-                ?.filterIsInstance<Authentication>()
-                ?.singleOrNull()
-        if (authenticationConcept != null) {
-            authentication = authenticationConcept
-        }
         /**
          * Pecan application object, created using
          * (`pecan.Pecan`)(https://pecan.readthedocs.io/en/latest/pecan_core.html). *
@@ -124,7 +103,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     httpMethod = mapHttpMethod("GET"),
                     path = "${requestHandler.basePath}/$methodName",
                     arguments = method.parameters,
-                    authentication = authentication,
+                    authentication = null,
                 )
                 .apply {
                     this.nextDFG += method
@@ -227,7 +206,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     httpMethod = mapHttpMethod(httpMethod),
                     path = requestHandler.basePath,
                     arguments = method.parameters,
-                    authentication = authentication,
+                    authentication = null,
                 )
                 .apply {
                     this.nextDFG += method

@@ -5,10 +5,8 @@ package de.fraunhofer.aisec.openstack.passes.auth
 
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
-import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.conceptNodes
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.newAuthenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.newTokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
@@ -16,12 +14,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
-import de.fraunhofer.aisec.cpg.graph.evaluate
-import de.fraunhofer.aisec.cpg.graph.firstParentOrNull
-import de.fraunhofer.aisec.cpg.graph.followNextFullDFGEdgesUntilHit
-import de.fraunhofer.aisec.cpg.graph.followPrevDFG
-import de.fraunhofer.aisec.cpg.graph.functions
-import de.fraunhofer.aisec.cpg.graph.records
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -48,51 +40,71 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val cinderConfig = getConfigSourceByNameOrPath(t, "cinder.conf")
         val barbicanConfig = getConfigSourceByNameOrPath(t, "barbican-api-paste.ini")
         if (cinderConfig != null) {
-            val cinderComponent = t.components.singleOrNull { it.name.localName == "cinder" }
             val apiPasteConfigPath =
                 getConfigOptionValue(cinderConfig, "api_paste_config") ?: return
             val authStrategyValue = getConfigOptionValue(cinderConfig, "auth_strategy") ?: return
             val apiPasteConfig = getConfigSourceByNameOrPath(t, apiPasteConfigPath) ?: return
             val authPipeline = getConfigOptionValue(apiPasteConfig, authStrategyValue) ?: return
-            handlePasteDeployPipeline(
-                t = t,
-                configSource = apiPasteConfig,
-                authPipeline = authPipeline,
-                affectedComponent = cinderComponent,
-            )
+            applyAuthentication(t, apiPasteConfig, authPipeline, "cinder")
         }
         if (barbicanConfig != null) {
-            val barbicanComponent = t.components.singleOrNull { it.name.localName == "barbican" }
-            val authPipeline = getConfigOptionValue(barbicanConfig, "/v1") ?: return
-            handlePasteDeployPipeline(
-                t = t,
-                configSource = barbicanConfig,
-                authPipeline = authPipeline,
-                affectedComponent = barbicanComponent,
-            )
+            val authStrategyValue = getConfigOptionValue(barbicanConfig, "/v1") ?: return
+            val authPipeline =
+                getConfigOptionValueByGroupName(barbicanConfig, authStrategyValue) ?: return
+            applyAuthentication(t, barbicanConfig, authPipeline, "barbican")
         }
     }
 
     /**
-     * Handles the PasteDeploy pipeline (e.g., keystone = request_id cors http_proxy_to_wsgi
-     * faultwrap sizelimit osprofiler authtoken keystonecontext apiv3
-     *
-     * to extract and process the `keystonemiddleware` authentication configuration. This method is
-     * shared between Cinder and Barbican, as both use the same `authtoken` middleware for token
-     * validation.
+     * Processes the PasteDeploy pipeline for the given configuration source, registers token-based
+     * authentication, and applies it to the HTTP endpoints of the corresponding component.
      */
-    private fun handlePasteDeployPipeline(
+    private fun applyAuthentication(
         t: TranslationResult,
         configSource: ConfigurationSource,
         authPipeline: String,
-        affectedComponent: Component?,
+        componentName: String,
     ) {
+        val authProtocol = extractMiddlewareFromPipeline(t, configSource, authPipeline) ?: return
+        val tokenBasedAuth = registerTokenAuthentication(authProtocol, t)
+        if (tokenBasedAuth != null) {
+            val component = t.components.singleOrNull { it.name.localName == componentName }
+            component?.allChildrenWithOverlays<HttpEndpoint>()?.forEach {
+                it.authentication = tokenBasedAuth
+            }
+        }
+    }
+
+    /**
+     * Extracts the middleware class from the PasteDeploy pipeline for `keystonemiddleware`. It
+     * processes the pipeline (e.g.,"keystone = cors http_proxy_to_wsgi faultwrap sizelimit
+     * authtoken keystonecontext apiv3"), where `authtoken` points to a `filter_factory` option
+     * (e.g.,`keystonemiddleware.auth_token:filter_factory`). The method then searches for this
+     * middleware function in 'keystonemiddleware' and returns the class which is instantiated from
+     * it and handles incoming requests and responses via its `__call__` method.
+     */
+    private fun extractMiddlewareFromPipeline(
+        t: TranslationResult,
+        configSource: ConfigurationSource,
+        authPipeline: String,
+    ): RecordDeclaration? {
+        val authTokenValue =
+            authPipeline.split(" ").firstOrNull() { it == "authtoken" } ?: return null
+
+        // Find config group which contains 'authtoken'. This specifies the middleware invocation.
+        val authTokenGroupFilter =
+            configSource.groups.firstOrNull { it.name.localName.contains(authTokenValue) }
+
+        val middlewareFilterFactory =
+            authTokenGroupFilter?.options?.firstOrNull {
+                it.name.localName == "filter_factory" && it.name.parent?.localName == "paste"
+            }
         val middlewareFunctionName =
-            extractMiddlewareFunctionName(configSource, authPipeline) ?: return
+            (middlewareFilterFactory?.evaluate() as? String)?.replace(":", ".")
         val middlewareFilterFunction =
-            t.functions.firstOrNull { it.name.toString() == middlewareFunctionName } ?: return
-        val authProtocol = getAuthProtocol(middlewareFilterFunction) ?: return
-        registerTokenAuthentication(authProtocol, t, affectedComponent)
+            t.functions.firstOrNull { it.name.toString() == middlewareFunctionName } ?: return null
+
+        return getAuthProtocol(middlewareFilterFunction)
     }
 
     /**
@@ -109,28 +121,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
     }
 
     /**
-     * Extracts the middleware function name from the PasteDeploy pipeline (e.g., keystone=cors
-     * http_proxy_to_wsgi faultwrap sizelimit authtoken keystonecontext apiv3).
-     */
-    private fun extractMiddlewareFunctionName(
-        apiPasteConfig: ConfigurationSource,
-        authPipeline: String,
-    ): String? {
-        val authTokenValue =
-            authPipeline.split(" ").firstOrNull() { it == "authtoken" } ?: return null
-
-        // Find config group which contains 'authtoken'. This specifies the middleware invocation.
-        val authTokenGroupFilter =
-            apiPasteConfig.groups.firstOrNull { it.name.localName.contains(authTokenValue) }
-
-        val middlewareFilterFactory =
-            authTokenGroupFilter?.options?.firstOrNull {
-                it.name.localName == "filter_factory" && it.name.parent?.localName == "paste"
-            }
-        return (middlewareFilterFactory?.evaluate() as? String)?.replace(":", ".")
-    }
-
-    /**
      * Registers token-based authentication by creating the concepts and operations.
      *
      * As Keystone is not parsed at the moment, and he token is sent back to Keystone for
@@ -141,19 +131,22 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
     private fun registerTokenAuthentication(
         authProtocol: RecordDeclaration,
         t: TranslationResult,
-        affectedComponent: Component?,
-    ) {
+    ): TokenBasedAuth? {
         // The `__call__` method handles incoming requests and responses in 'keystonemiddleware'
         val authCallMethod =
-            authProtocol.methods.firstOrNull { it.name.localName == "__call__" } ?: return
+            authProtocol.methods.firstOrNull { it.name.localName == "__call__" } ?: return null
         // Extract the 'X-Auth-Token' token from headers
-        val token = getToken(t = t, callMethod = authCallMethod) ?: return
+        val token = getToken(t = t, callMethod = authCallMethod) ?: return null
         // The getter method (annotated with pythons `@property` decorator) holds the extracted
         // token
-        val tokenProperty = token.firstParentOrNull<MethodDeclaration>() ?: return
+        val tokenProperty = token.firstParentOrNull<MethodDeclaration>() ?: return null
+
+        // Validate the token by following its usage until `fetch_token` is called
         val tokenValidation =
             getTokenValidation(callMethod = authCallMethod, tokenProperty = tokenProperty)
-        val keystoneConf = getConfigSourceByNameOrPath(t, "keystone.conf") ?: return
+
+        // Check the Keystone configuration to determine the token provider
+        val keystoneConf = getConfigSourceByNameOrPath(t, "keystone.conf") ?: return null
         val tokenProvider =
             keystoneConf.groups
                 .flatMap { group -> group.options.filter { it.name.localName == "provider" } }
@@ -169,11 +162,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 concept = tokenBasedAuth,
                 credential = token,
             )
-
-            affectedComponent.allChildrenWithOverlays<HttpEndpoint>().forEach {
-                //                it.authentication = tokenBasedAuth
-            }
+            return tokenBasedAuth
         }
+        return null
     }
 
     /**
@@ -245,6 +236,30 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 log,
                 "Could not find option '{}' in configuration",
                 optionName,
+            )
+            null
+        }
+    }
+
+    /** Retrieves the value of a specified option from a configuration source. */
+    private fun getConfigOptionValueByGroupName(
+        conf: ConfigurationSource,
+        groupName: String,
+    ): String? {
+        val configOptionField =
+            conf.groups
+                .firstOrNull { it.name.localName.contains(groupName) }
+                ?.options
+                ?.singleOrNull()
+                ?.underlyingNode
+        return if (configOptionField != null) {
+            configOptionField.evaluate() as? String
+        } else {
+            warnWithFileLocation(
+                conf,
+                log,
+                "Could not find option '{}' in configuration",
+                groupName,
             )
             null
         }

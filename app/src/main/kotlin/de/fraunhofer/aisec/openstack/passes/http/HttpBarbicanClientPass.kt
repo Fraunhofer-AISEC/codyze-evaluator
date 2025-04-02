@@ -15,7 +15,6 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 import kotlin.collections.setOf
 
@@ -35,7 +34,6 @@ import kotlin.collections.setOf
  * request methods.
  */
 @DependsOn(SymbolResolver::class)
-@ExecuteLate
 class HttpBarbicanClientPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
     override fun accept(t: TranslationResult) {
         // The client class initializes and registers the manager classes
