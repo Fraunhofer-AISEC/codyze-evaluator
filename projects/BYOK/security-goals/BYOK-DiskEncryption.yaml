@@ -18,7 +18,7 @@ objectives:
     description: The selected customer key must be the actual input to the block encryption
     statements:
       - Given a customer-managed key K stored in Barbican, it must not be leaked via printing, logging, file writing or command execution input.
-      - Given a customer-managed key K stored in Barbican, K must only be accessible via the Barbican API endpoint.
+      - Given a customer-managed key K used for disk encryption, K must only be accessible via the Barbican API endpoint.
       - Given a device encryption operation O, the key K used in O must be deleted from memory after the operation is completed.
     components:
       - cinder
