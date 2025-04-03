@@ -41,14 +41,29 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         handleBarbicanConfig(t = t)
     }
 
+    /**
+     * Handles authentication for Cinder component.
+     *
+     * Assumptions:
+     * - The configuration for Cinder component is located in `cinder.conf`
+     * - The authentication strategy is defined in `auth_strategy`
+     * - The API paste config file is specified in `api_paste_config`
+     *
+     * See
+     * [Cinder Config samples](https://docs.openstack.org/cinder/2025.1/configuration/block-storage/samples/index.html)
+     */
     private fun handleCinderConfig(t: TranslationResult) {
         val cinderConfig = getConfigSourceByNameOrPath(t = t, value = "cinder.conf") ?: return
+        // The `api-paste.ini` file path is specified in cinder config
         val apiPasteConfigPath =
             getConfigOptionValue(conf = cinderConfig, optionName = "api_paste_config") ?: return
-        val authStrategyValue =
-            getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
         val apiPasteConfig =
             getConfigSourceByNameOrPath(t = t, value = apiPasteConfigPath) ?: return
+
+        // The authentication strategy (e.g., "keystone")
+        val authStrategyValue =
+            getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
+        // Extract the pipeline value based on the authentication strategy
         val authPipeline =
             getConfigOptionValue(conf = apiPasteConfig, optionName = authStrategyValue) ?: return
         applyAuthentication(
@@ -59,11 +74,23 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         )
     }
 
+    /**
+     * Handles authentication for Barbican component. Unlike in Cinder, the Barbican configuration
+     * file does not specify the authentication strategy or the path to the API paste config file.
+     * Therefore, we use the values following the guidelines from
+     * [Barbican Keystone Middleware setup](https://docs.openstack.org/barbican/2025.1/configuration/keystone.html).
+     *
+     * Assumptions:
+     * - The API paste config file for Barbican component is located in `barbican-api-paste.ini`.
+     * - The authentication strategy is defined in the `/v1` section
+     */
     private fun handleBarbicanConfig(t: TranslationResult) {
         val barbicanConfig =
             getConfigSourceByNameOrPath(t = t, value = "barbican-api-paste.ini") ?: return
+        // Extract the authentication strategy
         val authStrategyValue =
             getConfigOptionValue(conf = barbicanConfig, optionName = "/v1") ?: return
+        // Extract the pipeline for the given strategy
         val authPipeline =
             getConfigOptionValueByGroupName(conf = barbicanConfig, groupName = authStrategyValue)
                 ?: return
@@ -174,9 +201,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val keystoneConf = getConfigSourceByNameOrPath(t, "keystone.conf") ?: return null
         val tokenProvider =
             keystoneConf.groups
+                .filter { it.name.localName == "token" }
                 .flatMap { group -> group.options.filter { it.name.localName == "provider" } }
-                .firstOrNull()
-                ?.underlyingNode
+                .singleOrNull()
         val tokenProviderValue = getConfigOptionValue(conf = keystoneConf, optionName = "provider")
 
         if (tokenValidation != null && tokenProvider != null && tokenProviderValue == "fernet") {
@@ -276,7 +303,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
     ): String? {
         val configOptionField =
             conf.groups
-                .firstOrNull { it.name.localName.contains(groupName) }
+                .singleOrNull() { it.name.localName.endsWith(groupName) }
                 ?.options
                 ?.singleOrNull()
                 ?.underlyingNode
