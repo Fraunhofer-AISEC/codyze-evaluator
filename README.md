@@ -11,14 +11,8 @@ for information on how to configure JEP.
 ## Project Structure
 
 The openstack-checker currently houses two "projects":
-- `small-example`: A small example that demonstrates the checker's capabilities.
-- `BYOK`: An example of a Bring Your Own Key (BYOK) implementation in OpenStack. It currently includes one security goal for disk encryption
-
-To run the checker on the small example:
-```
-./gradlew installDist
-./app/build/install/app/bin/app --project-dir=projects/small-example --sources projects/small-example/ssl_version.py 
-```
+- `BYOK`: An example of a Bring Your Own Key (BYOK) implementation in OpenStack. It currently includes one security goal for disk encryption.
+- `magnum-cve`: An example with queries for general security goals like deleting secret data from memory and setting file permissions correctly.
 
 To run it on the BYOK example (this might take a while):
 ```
