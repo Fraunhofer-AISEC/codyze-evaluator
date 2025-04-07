@@ -17,6 +17,7 @@ import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
 import kotlin.test.assertNotNull
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -62,28 +63,38 @@ class AuthenticationPassTest {
         val cinderEndpoints = cinderComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(cinderEndpoints)
         cinderEndpoints.forEach { endpoint ->
-            assertNotNull(
-                endpoint.authentication,
-                "Cinder HTTP endpoint should have authentication set",
-            )
-            assertTrue(
-                endpoint.authentication is TokenBasedAuth,
-                "Cinder HTTP endpoint authentication should be a TokenBasedAuth",
-            )
+            // Check that authentication is applied only to the /v3 endpoints
+            if (endpoint.path.contains("/v3")) {
+                assertNotNull(endpoint.authentication, "Endpoints should have authentication set")
+                assertTrue(
+                    endpoint.authentication is TokenBasedAuth,
+                    "Authentication should be TokenBasedAuth",
+                )
+            } else {
+                assertNull(
+                    endpoint.authentication,
+                    "Non 'v3' version endpoints should not have authentication set",
+                )
+            }
         }
 
         val barbicanComponent = result.components.singleOrNull { it.name.localName == "barbican" }
         val barbicanEndpoints = barbicanComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(barbicanEndpoints)
         barbicanEndpoints.forEach { endpoint ->
-            assertNotNull(
-                endpoint.authentication,
-                "Cinder HTTP endpoint should have authentication set",
-            )
-            assertTrue(
-                endpoint.authentication is TokenBasedAuth,
-                "Cinder HTTP endpoint authentication should be a TokenBasedAuth",
-            )
+            // Check that authentication is applied only to the /v1 endpoints
+            if (endpoint.path.contains("/v1")) {
+                assertNotNull(endpoint.authentication, "Endpoints should have authentication set")
+                assertTrue(
+                    endpoint.authentication is TokenBasedAuth,
+                    "Authentication should be TokenBasedAuth",
+                )
+            } else {
+                assertNull(
+                    endpoint.authentication,
+                    "Non 'v1' version endpoints should not have authentication set ",
+                )
+            }
         }
     }
 }
