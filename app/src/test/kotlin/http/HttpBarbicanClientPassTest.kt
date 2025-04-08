@@ -36,8 +36,8 @@ class HttpBarbicanClientPassTest {
                 it.topLevels(
                     mapOf(
                         "python-barbicanclient" to
-                            topLevel.resolve("python-barbicanclient/barbicanclient").toFile(),
-                        "keystoneauth" to topLevel.resolve("keystoneauth/keystoneauth1").toFile(),
+                            topLevel.resolve("python-barbicanclient").toFile(),
+                        "keystoneauth" to topLevel.resolve("keystoneauth").toFile(),
                     )
                 )
             }

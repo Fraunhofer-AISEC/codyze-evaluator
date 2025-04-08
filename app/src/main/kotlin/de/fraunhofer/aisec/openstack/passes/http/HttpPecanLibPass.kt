@@ -4,21 +4,15 @@
 package de.fraunhofer.aisec.openstack.passes.http
 
 import de.fraunhofer.aisec.cpg.TranslationContext
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.Annotation
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newRegisterHttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
-import de.fraunhofer.aisec.cpg.graph.get
-import de.fraunhofer.aisec.cpg.graph.ifs
-import de.fraunhofer.aisec.cpg.graph.invoke
-import de.fraunhofer.aisec.cpg.graph.refs
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.AssignExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.BinaryOperator
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
@@ -26,10 +20,6 @@ import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 @DependsOn(SymbolResolver::class)
 class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
-    override fun cleanup() {
-        //
-    }
-
     override fun accept(component: Component) {
         /**
          * Pecan application object, created using
@@ -237,5 +227,9 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
      */
     fun String.toKebabCase(): String {
         return this.replace("Controller", "").replace(Regex("([a-z])([A-Z])"), "$1-$2").lowercase()
+    }
+
+    override fun cleanup() {
+        // Nothing to do here
     }
 }
