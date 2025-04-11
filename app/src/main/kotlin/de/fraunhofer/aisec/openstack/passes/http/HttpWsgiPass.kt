@@ -4,39 +4,21 @@
 package de.fraunhofer.aisec.openstack.passes.http
 
 import de.fraunhofer.aisec.cpg.TranslationContext
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.Annotation
-import de.fraunhofer.aisec.cpg.graph.Backward
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.GraphToFollow
-import de.fraunhofer.aisec.cpg.graph.assigns
-import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequestHandler
+import de.fraunhofer.aisec.cpg.graph.concepts.http.newRegisterHttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.edges.get
-import de.fraunhofer.aisec.cpg.graph.evaluate
-import de.fraunhofer.aisec.cpg.graph.followEOGEdgesUntilHit
-import de.fraunhofer.aisec.cpg.graph.followPrevDFG
-import de.fraunhofer.aisec.cpg.graph.methods
-import de.fraunhofer.aisec.cpg.graph.records
-import de.fraunhofer.aisec.cpg.graph.returns
-import de.fraunhofer.aisec.cpg.graph.statements
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.AssignExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.BinaryOperator
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.InitializerListExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.KeyValueExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.SubscriptExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
 
 /**
@@ -54,7 +36,6 @@ import de.fraunhofer.aisec.openstack.concepts.mapHttpMethod
  * See also the official [API Reference V3](https://docs.openstack.org/api-ref/block-storage/v3/)
  */
 @DependsOn(SymbolResolver::class)
-@ExecuteLate
 class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
     val apiVersionPath = "/v3"
 
