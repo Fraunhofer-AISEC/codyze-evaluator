@@ -11,3 +11,7 @@ objectives:
     description: Secret data should be deleted from memory, ideally right after usage.
     statements:
       - Delete secret data.
+  - name: No Logging of Secrets
+    description: Secret data must not be logged, i.e., they must not flow into a logging-statement.
+    statements:
+      - Secrets must not be logged
