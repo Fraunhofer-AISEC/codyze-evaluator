@@ -14,6 +14,8 @@ The openstack-checker currently houses two "projects":
 - `BYOK`: An example of a Bring Your Own Key (BYOK) implementation in OpenStack. It currently includes one security goal for disk encryption.
 - `magnum-cve`: An example with queries for general security goals like deleting secret data from memory and setting file permissions correctly.
 
+Furthermore, the projects folder contains a "common" folder, which includes common security goals and requirements, which can be used by all projects. Currently, they need to be linked into the specific project, but in the future, all queries and goals in the common folder will also be considered.
+
 To run it on the BYOK example (this might take a while):
 ```
 git submodule update --init
@@ -49,3 +51,10 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 ```bash
 ./configure-github.sh
 ```
+
+## Further documentation
+
+The documentation is available in the `documentation` folder. It contains further information on:
+
+* [How to write queries](documentation/writing-queries.md), and
+* [How to interpret the results](documentation/understanding-results.md)

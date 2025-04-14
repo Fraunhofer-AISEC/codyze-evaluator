@@ -126,9 +126,8 @@ fun statement3(result: TranslationResult): QueryTree<Boolean> {
             // The function `alwaysFlowsTo` checks if there's a data flow to a node fulfilling
             // the predicate on every possible execution path starting at the node `secret`.
             secret.alwaysFlowsTo(
-                // We perform an interprocedural analysis but limit it to 100 steps after the `GetSecret` operation.
-                // TODO: Delete this threshold once issue #112 is fixed.
-                scope = Interprocedural(maxSteps = 100),
+                // We perform an interprocedural analysis.
+                scope = Interprocedural(),
                 // We do not want to track unreachable EOG paths and we perform a context- and field-sensitive analysis.
                 sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
                 // We require a de-allocate operation to be present which affects the secret.
