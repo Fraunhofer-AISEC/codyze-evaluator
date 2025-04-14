@@ -99,6 +99,8 @@ Even though we did not show all the calls in detail, one can already see that th
 -  Concepts and passes need to be used to abstract certain operations in the code that are commonly found, e.g., loading a configuration
 -  Necessary reasonable assumptions can be made about how certain (third-party) libraries work. This can for example be done manually and then taken as an assumption in the automated process.
 
-### Involved Concepts
+In the current implementation, passes exist to extract the behavior of loading configuration values from files as well as dynamically instanciating objects from a list of entry points. The following assumptions are currently made:
+- We assume that Stevedore loads an entry from the Python entry points supplied by key/value and instanciates it. We do NOT analyze the `stevedore` package itself.
+- We assume that the Barbican client follows the [HATEOAS](https://en.wikipedia.org/wiki/HATEOAS) pattern in order to construct URLs from class controllers and function names. We do NOT analyze the `barbicanclient` package itself.
 
-
+Both assumptions were manually verified.
