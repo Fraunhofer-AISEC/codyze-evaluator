@@ -81,11 +81,12 @@ class DiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 }
                 ?.firstOrNull()
 
-        val cipher = cipherArg?.let { newCipher(underlyingNode = it) }
+        val cipher = cipherArg?.let { newCipher(underlyingNode = it, connect = true) }
         newDiskEncryption(
                 underlyingNode = call,
                 cipher = cipher,
                 key = (key as? GetSecret)?.concept,
+                connect = true,
             )
             .apply { this.prevDFG += call }
     }

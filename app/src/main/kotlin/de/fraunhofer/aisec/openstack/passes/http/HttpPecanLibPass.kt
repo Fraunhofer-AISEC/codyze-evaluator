@@ -61,6 +61,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 underlyingNode = controller,
                 basePath = basePath,
                 endpoints = mutableListOf(),
+                connect = true,
             )
 
         val annotatedMethods = controller.methods.filter { it.annotations.isNotEmpty() }
@@ -104,6 +105,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = "${requestHandler.basePath}/$methodName",
                     arguments = method.parameters,
                     authentication = null,
+                    connect = true,
                 )
                 .apply {
                     this.nextDFG += method
@@ -115,6 +117,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
             underlyingNode = method,
             concept = requestHandler,
             httpEndpoint = httpEndpoint,
+            connect = true,
         )
     }
 
@@ -207,6 +210,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = requestHandler.basePath,
                     arguments = method.parameters,
                     authentication = null,
+                    connect = true,
                 )
                 .apply {
                     this.nextDFG += method
@@ -218,6 +222,7 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
             underlyingNode = method,
             concept = requestHandler,
             httpEndpoint = httpEndpoint,
+            connect = true,
         )
     }
 

@@ -4,30 +4,9 @@
 package de.fraunhofer.aisec.openstack.passes
 
 import de.fraunhofer.aisec.cpg.TranslationContext
-import de.fraunhofer.aisec.cpg.graph.Backward
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.Forward
-import de.fraunhofer.aisec.cpg.graph.GraphToFollow
-import de.fraunhofer.aisec.cpg.graph.Name
-import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.allEOGStarters
-import de.fraunhofer.aisec.cpg.graph.component
-import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOperation
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfiguration
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationGroup
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newConfigurationOption
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newLoadConfiguration
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newReadConfigurationGroup
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newReadConfigurationOption
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationGroup
-import de.fraunhofer.aisec.cpg.graph.concepts.config.newRegisterConfigurationOption
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.config.*
 import de.fraunhofer.aisec.cpg.graph.edges.flows.CallingContextOut
-import de.fraunhofer.aisec.cpg.graph.evaluate
-import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
-import de.fraunhofer.aisec.cpg.graph.fqn
-import de.fraunhofer.aisec.cpg.graph.newLiteral
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -68,10 +47,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
         walker.registerHandler { node -> handleNode(node) }
 
         val nodes = c.allEOGStarters.filter { it.prevEOGEdges.isEmpty() }
-
-        for (node in nodes) {
-            walker.iterate(node)
-        }
+        walker.iterateAll(nodes)
     }
 
     private fun handleNode(node: Node) {
@@ -106,7 +82,12 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 is Configuration -> {
                     val group = last.groups.find { it.name.localName == me.name.localName }
                     if (group != null) {
-                        val op = newReadConfigurationGroup(underlyingNode = me, concept = group)
+                        val op =
+                            newReadConfigurationGroup(
+                                underlyingNode = me,
+                                concept = group,
+                                connect = true,
+                            )
 
                         // Add an incoming DFG from the option group
                         me.prevDFGEdges.add(group)
@@ -119,7 +100,12 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 is ConfigurationGroup -> {
                     val option = last.options.find { it.name.localName == me.name.localName }
                     if (option != null) {
-                        val op = newReadConfigurationOption(underlyingNode = me, concept = option)
+                        val op =
+                            newReadConfigurationOption(
+                                underlyingNode = me,
+                                concept = option,
+                                connect = true,
+                            )
 
                         // Add an incoming DFG from the option
                         me.prevDFGEdges.add(option)
@@ -179,14 +165,19 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
         // matches the originating component
         for (component in components) {
             val conf =
-                newConfiguration(underlyingNode = expr).also {
+                newConfiguration(underlyingNode = expr, connect = true).also {
                     it.name = Name("conf", component?.name)
                 }
             expr.prevDFGEdges.addContextSensitive(conf, callingContext = CallingContextOut(expr))
 
             val lit = newLiteral("${component?.name}.conf")
             ops +=
-                newLoadConfiguration(underlyingNode = expr, concept = conf, fileExpression = lit)
+                newLoadConfiguration(
+                        underlyingNode = expr,
+                        concept = conf,
+                        fileExpression = lit,
+                        connect = true,
+                    )
                     .also { it.name = Name(lit.value.toString()) }
         }
 
@@ -268,6 +259,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                         concept = group,
                         key = keyArgument,
                         value = defaultValueArgument,
+                        connect = true,
                     )
                     .also { it.name = group.name.fqn(keyArgument.evaluate().toString()) }
 
@@ -276,6 +268,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     underlyingNode = optionCall,
                     concept = option,
                     defaultValue = null,
+                    connect = true,
                 )
         }
 
@@ -309,10 +302,18 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
             // This is the first call we encounter that registers options to this group, so
             // we create it
             group =
-                newConfigurationGroup(underlyingNode = registerOptsCall, concept = conf).also {
-                    it.name = groupName
-                }
-            ops += newRegisterConfigurationGroup(underlyingNode = registerOptsCall, concept = group)
+                newConfigurationGroup(
+                        underlyingNode = registerOptsCall,
+                        concept = conf,
+                        connect = true,
+                    )
+                    .also { it.name = groupName }
+            ops +=
+                newRegisterConfigurationGroup(
+                    underlyingNode = registerOptsCall,
+                    concept = group,
+                    connect = true,
+                )
         }
 
         return group

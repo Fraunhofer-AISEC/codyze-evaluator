@@ -58,7 +58,7 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
         if (record != null) {
             val httpClient =
                 record.conceptNodes.filterIsInstance<HttpClient>().singleOrNull()
-                    ?: newHttpClient(record, isTLS = false, authentication = null)
+                    ?: newHttpClient(record, isTLS = false, authentication = null, connect = true)
             val extractedPath = extractEndpointPath(memberCall.arguments.first())
             val path = if (extractedPath != null) "$apiVersionPath$extractedPath" else ""
 
@@ -68,6 +68,7 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                 httpMethod = mapHttpMethod(memberCall.name.localName),
                 arguments = memberCall.arguments,
                 concept = httpClient,
+                connect = true,
             )
 
             val actionMethod = record.methods.firstOrNull() { it.name.localName == "_action" }
@@ -98,6 +99,7 @@ class HttpCinderClientPass(ctx: TranslationContext) : EOGStarterPass(ctx) {
                     httpMethod = mapHttpMethod(httpMethod.toString()),
                     arguments = calls.arguments,
                     concept = httpClient,
+                    connect = true,
                 )
             }
         }

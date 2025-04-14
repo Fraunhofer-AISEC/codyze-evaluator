@@ -59,7 +59,13 @@ class HttpBarbicanClientPass(ctx: TranslationContext) : TranslationResultPass(ct
 
     /** Registers the requests of the manager. */
     private fun registerRequests(manager: RecordDeclaration) {
-        val client = newHttpClient(underlyingNode = manager, isTLS = false, authentication = null)
+        val client =
+            newHttpClient(
+                underlyingNode = manager,
+                isTLS = false,
+                authentication = null,
+                connect = true,
+            )
 
         val constructor = manager.constructors.firstOrNull()
         val initCall =
@@ -101,6 +107,7 @@ class HttpBarbicanClientPass(ctx: TranslationContext) : TranslationResultPass(ct
                     url = basePath ?: "",
                     arguments = method.parameters,
                     httpMethod = mapHttpMethod(method.name.localName),
+                    connect = true,
                 )
             }
         }
