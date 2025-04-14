@@ -51,3 +51,10 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 ```bash
 ./configure-github.sh
 ```
+
+## Further documentation
+
+The documentation is available in the `documentation` folder. It contains further information on:
+
+* [How to write queries](documentation/writing-queries.md), and
+* [How to interpret the results](documentation/understanding-results.md)
