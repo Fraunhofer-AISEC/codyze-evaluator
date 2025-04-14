@@ -55,11 +55,11 @@ class ConceptListerCommand : CliktCommand() {
 
         println("# Operations")
         val operationClasses = listOverlayClasses<Operation>()
-        for (conceptClass in conceptClasses) {
-            println("## ${conceptClass.simpleName}")
+        for (operationClass in operationClasses) {
+            println("## ${operationClass.simpleName}")
 
-            conceptClass.kotlin.constructors.forEach {
-                println("### Constructor: ${conceptClass.simpleName}")
+            operationClass.kotlin.constructors.forEach {
+                println("### Constructor: ${operationClass.simpleName}")
                 println("Arguments:\n")
                 it.parameters.forEach {
                     println("* `${it.name}: ${it.type}`" + if (it.isOptional) " (optional)" else "")
@@ -67,7 +67,7 @@ class ConceptListerCommand : CliktCommand() {
             }
             println()
             println("### Properties:\n")
-            conceptClass.kotlin.memberProperties.forEach {
+            operationClass.kotlin.memberProperties.forEach {
                 if (it.name !in overlayProperties) {
                     println("* `${it.name}: ${it.returnType}`")
                 }

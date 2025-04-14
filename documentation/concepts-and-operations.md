@@ -7,12 +7,11 @@ Thus, they serve as a main entry-point for an analyst writing custom queries.
 This document aims to provide a list of all concepts and operations that are available in the OpenStack Checker.
 
 # Concepts
-
 ## EntryPoint
 ### Constructor: EntryPoint
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?`
 
 ### Properties:
 
@@ -22,7 +21,7 @@ Arguments:
 ### Constructor: DynamicLoading
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -32,18 +31,19 @@ Arguments:
 ### Constructor: Memory
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `mode: de.fraunhofer.aisec.cpg.graph.concepts.memory.MemoryManagementMode`
 
 ### Properties:
 
+* `mode: de.fraunhofer.aisec.cpg.graph.concepts.memory.MemoryManagementMode`
 * `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
 
 ## ConfigurationGroup
 ### Constructor: ConfigurationGroup
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
 
 ### Properties:
@@ -56,7 +56,7 @@ Arguments:
 ### Constructor: Secret
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -67,7 +67,7 @@ Arguments:
 ### Constructor: BlockStorage
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -77,7 +77,7 @@ Arguments:
 ### Constructor: OperatingSystemArchitecture
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
 
 ### Properties:
 
@@ -87,7 +87,7 @@ Arguments:
 ### Constructor: ConfigurationSource
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -99,7 +99,7 @@ Arguments:
 ### Constructor: ConfigurationOptionSource
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource`
 
 ### Properties:
@@ -111,7 +111,7 @@ Arguments:
 ### Constructor: File
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `fileName: kotlin.String`
 
 ### Properties:
@@ -123,7 +123,7 @@ Arguments:
 ### Constructor: Authentication
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
 
 ### Properties:
 
@@ -133,7 +133,7 @@ Arguments:
 ### Constructor: ConfigurationGroupSource
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -144,7 +144,7 @@ Arguments:
 ### Constructor: Configuration
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -156,7 +156,7 @@ Arguments:
 ### Constructor: HttpRequestHandler
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `basePath: kotlin.String`
 * `endpoints: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint>`
 
@@ -170,7 +170,7 @@ Arguments:
 ### Constructor: HttpClient
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `isTLS: kotlin.Boolean?` (optional)
 * `authentication: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication?` (optional)
 
@@ -184,7 +184,7 @@ Arguments:
 ### Constructor: ConfigurationOption
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
 * `key: de.fraunhofer.aisec.cpg.graph.Node`
 * `value: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
@@ -200,7 +200,7 @@ Arguments:
 ### Constructor: Cipher
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -213,7 +213,7 @@ Arguments:
 ### Constructor: DiskEncryption
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -226,7 +226,7 @@ Arguments:
 ### Constructor: Log
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -237,7 +237,7 @@ Arguments:
 ### Constructor: LocalEntryPoint
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?`
 * `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
 
 ### Properties:
@@ -249,7 +249,7 @@ Arguments:
 ### Constructor: RemoteEntryPoint
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?`
 
 ### Properties:
 
@@ -259,7 +259,7 @@ Arguments:
 ### Constructor: POSIX
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -269,7 +269,7 @@ Arguments:
 ### Constructor: Agnostic
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -279,7 +279,7 @@ Arguments:
 ### Constructor: Win32
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -289,7 +289,7 @@ Arguments:
 ### Constructor: TokenBasedAuth
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `token: de.fraunhofer.aisec.cpg.graph.Node`
 
 ### Properties:
@@ -301,7 +301,7 @@ Arguments:
 ### Constructor: LibraryEntryPoint
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?` (optional)
 * `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
 
 ### Properties:
@@ -328,7 +328,7 @@ Arguments:
 ### Constructor: Main
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?` (optional)
 * `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
 
 ### Properties:
@@ -340,7 +340,7 @@ Arguments:
 ### Constructor: HttpEndpoint
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration?` (optional)
 * `httpMethod: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod`
 * `path: kotlin.String`
 * `arguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
@@ -358,7 +358,7 @@ Arguments:
 ### Constructor: Darwin
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
@@ -368,7 +368,7 @@ Arguments:
 ### Constructor: JwtAuth
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 * `jwt: de.fraunhofer.aisec.cpg.graph.Node`
 * `payload: de.fraunhofer.aisec.cpg.graph.Node`
 
@@ -380,374 +380,524 @@ Arguments:
 * `token: de.fraunhofer.aisec.cpg.graph.Node`
 
 # Operations
-
-## EntryPoint
-### Constructor: EntryPoint
+## DiskEncryptionOperation
+### Constructor: DiskEncryptionOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
 
-## DynamicLoading
-### Constructor: DynamicLoading
+## HttpClientOperation
+### Constructor: HttpClientOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Memory
-### Constructor: Memory
+## LogGet
+### Constructor: LogGet
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `mode: de.fraunhofer.aisec.cpg.graph.concepts.memory.MemoryManagementMode`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.logging.Log`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.logging.Log`
 
-## ConfigurationGroup
-### Constructor: ConfigurationGroup
+## HttpRequestHandlerOperation
+### Constructor: HttpRequestHandlerOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
 ### Properties:
 
-* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
-* `options: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption>`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Secret
-### Constructor: Secret
+## MemoryOperation
+### Constructor: MemoryOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
 ### Properties:
 
-* `keySize: kotlin.Int?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## BlockStorage
-### Constructor: BlockStorage
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-
-### Properties:
-
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-
-## OperatingSystemArchitecture
-### Constructor: OperatingSystemArchitecture
+## BlockStorageOperation
+### Constructor: BlockStorageOperation
 Arguments:
 
 * `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.BlockStorage`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.BlockStorage`
 
-## ConfigurationSource
-### Constructor: ConfigurationSource
+## HttpEndpointOperation
+### Constructor: HttpEndpointOperation
 Arguments:
 
 * `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
 ### Properties:
 
-* `allOps: kotlin.collections.Set<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `groups: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource>`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## ConfigurationOptionSource
-### Constructor: ConfigurationOptionSource
+## LogWrite
+### Constructor: LogWrite
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.logging.Log`
+* `logLevel: de.fraunhofer.aisec.cpg.graph.concepts.logging.LogLevel`
+* `logArguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
 
 ### Properties:
 
-* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.logging.Log`
+* `logArguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
+* `logLevel: de.fraunhofer.aisec.cpg.graph.concepts.logging.LogLevel`
 
-## File
-### Constructor: File
+## SecretOperation
+### Constructor: SecretOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `fileName: kotlin.String`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
 
 ### Properties:
 
-* `fileName: kotlin.String`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
 
-## Authentication
-### Constructor: Authentication
+## AuthenticationOperation
+### Constructor: AuthenticationOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## ConfigurationGroupSource
-### Constructor: ConfigurationGroupSource
+## FileOperation
+### Constructor: FileOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
 
 ### Properties:
 
-* `options: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource>`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Configuration
-### Constructor: Configuration
+## CipherOperation
+### Constructor: CipherOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher`
 
 ### Properties:
 
-* `allOps: kotlin.collections.Set<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `groups: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup>`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher`
 
-## HttpRequestHandler
-### Constructor: HttpRequestHandler
+## ConfigurationOperation
+### Constructor: ConfigurationOperation
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `basePath: kotlin.String`
-* `endpoints: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint>`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
 ### Properties:
 
-* `basePath: kotlin.String`
-* `endpoints: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint>`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## HttpClient
-### Constructor: HttpClient
+## CreateEncryptedDisk
+### Constructor: CreateEncryptedDisk
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `isTLS: kotlin.Boolean?` (optional)
-* `authentication: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication?` (optional)
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
 
 ### Properties:
 
-* `authentication: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication?`
-* `isTLS: kotlin.Boolean?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
 
-## ConfigurationOption
-### Constructor: ConfigurationOption
+## UnlockEncryptedDisk
+### Constructor: UnlockEncryptedDisk
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
-* `key: de.fraunhofer.aisec.cpg.graph.Node`
-* `value: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
 
 ### Properties:
 
-* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
-* `key: de.fraunhofer.aisec.cpg.graph.Node`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption`
+
+## HttpRequest
+### Constructor: HttpRequest
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `url: kotlin.String`
+* `arguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
+* `httpMethod: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient`
+
+### Properties:
+
+* `arguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpClient`
+* `httpMethod: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod`
+* `to: kotlin.collections.MutableList<de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint>`
+* `url: kotlin.String`
+
+## RegisterHttpEndpoint
+### Constructor: RegisterHttpEndpoint
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `httpEndpoint: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint`
+
+### Properties:
+
+* `httpEndpoint: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+
+## DeAllocate
+### Constructor: DeAllocate
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `what: de.fraunhofer.aisec.cpg.graph.Node?`
+
+### Properties:
+
+* `what: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+
+## DynamicLoadingOperation
+### Constructor: DynamicLoadingOperation
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `what: T?`
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?` (optional)
+
+### Properties:
+
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?`
+* `what: T?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+
+## Allocate
+### Constructor: Allocate
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `what: de.fraunhofer.aisec.cpg.graph.Node?`
+
+### Properties:
+
+* `what: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+
+## CreateSecret
+### Constructor: CreateSecret
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+
+## GetSecret
+### Constructor: GetSecret
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+
+## Authenticate
+### Constructor: Authenticate
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication`
+* `credential: de.fraunhofer.aisec.cpg.graph.Node`
+
+### Properties:
+
+* `credential: de.fraunhofer.aisec.cpg.graph.Node`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+
+## ReadFile
+### Constructor: ReadFile
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## SetFileMask
+### Constructor: SetFileMask
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+* `mask: kotlin.Long`
+
+### Properties:
+
+* `mask: kotlin.Long`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## WriteFile
+### Constructor: WriteFile
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+* `what: de.fraunhofer.aisec.cpg.graph.Node`
+
+### Properties:
+
+* `what: de.fraunhofer.aisec.cpg.graph.Node`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## DeleteFile
+### Constructor: DeleteFile
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## SetFileFlags
+### Constructor: SetFileFlags
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+* `flags: kotlin.collections.Set<de.fraunhofer.aisec.cpg.graph.concepts.file.FileAccessModeFlags>`
+
+### Properties:
+
+* `flags: kotlin.collections.Set<de.fraunhofer.aisec.cpg.graph.concepts.file.FileAccessModeFlags>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## OpenFile
+### Constructor: OpenFile
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## CloseFile
+### Constructor: CloseFile
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+### Properties:
+
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `file: de.fraunhofer.aisec.cpg.graph.concepts.file.File`
+
+## Encrypt
+### Constructor: Encrypt
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher`
+* `key: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+
+### Properties:
+
+* `key: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher`
+
+## ProvideConfigurationOption
+### Constructor: ProvideConfigurationOption
+Arguments:
+
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource`
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
 * `value: de.fraunhofer.aisec.cpg.graph.Node?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-
-## Cipher
-### Constructor: Cipher
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
 
 ### Properties:
 
-* `blockSize: kotlin.Int?`
-* `cipherName: kotlin.String?`
-* `keySize: kotlin.Int?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource`
+* `value: de.fraunhofer.aisec.cpg.graph.Node?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## DiskEncryption
-### Constructor: DiskEncryption
+## ProvideConfigurationGroup
+### Constructor: ProvideConfigurationGroup
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource`
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
 
 ### Properties:
 
-* `cipher: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Cipher?`
-* `key: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret?`
-* `target: de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.BlockStorage?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Log
-### Constructor: Log
+## ProvideConfiguration
+### Constructor: ProvideConfiguration
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource`
+* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
 
 ### Properties:
 
-* `logName: kotlin.String?`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
+* `source: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## LocalEntryPoint
-### Constructor: LocalEntryPoint
+## RegisterConfigurationGroup
+### Constructor: RegisterConfigurationGroup
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
 
 ### Properties:
 
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## RemoteEntryPoint
-### Constructor: RemoteEntryPoint
+## RegisterConfigurationOption
+### Constructor: RegisterConfigurationOption
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
+* `defaultValue: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `defaultValue: de.fraunhofer.aisec.cpg.graph.Node?`
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## POSIX
-### Constructor: POSIX
+## ReadConfigurationOption
+### Constructor: ReadConfigurationOption
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `option: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOption`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Agnostic
-### Constructor: Agnostic
+## ReadConfigurationGroup
+### Constructor: ReadConfigurationGroup
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `group: de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroup`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## Win32
-### Constructor: Win32
+## LoadConfiguration
+### Constructor: LoadConfiguration
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
+* `fileExpression: de.fraunhofer.aisec.cpg.graph.statements.expressions.Expression`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `conf: de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration`
+* `fileExpression: de.fraunhofer.aisec.cpg.graph.statements.expressions.Expression`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
 
-## TokenBasedAuth
-### Constructor: TokenBasedAuth
+## LoadSymbol
+### Constructor: LoadSymbol
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `token: de.fraunhofer.aisec.cpg.graph.Node`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `what: T?`
+* `loader: de.fraunhofer.aisec.cpg.graph.concepts.memory.LoadLibrary?`
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?`
 
 ### Properties:
 
-* `token: de.fraunhofer.aisec.cpg.graph.Node`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
+* `loader: de.fraunhofer.aisec.cpg.graph.concepts.memory.LoadLibrary?`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?`
+* `what: T?`
 
-## LibraryEntryPoint
-### Constructor: LibraryEntryPoint
+## LoadLibrary
+### Constructor: LoadLibrary
 Arguments:
 
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
+* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?` (optional)
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `what: de.fraunhofer.aisec.cpg.graph.Component?`
+* `entryPoints: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.concepts.flows.LibraryEntryPoint>` (optional)
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?`
 
 ### Properties:
 
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
-
-## PythonEntryPoint
-### Constructor: PythonEntryPoint
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
-* `group: kotlin.String`
-* `objectReference: kotlin.String`
-
-### Properties:
-
-* `group: kotlin.String`
-* `objectReference: kotlin.String`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
-
-## Main
-### Constructor: Main
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
-
-### Properties:
-
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture`
-
-## HttpEndpoint
-### Constructor: HttpEndpoint
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration`
-* `httpMethod: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod`
-* `path: kotlin.String`
-* `arguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
-* `authentication: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication?`
-
-### Properties:
-
-* `arguments: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.Node>`
-* `authentication: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication?`
-* `httpMethod: de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod`
-* `path: kotlin.String`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-
-## Darwin
-### Constructor: Darwin
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-
-### Properties:
-
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-
-## JwtAuth
-### Constructor: JwtAuth
-Arguments:
-
-* `underlyingNode: de.fraunhofer.aisec.cpg.graph.Node`
-* `jwt: de.fraunhofer.aisec.cpg.graph.Node`
-* `payload: de.fraunhofer.aisec.cpg.graph.Node`
-
-### Properties:
-
-* `jwt: de.fraunhofer.aisec.cpg.graph.Node`
-* `payload: de.fraunhofer.aisec.cpg.graph.Node`
-* `ops: kotlin.collections.MutableSet<de.fraunhofer.aisec.cpg.graph.concepts.Operation>`
-* `token: de.fraunhofer.aisec.cpg.graph.Node`
+* `entryPoints: kotlin.collections.List<de.fraunhofer.aisec.cpg.graph.concepts.flows.LibraryEntryPoint>`
+* `concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept`
+* `os: de.fraunhofer.aisec.cpg.graph.concepts.arch.OperatingSystemArchitecture?`
+* `what: de.fraunhofer.aisec.cpg.graph.Component?`
