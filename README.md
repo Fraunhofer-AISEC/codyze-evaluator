@@ -56,5 +56,6 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 
 The documentation is available in the `documentation` folder. It contains further information on:
 
-* [How to write queries](documentation/writing-queries.md), and
-* [How to interpret the results](documentation/understanding-results.md)
+* [How to write queries](documentation/writing-queries.md),
+* [How to interpret the results](documentation/understanding-results.md), and
+* [A concept for categorizing assumptions of the analysis](documentation/assumptions-concept.md)
