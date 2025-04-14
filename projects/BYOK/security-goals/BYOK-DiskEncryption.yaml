@@ -38,8 +38,6 @@ objectives:
     description: The key must only be accessible by a valid user and through the REST API of barbican.
     statements:
       - Access to Barbican keys must be restricted to authenticated users, i.e., each Barbican REST API that provides access to K must be connected to an Authentication concept.
-      - Access to Barbican keys must be restricted to authenticated users through authorization, i.e., each operation on K must be connected to an Authorization concept.
-      - Given a list of user permissions P (defined in permission configs) and an authorization check A, a check is performed on P and used as input to A.
     restrictions:
       - No authorization check are in scope in the initial version of the use case.
     components:
