@@ -54,8 +54,4 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 
 ## Further documentation
 
-A user facing documentation is available in the [`documentation`](./documentation/index.md) folder. It contains further information on:
-
-* [How to write queries](documentation/writing-queries.md),
-* [How to interpret the results](documentation/understanding-results.md), and
-* [A concept for categorizing assumptions of the analysis](documentation/assumptions-concept.md)
+A user facing documentation is available in the [`documentation`](./documentation/index.md) folder.
