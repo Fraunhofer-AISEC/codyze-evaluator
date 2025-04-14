@@ -54,7 +54,7 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 
 ## Further documentation
 
-The documentation is available in the `documentation` folder. It contains further information on:
+A user facing documentation is available in the [`documentation`](./documentation/index.md) folder. It contains further information on:
 
 * [How to write queries](documentation/writing-queries.md),
 * [How to interpret the results](documentation/understanding-results.md), and
