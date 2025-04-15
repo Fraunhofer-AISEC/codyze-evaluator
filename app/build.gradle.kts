@@ -10,6 +10,8 @@ plugins {
 }
 
 dependencies {
+    implementation(kotlin("reflect"))
+
     implementation(libs.bundles.cpg) { isChanging = true }
     implementation(libs.jep)
 
