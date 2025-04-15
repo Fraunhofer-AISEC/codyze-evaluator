@@ -37,7 +37,7 @@ class SecretPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     val concept =
                         when (nextDFG) {
                             is Reference -> {
-                                newSecret(underlyingNode = nextDFG).apply {
+                                newSecret(underlyingNode = nextDFG, connect = true).apply {
                                     this.prevDFG += nextDFG
                                 }
                             }
@@ -45,7 +45,7 @@ class SecretPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                 TODO("Expected to find a Reference")
                             }
                         }
-                    newGetSecret(underlyingNode = call, concept = concept).apply {
+                    newGetSecret(underlyingNode = call, concept = concept, connect = true).apply {
                         this.nextDFG += call.nextDFG
                     }
                 }
