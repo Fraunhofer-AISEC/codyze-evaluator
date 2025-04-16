@@ -150,6 +150,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 underlyingNode = controller,
                 basePath = basePath,
                 endpoints = mutableListOf(),
+                connect = true,
             )
 
         controller.methods
@@ -272,6 +273,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 underlyingNode = controller,
                 basePath = basePath,
                 endpoints = mutableListOf(),
+                connect = true,
             )
 
         calls.forEach { call ->
@@ -532,6 +534,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 underlyingNode = controller,
                 basePath = path,
                 endpoints = mutableListOf(),
+                connect = true,
             )
         registerEndpointsOfCrudMethods(
             methods = controller.methods,
@@ -553,6 +556,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = path,
                     arguments = method.parameters,
                     authentication = null,
+                    connect = true,
                 )
                 .apply {
                     this.nextDFG += method
@@ -564,6 +568,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
             underlyingNode = method,
             concept = requestHandler,
             httpEndpoint = httpEndpoint,
+            connect = true,
         )
     }
 

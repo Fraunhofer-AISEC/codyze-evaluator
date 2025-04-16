@@ -121,7 +121,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
         val possibleTypes = mutableListOf<Type>()
 
         // Create a new dynamic loading concept and associate it to the driver creation
-        val concept = newDynamicLoading(constructDriver)
+        val concept = newDynamicLoading(constructDriver, connect = true)
 
         assume(
             constructDriver,
@@ -171,6 +171,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                         what = impl,
                         loader = null,
                         os = null,
+                        connect = true,
                     )
 
                 accessDriver.prevDFGEdges.addContextSensitive(

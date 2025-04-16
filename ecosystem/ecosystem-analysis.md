@@ -89,6 +89,15 @@ In the following, multiple ecosystem-related security criteria are described and
 | Packaging | No |
 | Signed Releases | No |
 
+### Overview Guidlines
+- [G1: Checking Known Vulnerabilities](#g1-checking-known-vulnerabilities)
+- [G2: Checking Continuous Maintenance](#g2-checking-continuous-maintenance)
+- [G3: Checking CII Best Practices](#g3-checking-cii-best-practices)
+- [G4: Checking Continuous Testing](#g4-checking-continuous-testing) 
+- [G5: Checking CI/CD Security](#g5-checking-cicd-security)
+- [G6: Checking Code Contributions and Reviews](#g6-checking-code-contributions-and-reviews)
+- [G7: Checking Build Risks](#g7-checking-build-risks)
+
 ### G1: Checking Known Vulnerabilities
 Open vulnerabilities can be easily exploited by attackers and need to be addressed promptly. This check assesses if the project contains open, unresolved vulnerabilities in its codebase or dependencies. 
 
@@ -202,6 +211,38 @@ Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.o
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
+##### HowTo:
+On opendev check whether the component repository (assumption: project is created using [cookiecutter](https://opendev.org/openstack/cookiecutter)):
+
+- contains `.zuul.yaml`
+- in `zuul.yaml`: defines component specific job-definitions ideally based on templates (s. example below)
+```yaml
+- job:
+    name: nova-tox-functional-py39
+    parent: openstack-tox-functional-py39 # inherit definitions from parent template
+```
+- in `zuul.yaml`: `check` and `gate` pipeline are populated with jobs (s. example below)
+```yaml
+- project:
+    # Please try to keep the list of job names sorted alphabetically.
+    templates:
+        - ...
+    check:
+      jobs:
+        - nova-tox-functional-py39
+        - ...
+    gate:
+      jobs:
+        - nova-tox-functional-py39
+        - ...
+```
+- contains `tox.ini`
+- contains a populated `tests` directory alongside the source code (e.g. `nova/tests`)
+
+In gerrit (can be opened via "proposed changes"):
+- assure that `Verified`and `Workflow` are part of the submit requirements of changes (these directly correspond to the testpipelines).
+![](./images/nova_gerrit_change.png)
+
 #### Fuzzing
 Fuzzing involves inputting unexpected or random data into a program to uncover bugs. Conducting regular fuzzing is crucial for identifying vulnerabilities that could be exploited, particularly since attackers may utilize fuzzing to discover the same issues.
 
@@ -212,16 +253,35 @@ In OpenStack components, the Tox automation tool is used to run different types 
 SAST is testing performed on source code prior to executing the application. Utilizing SAST tools can help prevent known types of bugs from being unintentionally introduced into the codebase.
 
 The [OpenStack documentation](https://docs.openstack.org/security-guide/compliance/compliance-activities.html) mentions code analysis, penetration testing, and other approaches for security reviews, but does not clearly stipulates their usage. [Bandit](https://wiki.openstack.org/wiki/Security/Projects/Bandit) is a Python SAST tool that was originally developed in OpenStack, but is now independent. The ```tox.ini``` files in the components' repositories show which SAST and other tooling is applied. Nova's tox file, for example [includes the usage of Bandit](https://github.com/openstack/nova/blob/master/tox.ini#L275). Also Cinder and Barbican include Bandit testing.
-It is unclear, however, if it is mandatory to include SAST tools in the testing of OpenStack components.
+It is unclear, however, if it is mandatory to include SAST tools in the testing of OpenStack components. At least, it is **not** part of the official project-creation template for the `tox.ini` (s. [cookiecutter](https://opendev.org/openstack/cookiecutter/src/branch/master/%7B%7Bcookiecutter.repo_name%7D%7D/tox.ini)). If present, it is executed if all tox environments are used (https://opendev.org/zuul/zuul-jobs/src/branch/master/zuul.d/python-jobs.yaml#L63) 
+
+#### HowTo:
+
+Check if `tox.ini` contains
+```ini
+[testenv:bandit]
+extras =
+commands = bandit -r <src-dir> -x tests -n 5 -ll 
+# -r recurse into subdirs 
+# -x exclude path
+# -n num of lines printed for each found issue
+# -ll == level MEDIUM
+``` 
 
 ### G5: Checking CI/CD Security
-WIP: KPIs
-* per project checks
-    * are there jobs defined?
-    * are jobs based on openstack templates?
-    * are `check` and `gate` pipeline populated with jobs?
-    * are `check` and `gate` jobs different (optional)?
-    * contains the `tox` file reasonable tests?
+#### Gerrit Settings
+Openstack manages its CI/CD infrastructure centrally for all core-projects. Thereby, security critical settings and configurations of the infrastructure should
+not be part of individual projects like nova or barbican. Official openstack projects should be integrated in the official infrastructure. 
+##### HowTo:
+* `openstack/project-config`:
+    * check if project is listen in: https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml
+    * check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml
+    * check if there exists `gerrit/acls/<group>/<project>.config`
+    * check access rights in `<project>.config`
+        * assure, that `label-code-Review = -2..+2` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`)
+        * assure, that `label-Workflow = -1..+1` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`)
     
 #### Branch Protection
 Branches, especially the main project branches (e.g. `main or master`, `release`), should be protected such that a defined workflow pattern for applying changes is enforced. This is necessary to prevent malicious code changes.
@@ -246,9 +306,9 @@ Opendev Gerrit-Workflow ensures the following aspects:
 This corresponds to tier 4 according to ossf defintions.
 
 - TODO: idiomatic way to check repository settings for given openstack project\
-ISSUE: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
+<span style="color: red;">**ISSUE**: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
 retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account 
-(s. https://review.opendev.org/admin/repos/All-Projects,access)
+(s. https://review.opendev.org/admin/repos/All-Projects,access)</span>
 
 
 #### Dangerous Workflows
@@ -271,10 +331,20 @@ containing jobs to be executed. These are restricted in their capabilities to al
 triggered on untrusted code is the `check` pipeline which should **not** be able to merge code. Code is merged via the 
 `gate` pipeline which is only executed on explicit approval of a human reviewer.
 
-WIP KPI:
+##### HowTo:
+Assure that no unreviewed code can be merged upstream:
 * check, that project is listed in `openstack/project-config/zuul/main.yaml` in `tenant: name: openstack` in the field 
 `untrusted-projects`
-* check, that pipeline definition of `check` has **no** `submit: true` field on success
+* check, that the pipeline definition of `check` in `openstack/project-config/zuul.d/pipelines.yaml` has **no** `submit: true` field (s. example)
+```yaml
+- pipeline:
+    name: gate
+    # [...]
+    success:
+      gerrit:
+        Verified: 2
+        submit: true # <--- this should **not** exist in the 'check'-pipeline definition
+```
 
 
 #### Token Permissions
@@ -289,17 +359,7 @@ See information in dangerous workflows above. Zuul pipeline should only have the
 human review and approval.**TODO:** further investigation of Zuul access control and integration with gerrit. 
 
 
-### G5: Checking Code Contributions and Reviews
-### Gerrit Settings
-KPIs:
-* `openstack/project-conifg`:
-    * check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml
-    * check if there exists `gerrit/acls/<group>/<project>.config`
-    * check access rights in `<project>.config`
-        * assure, that `label-code-Review = -2..+2` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
-        * assure, that `label-Workflow = -1..+1` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
+### G6: Checking Code Contributions and Reviews
         
 #### Code Review
 Check whether code changes are reviewed by **humans** before they are added to the repository. Code reviews
@@ -331,7 +391,7 @@ Check KPIs:
 
 - TODO step-by-step guide on how to assess these KPIs (go to stackalytics, select filter XY, ...)
 
-### G6: Checking Build Risks
+### G7: Checking Build Risks
 
 #### Binary Artifacts
 The project repository should be free of executable binary artifacts (e.g. for Python `.pyc` files). Binary artifacts can not be easily reviewed, especially if the corresponding source code is not available.

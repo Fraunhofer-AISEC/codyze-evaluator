@@ -35,21 +35,3 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
             )
         })
 }
-
-/**
- * Access to Barbican keys must be restricted to authenticated
- * users through authorization, i.e., each operation on K must
- * be connected to an Authorization concept.
- */
-fun statement2(tr: TranslationResult): QueryTree<Boolean> {
-    return QueryTree(true)
-}
-
-/**
- * Given a list of user permissions P (defined in permission
- * configs) and an authorization check A, a check is performed
- * on P and used as input to A.
- */
-fun statement3(tr: TranslationResult): QueryTree<Boolean> {
-    return QueryTree(true)
-}
