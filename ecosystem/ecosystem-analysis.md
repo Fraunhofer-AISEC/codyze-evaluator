@@ -211,17 +211,24 @@ Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.o
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
-##### HowTo:
-On opendev check whether the component repository (assumption: project is created using [cookiecutter](https://opendev.org/openstack/cookiecutter)):
+For official OpenStack projects continuous testing is enforced with Gerrit and Zuul. Change requests must pass a `check` and a 
+`gate` pipeline prior merging ([s. developer documentation](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#automated-testing)).
 
-- contains `.zuul.yaml`
-- in `zuul.yaml`: defines component specific job-definitions ideally based on templates (s. example below)
+##### HowTo:
+In order to assure, that a given OpenStack project performs test prior merging code changes, it needs to be verified that it is correctly configured and integrated
+in the Openstack CI/CD-Framework. In the following, we use `nova` as example for the necessary checks.
+
+- The project repository should be hosted on [opendev/openstack](https://opendev.org/openstack) (e.g. [nova](https://opendev.org/openstack/nova))
+- The repository should be based on the official [cookiecutter-template](https://opendev.org/openstack/cookiecutter)
+
+- The repository must contain a `.zuul.yaml` in the repository root (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/.zuul.yaml))
+- The `.zuul.yaml` should define project specific job-definitions ideally based on templates (s. example taken from nova below)
 ```yaml
 - job:
     name: nova-tox-functional-py39
     parent: openstack-tox-functional-py39 # inherit definitions from parent template
 ```
-- in `zuul.yaml`: `check` and `gate` pipeline are populated with jobs (s. example below)
+- In `.zuul.yaml`: assure that the `check` and `gate` pipelines are populated with jobs (s. example taken from nova below)
 ```yaml
 - project:
     # Please try to keep the list of job names sorted alphabetically.
@@ -236,10 +243,10 @@ On opendev check whether the component repository (assumption: project is create
         - nova-tox-functional-py39
         - ...
 ```
-- contains `tox.ini`
-- contains a populated `tests` directory alongside the source code (e.g. `nova/tests`)
+- The repository must contain a `tox.ini` in the repository root (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/tox.ini))
+- The repository should contain a populated `tests` directory alongside the source code containing unit-test definitions (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/nova/tests))
 
-In gerrit (can be opened via "proposed changes"):
+In gerrit (can be opened via "proposed changes" in opendev repository, e.g. [nova](https://review.opendev.org/q/status:open+project:openstack/nova)):
 - assure that `Verified`and `Workflow` are part of the submit requirements of changes (these directly correspond to the testpipelines).
 ![](./images/nova_gerrit_change.png)
 
@@ -257,7 +264,7 @@ It is unclear, however, if it is mandatory to include SAST tools in the testing 
 
 #### HowTo:
 
-Check if `tox.ini` contains
+Check if the `tox.ini` in the repository root contains
 ```ini
 [testenv:bandit]
 extras =
@@ -265,7 +272,7 @@ commands = bandit -r <src-dir> -x tests -n 5 -ll
 # -r recurse into subdirs 
 # -x exclude path
 # -n num of lines printed for each found issue
-# -ll == level MEDIUM
+# -ll == level MEDIUM <-- report level
 ``` 
 
 ### G5: Checking CI/CD Security
@@ -273,15 +280,15 @@ commands = bandit -r <src-dir> -x tests -n 5 -ll
 Openstack manages its CI/CD infrastructure centrally for all core-projects. Thereby, security critical settings and configurations of the infrastructure should
 not be part of individual projects like nova or barbican. Official openstack projects should be integrated in the official infrastructure. 
 ##### HowTo:
-* `openstack/project-config`:
-    * check if project is listen in: https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml
-    * check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml
-    * check if there exists `gerrit/acls/<group>/<project>.config`
-    * check access rights in `<project>.config`
-        * assure, that `label-code-Review = -2..+2` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
-        * assure, that `label-Workflow = -1..+1` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
+- check if project is listen in: https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml (e.g. [nova](https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml#L942))
+- check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml#L4296))
+- in the [`openstack/project-config`](https://opendev.org/openstack/project-config) repository:
+  - check if there exists `gerrit/acls/openstack/<project>.config` (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config))
+  - check access rights in this `<project>.config`
+  - assure, that `label-code-Review = -2..+2` is only set for restricted groups
+        (e.g. `<project>-core` and **not** `Registered Users`, see [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config#L6))
+  - assure, that `label-Workflow = -1..+1` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`, see [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config#L10))
     
 #### Branch Protection
 Branches, especially the main project branches (e.g. `main or master`, `release`), should be protected such that a defined workflow pattern for applying changes is enforced. This is necessary to prevent malicious code changes.
@@ -305,10 +312,9 @@ Opendev Gerrit-Workflow ensures the following aspects:
 
 This corresponds to tier 4 according to ossf defintions.
 
-- TODO: idiomatic way to check repository settings for given openstack project\
 <span style="color: red;">**ISSUE**: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
 retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account 
-(s. https://review.opendev.org/admin/repos/All-Projects,access)</span>
+(s. https://review.opendev.org/admin/repos/All-Projects,access).</span>
 
 
 #### Dangerous Workflows
@@ -333,9 +339,9 @@ triggered on untrusted code is the `check` pipeline which should **not** be able
 
 ##### HowTo:
 Assure that no unreviewed code can be merged upstream:
-* check, that project is listed in `openstack/project-config/zuul/main.yaml` in `tenant: name: openstack` in the field 
-`untrusted-projects`
-* check, that the pipeline definition of `check` in `openstack/project-config/zuul.d/pipelines.yaml` has **no** `submit: true` field (s. example)
+* check, that project is listed in [`openstack/project-config/zuul/main.yaml`](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml) in `tenant: name: openstack` in the field 
+`untrusted-projects` (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml#L653))
+* check, that the pipeline definition of `check` in [`openstack/project-config/zuul.d/pipelines.yaml`](https://opendev.org/openstack/project-config/src/branch/master/zuul.d/pipelines.yaml) has **no** `submit: true` field (s. example); this is a global setting affecting **all** openstack projects
 ```yaml
 - pipeline:
     name: gate
@@ -356,7 +362,7 @@ repository content.
 OSSF scorecard currently is not capable of analysing Zuul related configuration files. Further investigation of the Zuul framework and its integration in opendev is necessary for understanding necessary access privileges. This is necessary in order to allow assessing whether pipeline scripts of a openstack component follow the principle of least privilege.
 
 See information in dangerous workflows above. Zuul pipeline should only have the privileges to merge code **after** 
-human review and approval.**TODO:** further investigation of Zuul access control and integration with gerrit. 
+human review and approval. Therefore the same checks apply. 
 
 
 ### G6: Checking Code Contributions and Reviews
