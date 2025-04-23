@@ -6,9 +6,7 @@ package auth
 import analyze
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
-import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.openstack.passes.PythonEntryPointPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
@@ -26,13 +24,12 @@ class AuthorizationPassTest {
                 it.registerPass<AuthorizationPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.registerPass<OsloPolicyPass>()
-                it.registerPass<PythonEntryPointPass>()
                 it.registerPass<ProvideConfigPass>()
-                it.registerPass<IniFileConfigurationSourcePass>()
                 it.registerPass<OsloConfigPass>()
                 it.exclusionPatterns("tests", "drivers")
                 it.includePath("../external/webob")
                 it.includePath("../external/oslo.config")
+                it.includePath("../external/oslo.policy")
                 it.softwareComponents(
                     mutableMapOf(
                         "cinder" to listOf(topLevel.resolve("cinder/cinder").toFile())
