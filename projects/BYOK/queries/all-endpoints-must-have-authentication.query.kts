@@ -1,11 +1,4 @@
-import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
-import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
-import de.fraunhofer.aisec.cpg.query.*
-import de.fraunhofer.aisec.cpg.*
 
 /**
  * All HTTPEndpoints in /v3/ for cinder and /v1/ for barbican must have authentication
