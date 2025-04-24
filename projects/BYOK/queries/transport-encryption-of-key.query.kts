@@ -1,5 +1,3 @@
-import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.query.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 
 /**

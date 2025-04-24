@@ -1,12 +1,11 @@
-import de.fraunhofer.aisec.cpg.*
-import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.edges.*
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
-import de.fraunhofer.aisec.cpg.graph.concepts.file.*
-import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
-import de.fraunhofer.aisec.cpg.graph.concepts.http.*
-import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
+import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
+import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 
 /**
  * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
@@ -138,7 +137,7 @@ fun statement3(result: TranslationResult): QueryTree<Boolean> {
         // We do so by creating a single QueryTree object with value `true` if the query above is fulfilled for all
         // `GetSecret` operations. If the key was `null`, the result will be `false`.
         QueryTree(
-            value = subQueries?.all { it.value == true } ?: false,
+            value = subQueries?.all { it.value } ?: false,
             // Store the sub-queries into the list of children.
             children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
             stringRepresentation = "All keys must be deleted",
