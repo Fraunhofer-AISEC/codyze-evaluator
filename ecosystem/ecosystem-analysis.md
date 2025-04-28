@@ -376,15 +376,31 @@ Code changes need to be reported using Gerrit. Once visible, everyone is allowed
 via a voting system. Only core-reviewers are allowed to give a `+2` vote which is mandatory for approving changes. Per
 Openstack convention, at least two independent core-reviewers must provide such a vote in order to approve code changes for merging. Furthermore, before being merged code changes need to pass several test-pipelines. Merging is performed automatically using Zuul.
 
+##### HowTo:
+Prerequisites for any given OpenStack project: 
+
+- Check G4 CI Tests must be fullfilled
+- Check G5 Gerrit Settings must be fullfilled
+- Check G5 Dangerous Workflows must be fullfilled
+
+In gerrit (can be opened via "proposed changes" in an opendev repository, e.g. [nova](https://review.opendev.org/q/status:open+project:openstack/nova)):
+- filter for merged changes by setting the status value in the search field from `status:open` to `status:merged`
+![](./images/nova_gerrit.png)
+For the last 10(?) changes check by klicking on a change that:
+- `Code-Review` is part of the submit requirements of changes and at least one `+2` reviewer is present.
+![](./images/nova_gerrit_change.png)
+- klick on `Comments` and verify whether reviewers left any comments or just approved changes. Rationale: Reviewers leaving ideally code-based comments are more likely to actually have looked into the code.
+
 
 #### Contributors
 Check whether project has contributors from different organizations. Knowledge about contributing organizations
 may help in deciding whether a project is trustworthy or not.
 
-Applying OSSF scorecards on the Github mirror of openstack-nova revealed a total of 47 different contributing organizations.
-Amongst them RedHat, Nvidia and IBM.
+OpenStack provides statistical insights into its projects via the platform [stackalytics](https://www.stackalytics.io/). Using this platform, various 
+different metrics on different scopes can be applied and viewed. For example one can get an overview over all companies which contributed to reviewing the [latest
+release](https://www.stackalytics.io/?metric=marks).
 
-Check KPIs:
+Potential Check KPIs:
 - Contributors in the Current Release: Total number of contributors involved in the current release (e.g. >2)
 - Contributor Diversity: Diversity of contributors based on affiliation (e.g. >=2 companies)
 - “Do not merge” votings in the current release: Number of votings with the worst assessment of a contribution, i.e. “Do not merge” (e.g. <5)
@@ -395,7 +411,21 @@ Check KPIs:
 - Contribution Frequency: Regularity and frequency of contributions by each contributor (e.g. Top 10 contributors have been active for >12 months)
 - Code Review Participation: Percentage of contributions that undergo peer review (e.g. 100%)
 
-- TODO step-by-step guide on how to assess these KPIs (go to stackalytics, select filter XY, ...)
+##### HowTo
+- open [stackalytics](https://www.stackalytics.io/)
+- under `Release` select the desired OpenStack release and as `Project Type` OpenStack
+- select the desired Openstack project under `Modules` (e.g. [nova](https://www.stackalytics.io/?module=opendev.org/openstack/nova))
+- select the desired metric under `Metric` (e.g. reviews in [nova](https://www.stackalytics.io/?project_type=openstack&release=epoxy&metric=marks&module=opendev.org/openstack/nova))
+
+- Metric `Reviews`
+  - by Company: More than one company? Well known companies?
+  - by Contributor: Several Contributors with a more or less equal amount of performed reviews?
+- Metric `Patch sets`
+  - by Company: More than one company? Well known companies?
+  - by Contributor: Several Contributors with a more or less equal amount of submitted patch sets?
+- Metric `Person-day Effort`
+  - by Company: Several companies with more or less equal shares? One or few well known companies with large(r) shares?
+  - by Contributor: Several contributors with more or less equal shares?
 
 ### G7: Checking Build Risks
 
@@ -404,6 +434,15 @@ The project repository should be free of executable binary artifacts (e.g. for P
 
 The repository of Openstack nova contains no binary artifacts. (OSSF tool applied on github mirror of nova).
 
+##### HowTo
+- check if the repository contains any binary artifacts
+- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+  - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
+  - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+  - run scorecard tool binary-artifacts check on desired repository (e.g. nova):
+  ```
+  docker run -e GITHUB_AUTH_TOKEN=token gcr.io/openssf/scorecard:stable --show-details --checks=Binary-Artifacts --repo=https://github.com/openstack/nova
+  ```
 
 #### Pinned Dependencies
 The project should explicitly pin dependencies used for builds and releases not only by version but also with a
@@ -415,7 +454,19 @@ Applying OSSF scorecards on the Github mirror of openstack nova, no pinned depen
 A `requirements.txt` exits ([link](https://github.com/openstack/nova/blob/master/requirements.txt)), but only a minimum 
 version number is defined for each dependency. Furthermore, it is stateted in a comment that these lower bounds are only 
 kept up to date on a best effort basis. For passing the check, explicit hashes of the used versions would be necessary (see [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)).
+Openstack manages requirments globally for all projects, but also allows projects to define custom lower bounds (see [documentation](https://docs.openstack.org/project-team-guide/dependency-management.html)).
 
+##### HowTo
+- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+  - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
+  - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+  - run scorecard tool Pinned-Dependencies check on desired repository (e.g. nova):
+  ```
+  docker run -e GITHUB_AUTH_TOKEN=token gcr.io/openssf/scorecard:stable --show-details --checks=Pinned-Dependencies --repo=https://github.com/openstack/nova
+
+- alternatively check the `requirements.txt` file (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/requirements.txt)) in the project-root manually
+  - this file should contain a hash for each declared dependency as described in the [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)
+- the same applies for the the files listet in the [dependency management documentation](https://docs.openstack.org/project-team-guide/dependency-management.html) which can be found on [openstack/requirements](https://opendev.org/openstack/requirements)
 
 #### Packaging
 Check whether the project publishes packages. Packages make it easier for customers to install and use the latest 
@@ -423,10 +474,16 @@ version as well as receiving security critical patches.
 
 Opendev supports automatic publishing of releases on [PyPI](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-permission-to-publish-releases).
 
+##### HowTo
+- official OpenStack projects should be released automatically on PyPi by the [openstackci](https://pypi.org/user/openstackci/) user as described in the [Project Creators Guide](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-exclusive-permission-to-publish-releases)
+- check for a given project wether it can be found on PyPi and is maintained the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
+
 #### Signed Releases
 Official project artifacts like packages should be accompanied with a cryptographic signature. This allows a user 
 to verify the provenance of artifacts as well as their integrity. This is crucial in order to establish trust 
 into such artifacts.
+
+<span style="color: red;">**ISSUE**</span>
 
 [Releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Nevertheless, the signature is not visible on 
 https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/).
