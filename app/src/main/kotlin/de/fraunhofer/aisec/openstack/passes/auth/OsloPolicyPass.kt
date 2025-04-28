@@ -8,10 +8,6 @@ import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Name
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.Policy
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.Role
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.newPolicy
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.newPolicyRule
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.mcalls
@@ -23,6 +19,11 @@ import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
+import de.fraunhofer.aisec.openstack.concepts.auth.Policy
+import de.fraunhofer.aisec.openstack.concepts.auth.PolicyRule
+import de.fraunhofer.aisec.openstack.concepts.auth.Role
+import de.fraunhofer.aisec.openstack.concepts.auth.newPolicy
+import de.fraunhofer.aisec.openstack.concepts.auth.newPolicyRule
 
 /** A pass to register policies for OpenStack components using the `oslo.policy` package. */
 @DependsOn(SymbolResolver::class)
@@ -99,12 +100,7 @@ class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {
                                     roles = roles,
                                     connect = true,
                                 )
-                                .apply {
-                                    val name = construct.arguments.getOrNull(0)?.name
-                                    if (name != null) {
-                                        this.name = name
-                                    }
-                                }
+                                .apply { this.name = Name(ruleName) }
                         }
                     }
                 }
@@ -159,12 +155,12 @@ class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {
             if (actualRoles.isNotEmpty()) {
                 // For each actual role (starting with "role:...")
                 actualRoles.forEach { role ->
-                    roleInfos.add(Role(name = role, requiredWith = conditions))
+                    roleInfos.add(Role(name = role, conditions = conditions))
                 }
             } else {
                 // If no role is found, this typically is a pre-defined policy rule
                 andParts.forEach { part ->
-                    roleInfos.add(Role(name = part, requiredWith = emptySet()))
+                    roleInfos.add(Role(name = part, conditions = emptySet()))
                 }
             }
         }

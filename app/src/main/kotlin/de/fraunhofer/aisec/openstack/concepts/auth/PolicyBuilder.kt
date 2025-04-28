@@ -6,9 +6,6 @@ package de.fraunhofer.aisec.openstack.concepts.auth
 import de.fraunhofer.aisec.cpg.graph.MetadataProvider
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.newConcept
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.Policy
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.PolicyRule
-import de.fraunhofer.aisec.cpg.graph.concepts.policy.Role
 
 fun MetadataProvider.newPolicy(underlyingNode: Node, connect: Boolean) =
     newConcept(::Policy, underlyingNode = underlyingNode, connect = connect)

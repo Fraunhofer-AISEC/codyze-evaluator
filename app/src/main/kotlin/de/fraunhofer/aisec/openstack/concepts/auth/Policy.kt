@@ -12,6 +12,6 @@ class Policy(underlyingNode: Node? = null) : Concept(underlyingNode = underlying
 }
 
 class PolicyRule(underlyingNode: Node? = null, val roles: Set<Role> = emptySet()) :
-    Concept(underlyingNode = underlyingNode) {}
+    Concept(underlyingNode = underlyingNode)
 
-data class Role(val name: String, val requiredWith: Set<String> = emptySet())
+data class Role(val name: String, val conditions: Set<String> = emptySet())
