@@ -62,7 +62,12 @@ class SecureKeyRetrievalPass(ctx: TranslationContext) : TranslationResultPass(ct
             baseObjects.flatMap {
                 // This call generates a new HttpClient
                 val httpClient =
-                    newHttpClient(underlyingNode = it, isTLS = isTLS, authentication = null)
+                    newHttpClient(
+                        underlyingNode = it,
+                        isTLS = isTLS,
+                        authentication = null,
+                        connect = true,
+                    )
                 // Find usage of the object as a base for a HttpRequest. Heuristics: The object
                 // refersTo the same declaration
                 val getCalls =
@@ -82,6 +87,7 @@ class SecureKeyRetrievalPass(ctx: TranslationContext) : TranslationResultPass(ct
                             arguments = it.arguments,
                             httpMethod = HttpMethod.GET,
                             concept = httpClient,
+                            connect = true,
                         )
                     it.prevDFG += request
                     request

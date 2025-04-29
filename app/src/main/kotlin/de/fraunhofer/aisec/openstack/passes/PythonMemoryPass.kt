@@ -19,14 +19,19 @@ import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 class PythonMemoryPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun accept(comp: Component) {
         // Create one memory concept per component
-        val memory = newMemory(comp, MemoryManagementMode.MANAGED_WITH_GARBAGE_COLLECTION)
+        val memory =
+            newMemory(comp, MemoryManagementMode.MANAGED_WITH_GARBAGE_COLLECTION, connect = true)
 
         // We are only interested in delete expressions
         comp.allChildren<DeleteExpression>().forEach { deleteExpr ->
             deleteExpr.operands.forEach {
-                newDeallocate(underlyingNode = deleteExpr, concept = memory, what = it).apply {
-                    this.prevDFGEdges += it
-                }
+                newDeallocate(
+                        underlyingNode = deleteExpr,
+                        concept = memory,
+                        what = it,
+                        connect = true,
+                    )
+                    .apply { this.prevDFGEdges += it }
             }
         }
     }

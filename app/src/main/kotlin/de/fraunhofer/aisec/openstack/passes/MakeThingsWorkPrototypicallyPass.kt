@@ -55,11 +55,10 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                 it.name.localName == "get_decrypted_private_key" &&
                     it.base?.name?.localName == "magnum_cert"
             })) {
-            val secret = newSecret(underlyingNode = getSecretCall)
+            val secret = newSecret(underlyingNode = getSecretCall, connect = true)
             val getSecret =
-                newGetSecret(underlyingNode = getSecretCall, concept = secret).apply {
-                    this.nextDFG += getSecretCall
-                }
+                newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true)
+                    .apply { this.nextDFG += getSecretCall }
         }
     }
 
@@ -72,11 +71,10 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
             t.mcalls({
                 it.name.localName == "get_secret" && it.base?.name?.localName == "retrieve_plugin"
             })) {
-            val secret = newSecret(underlyingNode = getSecretCall)
+            val secret = newSecret(underlyingNode = getSecretCall, connect = true)
             val getSecret =
-                newGetSecret(underlyingNode = getSecretCall, concept = secret).apply {
-                    this.nextDFG += getSecretCall
-                }
+                newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true)
+                    .apply { this.nextDFG += getSecretCall }
         }
     }
 
@@ -109,9 +107,14 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                 val argumentOfCipher =
                     executeCall.arguments[arguments.indexOfFirst { it == "--cipher" } + 1]
                 // TODO: Fill the properties of cipher
-                val cipher = newCipher(argumentOfCipher)
+                val cipher = newCipher(argumentOfCipher, connect = true)
                 val diskEncryption =
-                    newDiskEncryption(underlyingNode = executeCall, cipher = cipher, key = key)
+                    newDiskEncryption(
+                            underlyingNode = executeCall,
+                            cipher = cipher,
+                            key = key,
+                            connect = true,
+                        )
                         .apply { this.prevDFG += executeCall }
 
                 // val secretInput = executeCall.arguments[arguments.indexOfFirst { "--key-file" in
@@ -125,7 +128,11 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                     secret.prevDFG += secretInput
                 }*/
 
-                newCreateEncryptedDisk(underlyingNode = executeCall, concept = diskEncryption)
+                newCreateEncryptedDisk(
+                        underlyingNode = executeCall,
+                        concept = diskEncryption,
+                        connect = true,
+                    )
                     .apply {
                         // This probably makes it "too" easy?
                         // diskEncryption.key?.let { this.prevDFG += it }
@@ -150,10 +157,16 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
             baseObjects.flatMap {
                 // This call generates a new HttpClient
                 val httpClient =
-                    newHttpClient(underlyingNode = it, isTLS = false, authentication = null).apply {
-                        this.nextDFG += it
-                        this.prevDFG += it
-                    }
+                    newHttpClient(
+                            underlyingNode = it,
+                            isTLS = false,
+                            authentication = null,
+                            connect = true,
+                        )
+                        .apply {
+                            this.nextDFG += it
+                            this.prevDFG += it
+                        }
                 // Find usage of the object as a base for a HttpRequest. Heuristics: The object
                 // refersTo the same declaration
                 val getCalls =
@@ -173,6 +186,7 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                             arguments = it.arguments,
                             httpMethod = HttpMethod.GET,
                             concept = httpClient,
+                            connect = true,
                         )
                     it.prevDFG += request
                     request

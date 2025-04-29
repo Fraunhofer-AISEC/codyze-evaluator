@@ -1,8 +1,4 @@
-import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
-import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.cpg.query.const
-import de.fraunhofer.aisec.cpg.query.ge
 
 val SYM_KEYLENGTH = 256
 
@@ -15,6 +11,7 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
     // We currently allow the two ciphers aes-xts-plain64 and aes-cbc-essiv.
     // This could be extracted to a variable outside this statement.
     val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
+
     // The predicate must hold for all DiskEncryption concepts.
     return tr.allExtended<DiskEncryption>() {
         // The cipher's name must be in the list of allowed ciphers.

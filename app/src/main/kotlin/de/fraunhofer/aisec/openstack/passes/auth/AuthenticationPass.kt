@@ -264,9 +264,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
 
         return when (tokenProviderValue) {
             "fernet" -> {
-                val tokenBasedAuth = newTokenBasedAuth(tokenProvider, tokenProperty)
+                val tokenBasedAuth = newTokenBasedAuth(tokenProvider, tokenProperty, connect = true)
                 if (tokenValidation != null) {
-                    newAuthenticate(tokenValidation, tokenBasedAuth, tokenProperty)
+                    newAuthenticate(tokenValidation, tokenBasedAuth, tokenProperty, connect = true)
                     tokenBasedAuth
                 } else null
             }
