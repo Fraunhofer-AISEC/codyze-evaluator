@@ -465,6 +465,14 @@ class OpenStackTest {
             keyManagerAPI.returnTypes.singleOrNull()?.name.toString(),
             "The return type of $keyManagerAPI should be 'castellan.key_manager.barbican_key_manager.BarbicanKeyManager'",
         )
+
+        val keyManagerGetCall =
+            result.calls("castellan.key_manager.barbican_key_manager.BarbicanKeyManager.get")
+        assertEquals(
+            2,
+            keyManagerGetCall.size,
+            "There should be 2 calls to the get method of BarbicanKeyManager that we can resolve",
+        )
     }
 
     @Test
