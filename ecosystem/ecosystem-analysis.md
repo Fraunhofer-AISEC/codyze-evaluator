@@ -101,24 +101,17 @@ In the following, multiple ecosystem-related security criteria are described and
 ### G1: Checking Known Vulnerabilities
 Open vulnerabilities can be easily exploited by attackers and need to be addressed promptly. This check assesses if the project contains open, unresolved vulnerabilities in its codebase or dependencies. 
 
-For the purpose of assessing open vulnerabilities for OpenStack components, the OSV (Open Source Vulnerabilities) service can be used. A further possibility is to generate SBOMs and analyze them, using existing tooling.
+For the purpose of assessing open vulnerabilities for OpenStack components, the OSV (Open Source Vulnerabilities) service can be used. A further possibility is to generate SBOMs and analyze them using existing tooling. One existing tool is OWASP [Dependency Track](https://dependencytrack.org/). In this guideline, we focus on the OSV (Open Source Vulnerabilities) service which allows to review vulnerabilities in open-source projects. 
 
-The OSV (Open Source Vulnerabilities) service allows to review vulnerabilities in open-source projects. A [search for openstack vulnerabilities](https://osv.dev/list?q=OpenStack&ecosystem=) results in various potential vulnerabilities in different OpenStack-related packages.
-For severe security issues, OpenStack security advisories (OSSAs) are published. In 2024, five such OSSAs have been published.
 
-Guideline
-- TODO provide more detailed guide on how to use OSV etc.
-- Check KPIs:
-  - Contributors in the Current Release​: Total number of contributors involved in the current release​ (e.g. >2)
-  - Contributor Diversity​: Diversity of contributors based on affiliation ​(e.g. >2)
-  - “Do not merge” votings in the current release​: Number of votings with the worst assessment of a contribution, i.e. “Do not merge”​ (e.g. <5)
-  - Filed-to-resolved-bugs ratio​: How many bugs were filed vs how many were resolved​ (e.g. >33%​)
-  - Abandoned change requests in the current release​: Number of change requests that were contributed but abandoned​ (e.g. <10​)
-  - Number of Reviewers​: Total number of reviewers involved in the current release​ (e.g. >10​)
-  - Review Diversity​: Diversity of reviewers based on affiliation ​(e.g. >=2 companies​)
-  - Contribution Frequency​: Regularity and frequency of contributions by each contributor (e.g. top 10 contributors have been active for >12 months​)
-  - Code Review Participation​: Percentage of contributions that undergo peer review (e.g. 100%).
-- Set desired security target values and use tooling to assess the values
+#### HowTo:
+- Create a list of components to be used, e.g. Nova, Barbican, etc.
+- Add to the list the concrete packages that are planned to be used, e.g. github.com/openstack/nova
+- Use osv.dev to search for vulnerabilities in the specified packages
+- Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
+
+Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
+For severe security issues, [OpenStack security advisories](https://security.openstack.org/ossalist.html) (OSSAs) are published. In 2024, five such OSSAs have been published. It should thus also be checked if current OSSAs exist for the components that are planned to be used.
 
 
 ### G2: Checking Continuous Maintenance
@@ -128,35 +121,28 @@ Using a dependency update tool ensures that updates are done timely for all depe
 
 [A central list of all the requirements](https://docs.openstack.org/project-team-guide/dependency-management.html) that are allowed in OpenStack projects is globally maintained. The OpenStack [proposal bot](https://review.opendev.org/q/owner:proposal-bot) then automatically proposes updates to OpenStack dependencies. These proposals follow a defined workflow with reviews that verify that the proposed updates can be integrated. 
 
-Guideline: 
-- Check https://review.opendev.org/q/owner:proposal-bot to see if the OpenStack proposal bot is active / has been active in the past
+#### HowTo:
+- Verify that the proposal bot is in active use using https://review.opendev.org/q/owner:proposal-bot
+
+At the time of writing, the OpenStack proposal bot is in active use.
 
 #### Activity
 An inactive project may not receive patches, have its dependencies updated, or be actively tested and used. Some software, particularly smaller utility functions, typically doesn't require ongoing maintenance. However, OpenStack components can be expected to be actively maintained.
 
-This check assesses whether the project is actively maintained. In the OSSF check, an archived project receives the lowest score, while a project with at least one commit per week over the last 90 days earns the highest score. If there is activity on issues from collaborators, members, or owners, the project receives a partial score.
+This check assesses whether the project is actively maintained. In the respective OSSF check, an archived project receives the lowest score, while a project with at least one commit per week over the last 90 days earns the highest score. If there is activity on issues from collaborators, members, or owners, the project receives a partial score.
 
-There is a [list of designations for OpenStack projects](https://wiki.openstack.org/wiki/ProjectTypes) as follows:
-- Core: official projects with full access to OpenStack brand and assets
-- Incubated: projects that have been approved for the Incubator program which puts them on an official track to become core projects
-- Library: library projects are directly or indirectly used by the core projects
-- Gating: gating projects are used in the continuous integration processes, for example as integration test suites and specific deployment tools
-- Supporting: supporting projects are used for, e.g., documentation and development infrastructure
-- Related: related projects are unofficial projects are somehow associated with OpenStack but are not officially tied to OpenStack
+In the OpenStack ecosystem, projects are generally very active. Still, the projects that are planned to be used can be checked for their active maintenance. The OSSF Maintained check defines a threshold of a maximum of 90 days for the last maintenance activity. 
 
-The projects that can be considered to strictly follow the OpenStack security guidelines are thus the Core projects. Still, other projects are also actively maintained. The OSSF Maintained check defines a threshold of a maximum of 90 days for the last maintenance activity. A look at the list of OpenStack components on opendev.org, sorting them by _oldest_, [shows that all OpenStack components have been updated within the last day](https://opendev.org/openstack?q=&sort=oldest).
+#### HowTo:
+To perform this check, retrieve a list of OpenStack components on [opendev.org, sorting them by _oldest_](https://opendev.org/openstack?q=&sort=oldest).
 
-Guideline:
-- Identify relevant OpenStack components
-- Check their project type, verify that it is a Core project
-- Check the dates of their last commits; verify they have been actively maintained 
+At the time of writing, all OpenStack components have been updated recently.
 
 #### Security-Policy
-OpenStack maintains a general security policy for the projects. A security policy gives users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible.
+OpenStack maintains a general security policy for the projects. A security policy gives users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible. This check therefore examines the security policy checking for vulnerability process(es), disclosure timelines, and links (e.g., URL(s) and email(s)) to support users. 
 
-This check examines the contents of the security policy checking for vulnerability process(es), disclosure timelines, and links (e.g., URL(s) and email(s)) to support users.
-
-The requirements for the Security-Policy check (based on OSSF criteria) are as follows:
+#### HowTo:
+The requirements for the Security-Policy check (based on OSSF criteria) are as follows (based on the OSSF criteria):
 
 Linking Requirements (one or more):
 - A valid form of an email address to contact for vulnerabilities
@@ -179,16 +165,15 @@ OpenStack (Core) projects therefore fulfill the Security-Policy check at the tim
 A license provides users with details on how the source code can or cannot be used. The absence of a license hinders any security review or audit and poses a legal risk for potential users.
 This check therefore aims to identify if the project has a published license. It operates by utilizing hosting APIs or by examining standard locations for a file named according to common licensing conventions. 
 
+#### HowTo:
 According to OSSF, the license should be declared as follows:
 - There should be a LICENSE, COPYRIGHT, or COPYING filename, or license files in a LICENSES directory
 - The license file should be at the top-level directory
 - A FSF or OSI license should be specified
 
-In OpenStack projects, these files are contained in the opendev repositories.
-
 OpenStack components are published under the Apache 2.0 license which can be found in the LICENSE file in each repository, see, for example, https://opendev.org/openstack/nova/src/branch/master/LICENSE.
-The criteria listed above are all fulfilled for OpenStack components.
 
+The criteria listed above are all fulfilled for OpenStack components.
 
 ### G3: Checking CII Best Practices
 The OpenSSF Best Practices Badge Program specifies best practices for open-source projects and assesses whether they follow the best practices. It is therefore a valuable starting point for checking the security and reliability of an open-source project (since it also comprises security requirements). The program awards passing, silver, or gold level badges. The automatic OSSF evaluation utilizes the Git repository URL along with the OpenSSF Best Practices badge API. 
