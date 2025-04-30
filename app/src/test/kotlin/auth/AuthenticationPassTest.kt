@@ -35,10 +35,11 @@ class AuthenticationPassTest {
                 it.registerPass<HttpWsgiPass>()
                 it.exclusionPatterns("tests", "drivers")
                 it.includePath("../external/webob")
+                it.includePath("../external/oslo.context")
                 it.softwareComponents(
                     mutableMapOf(
-                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
-                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican").toFile()),
                         "keystonemiddleware" to
                             listOf(
                                 Path("../external/keystonemiddleware/keystonemiddleware").toFile()

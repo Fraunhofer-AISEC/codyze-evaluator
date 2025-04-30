@@ -3,17 +3,14 @@
  */
 package de.fraunhofer.aisec.openstack.concepts.auth
 
-import de.fraunhofer.aisec.cpg.graph.MetadataProvider
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
-import de.fraunhofer.aisec.cpg.graph.concepts.newConcept
 
+/**
+ * Represents an authorization context linked to a policy.
+ *
+ * @param underlyingNode The underlying CPG node.
+ * @param policy The associated policy.
+ */
 class Authorization(underlyingNode: Node? = null, policy: Policy) :
     Concept(underlyingNode = underlyingNode)
-
-fun MetadataProvider.newAuthorization(underlyingNode: Node, policy: Policy, connect: Boolean) =
-    newConcept(
-        { Authorization(policy = policy) },
-        underlyingNode = underlyingNode,
-        connect = connect,
-    )

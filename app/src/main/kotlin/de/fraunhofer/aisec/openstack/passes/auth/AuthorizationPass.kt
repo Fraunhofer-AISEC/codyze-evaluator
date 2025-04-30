@@ -14,7 +14,6 @@ import de.fraunhofer.aisec.cpg.graph.firstParentOrNull
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
-import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.openstack.concepts.auth.Policy
@@ -22,7 +21,6 @@ import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorization
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 
-@DependsOn(SymbolResolver::class)
 @DependsOn(HttpPecanLibPass::class)
 @DependsOn(HttpWsgiPass::class)
 @DependsOn(OsloPolicyPass::class)

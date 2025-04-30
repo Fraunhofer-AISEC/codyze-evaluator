@@ -22,10 +22,12 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
-import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
+import de.fraunhofer.aisec.openstack.concepts.auth.RequestContext
+import de.fraunhofer.aisec.openstack.concepts.auth.newRequestContext
+import de.fraunhofer.aisec.openstack.concepts.auth.newUserInfo
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.String
@@ -37,7 +39,6 @@ import kotlin.text.contains
  * This pass creates the authentication concepts and operations. It extracts the relevant settings
  * from the configuration files, identifies the middleware handling authentication.
  */
-@DependsOn(SymbolResolver::class)
 @DependsOn(IniFileConfigurationSourcePass::class)
 @DependsOn(HttpPecanLibPass::class)
 @DependsOn(HttpWsgiPass::class)
@@ -80,6 +81,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 apiVersionWithAuth = apiVersionWithAuth,
             )
         }
+        registerRequestContext(t = t, conf = apiPasteConfig, authStrategy = authStrategyValue)
     }
 
     /**
@@ -109,6 +111,75 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 apiVersionWithAuth = apiVersionWithAuth,
             )
         }
+        registerRequestContext(t = t, conf = barbicanConfig, authStrategy = authStrategyValue)
+    }
+
+    private fun registerRequestContext(
+        t: TranslationResult,
+        conf: ConfigurationSource,
+        authStrategy: String,
+    ) {
+        // We need to extract the name of the context from the pipeline
+        val pipeline = getPipelineWithAuthtoken(conf = conf, authStrategy).firstOrNull() ?: return
+        val context =
+            pipeline.evaluate().toString().split(" ").firstOrNull {
+                it.contains("context", ignoreCase = true)
+            } ?: ""
+        val contextOptionValue = getConfigOptionValueByGroupName(conf = conf, groupName = context)
+        if (contextOptionValue == null) {
+            warnWithFileLocation(conf, log, "Could not find '{}' in configuration", context)
+            return
+        }
+        val adjustedContextOptionValue = contextOptionValue.replace(":", ".")
+        val contextClass =
+            t.records.singleOrNull { adjustedContextOptionValue.contains(it.name.toString()) }
+                as? RecordDeclaration
+
+        // TODO: Need to find a way how to reach the RequestContext from the context class we
+        // reached from the config
+        //  for now we assume that the RequestContext is set in the same file and we know that
+        // `context.RequestContext.from_environ(req.environ, **kwargs)`
+        // is called, therefore we search manually for that call
+        val fromEnvironCall =
+            contextClass?.astParent.mcalls.singleOrNull { it.name.localName == "from_environ" }
+        val requestContext =
+            fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.lastOrNull()
+                as? RecordDeclaration
+        if (requestContext != null) {
+            val token =
+                requestContext.fields.singleOrNull { it.name.localName == "auth_token" } ?: return
+            val reqContext =
+                newRequestContext(underlyingNode = requestContext, token = token, connect = true)
+
+            // Here we normally should follow the data flow of the token through the middleware and
+            // keystone. For now we assume that
+            // the validation is done and we can access the user data at the base RequestContext
+            // class from oslo.context
+            val baseRequestContext =
+                requestContext.superTypeDeclarations.firstOrNull() as? RecordDeclaration
+            if (baseRequestContext != null) {
+                registerUserInfo(record = baseRequestContext, requestContext = reqContext)
+            }
+        }
+    }
+
+    fun registerUserInfo(record: RecordDeclaration, requestContext: RequestContext) {
+        val userId = record.fields.singleOrNull { it.name.localName == "user_id" } ?: return
+        val projectId = record.fields.singleOrNull { it.name.localName == "project_id" } ?: return
+        val roles = record.fields.singleOrNull { it.name.localName == "roles" } ?: return
+        val systemScope =
+            record.fields.singleOrNull { it.name.localName == "system_scope" } ?: return
+        val domainId = record.fields.singleOrNull { it.name.localName == "domain_id" } ?: return
+        newUserInfo(
+            underlyingNode = record,
+            concept = requestContext,
+            userId = userId,
+            projectId = projectId,
+            roles = roles,
+            systemScope = systemScope,
+            domainId = domainId,
+            connect = true,
+        )
     }
 
     /**
@@ -134,6 +205,32 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         }
     }
 
+    private fun getPipelineWithAuthtoken(
+        conf: ConfigurationSource,
+        authStrategy: String?,
+    ): List<ConfigurationOptionSource> {
+        val keystonemiddlewareGroup = findMiddlewareGroup(conf = conf) ?: return emptyList()
+        // Since this is a filter: take the name of the group and find the pipelines that reference
+        // this filter
+        val keystonemiddlewareGroupName =
+            keystonemiddlewareGroup.name.localName.substringAfterLast(":")
+
+        return conf.groups.flatMap { group ->
+            val matchingOptions =
+                group.options.filter { option ->
+                    val optionValue = option.evaluate() as? String
+                    optionValue?.split(" ")?.contains(keystonemiddlewareGroupName) == true
+                }
+            when {
+                matchingOptions.size == 1 -> matchingOptions
+                matchingOptions.size > 1 && authStrategy != null ->
+                    matchingOptions.filter { option -> option.name.localName == authStrategy }
+
+                else -> emptyList()
+            }
+        }
+    }
+
     /**
      * Returns the API version which has authentication applied.
      *
@@ -146,35 +243,11 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         conf: ConfigurationSource,
         authStrategy: String?,
     ): ConfigurationOptionSource? {
-        val keystonemiddlewareGroup = findMiddlewareGroup(conf = conf) ?: return null
-        // Since this is a filter: take the name of the group and find the pipelines that reference
-        // this filter
-        val keystonemiddlewareGroupName =
-            keystonemiddlewareGroup.name.localName.substringAfterLast(":")
-
-        val groupWithAuthToken =
-            conf.groups.filter { group ->
-                val matchingOptions =
-                    group.options.filter { option ->
-                        val optionValue = option.evaluate() as? String
-                        optionValue?.split(" ")?.contains(keystonemiddlewareGroupName) == true
-                    }
-                when {
-                    matchingOptions.size == 1 -> true
-                    // In a group there may be multiple options with `authtoken` registered.
-                    // We compare if any of them match the `authStrategy` specified in the config,
-                    // to be sure
-                    // that this group has really authentication registered
-                    matchingOptions.size > 1 && authStrategy != null ->
-                        matchingOptions.any { option -> option.name.localName == authStrategy }
-
-                    else -> false
-                }
-            }
-        if (groupWithAuthToken.isEmpty()) return null
+        val matchingOptions = getPipelineWithAuthtoken(conf = conf, authStrategy = authStrategy)
         val relevantGroupNames =
-            groupWithAuthToken.map { it.name.localName.substringAfterLast(":") }
-
+            conf.groups
+                .filter { group -> group.options.any { it in matchingOptions } }
+                .map { it.name.localName.substringAfterLast(":") }
         // We check that the option matches the relevant group names found above and
         // look for the option that specifies the API version
         return conf.groups

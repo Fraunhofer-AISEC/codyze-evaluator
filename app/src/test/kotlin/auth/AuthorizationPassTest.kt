@@ -7,6 +7,7 @@ import analyze
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
+import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
@@ -22,6 +23,7 @@ class AuthorizationPassTest {
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<AuthorizationPass>()
+                it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.registerPass<OsloPolicyPass>()
                 it.registerPass<ProvideConfigPass>()

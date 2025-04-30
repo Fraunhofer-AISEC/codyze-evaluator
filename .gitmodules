@@ -60,3 +60,6 @@
 [submodule "external/oslo.policy"]
 	path = external/oslo.policy
 	url = https://github.com/openstack/oslo.policy
+[submodule "external/oslo.context"]
+	path = external/oslo.context
+	url = https://github.com/openstack/oslo.context.git
