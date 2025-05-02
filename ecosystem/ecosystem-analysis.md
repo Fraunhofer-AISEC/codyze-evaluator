@@ -8,8 +8,6 @@ This document is divided into two major parts: First, a general description of m
 
 ## Security-Relevant Elements in the OpenStack Ecosystem 
 
-- TODO add some documentation sources
-
 ### Contribution Process
 The OpenStack contribution process is a transparent framework that aims as balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. 
 
@@ -106,8 +104,7 @@ For the purpose of assessing open vulnerabilities for OpenStack components, the 
 
 #### HowTo:
 - Create a list of components to be used, e.g. Nova, Barbican, etc.
-- Add to the list the concrete packages that are planned to be used, e.g. github.com/openstack/nova
-- Use osv.dev to search for vulnerabilities in the specified packages
+- Use [osv.dev](osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
 - Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
 
 Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
@@ -122,7 +119,7 @@ Using a dependency update tool ensures that updates are done timely for all depe
 [A central list of all the requirements](https://docs.openstack.org/project-team-guide/dependency-management.html) that are allowed in OpenStack projects is globally maintained. The OpenStack [proposal bot](https://review.opendev.org/q/owner:proposal-bot) then automatically proposes updates to OpenStack dependencies. These proposals follow a defined workflow with reviews that verify that the proposed updates can be integrated. 
 
 #### HowTo:
-- Verify that the proposal bot is in active use using https://review.opendev.org/q/owner:proposal-bot
+- Verify that the proposal bot is in active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
 
 At the time of writing, the OpenStack proposal bot is in active use.
 
@@ -182,9 +179,12 @@ OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=
 - The project website, the repository, and the downloaded pages (if separate) MUST include key-hardening headers with non-permeable values
 - The project MUST apply at least one dynamic analysis tool to each upcoming major production release of the software produced by the project before its release.
 
-Note that some criteria are not clearly documented, e.g. _The project SHOULD support multiple cryptographic algorithms so that users can quickly switch if one is compromised._ 
+### HowTo:
+- Check the [OpenStack project on OpenSSF Best Practices](https://www.bestpractices.dev/de/projects/246)
+Thus, the security criteria that are explicitly _not fulfilled_ should be checked to see whether they present a significant security risk. 
+- Click on the levels that are not fulfilled (for OpenStack: silver and gold), check the security criteria, and check whether any security criteria are _not fulfilled_
+- Assess the criteria's impacts on the project's security
 
-Thus, the criteria that are explicitly _not fulfilled_ should be checked to see whether they present a significant security risk. 
 According to the CII assessment, there is one that is not fulfilled for Openstack, i.e. the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options should be set and maintained. These headers are used to prevent, e.g., cross-site scripting, man-in-the-middle, and clickjacking attacks. Since the headers CSP, HSTS, and X-Content-Type-Options are not set for opendev.org (see https://securityheaders.com/?q=opendev.org&followRedirects=on), they can present a security risk in the usage of the code repository.
 
 ### G4: Checking Continuous Testing
@@ -295,11 +295,9 @@ Opendev Gerrit-Workflow ensures the following aspects:
 * code must pass automated testcases
 * if all conditions are met code gets automatically merged
 
-This corresponds to tier 4 according to ossf defintions.
+This corresponds to tier 4 according to ossf definitions.
 
-<span style="color: red;">**ISSUE**: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
-retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account 
-(s. https://review.opendev.org/admin/repos/All-Projects,access).</span>
+Note: According to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account (see https://review.opendev.org/admin/repos/All-Projects,access).
 
 
 #### Dangerous Workflows
@@ -322,7 +320,7 @@ containing jobs to be executed. These are restricted in their capabilities to al
 triggered on untrusted code is the `check` pipeline which should **not** be able to merge code. Code is merged via the 
 `gate` pipeline which is only executed on explicit approval of a human reviewer.
 
-##### HowTo:
+#### HowTo:
 Assure that no unreviewed code can be merged upstream:
 * check that project is listed in [`openstack/project-config/zuul/main.yaml`](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml) in `tenant: name: openstack` in the field 
 `untrusted-projects` (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml#L653))
@@ -396,7 +394,7 @@ KPI Checks:
 - Contribution Frequency: Regularity and frequency of contributions by each contributor (e.g. Top 10 contributors have been active for >12 months)
 - Code Review Participation: Percentage of contributions that undergo peer review (e.g. 100%)
 
-##### HowTo
+##### HowTo:
 - open [stackalytics](https://www.stackalytics.io/)
 - under `Release` select the desired OpenStack release and as `Project Type` OpenStack
 - select the desired Openstack project under `Modules` (e.g. [nova](https://www.stackalytics.io/?module=opendev.org/openstack/nova))
@@ -419,7 +417,7 @@ The project repository should be free of executable binary artifacts (e.g. for P
 
 The repository of Openstack nova contains no binary artifacts. (OSSF tool applied on github mirror of nova).
 
-##### HowTo
+##### HowTo:
 - check if the repository contains any binary artifacts
 - this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
   - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
@@ -441,7 +439,7 @@ version number is defined for each dependency. Furthermore, it is stateted in a 
 kept up to date on a best effort basis. For passing the check, explicit hashes of the used versions would be necessary (see [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)).
 Openstack manages requirements globally for all projects, but also allows projects to define custom lower bounds (see [documentation](https://docs.openstack.org/project-team-guide/dependency-management.html)).
 
-##### HowTo
+##### HowTo:
 - this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
   - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
   - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
@@ -459,7 +457,7 @@ version as well as receiving security critical patches.
 
 Opendev supports automatic publishing of releases on [PyPI](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-permission-to-publish-releases).
 
-##### HowTo
+##### HowTo:
 - official OpenStack projects should be released automatically on PyPi by the [openstackci](https://pypi.org/user/openstackci/) user as described in the [Project Creators Guide](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-exclusive-permission-to-publish-releases)
 - check for a given project wether it can be found on PyPi and is maintained the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
 
@@ -468,7 +466,7 @@ Official project artifacts like packages should be accompanied with a cryptograp
 to verify the provenance of artifacts as well as their integrity. This is crucial in order to establish trust 
 into such artifacts.
 
-<span style="color: red;">**ISSUE**</span>
+##### HowTo:
+- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed, i.e., if cryptographic signature files are provided
 
-[Releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Nevertheless, the signature is not visible on 
-https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/).
+Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. The signature is not, however, visible on  https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
