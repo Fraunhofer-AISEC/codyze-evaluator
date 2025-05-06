@@ -1,4 +1,3 @@
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authentication
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 
