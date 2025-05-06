@@ -9,8 +9,13 @@ import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
+import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
+import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.query.QueryTree
+import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
@@ -96,5 +101,47 @@ class AuthenticationPassTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun authStrategyTest() {
+        val topLevel = Path("../projects/BYOK/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.exclusionPatterns("tests", "drivers")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "conf" to topLevel.resolve("conf").toFile(),
+                        "cinder" to topLevel.resolve("cinder/api").toFile(),
+                        "barbican" to topLevel.resolve("barbican/api").toFile(),
+                    )
+                )
+            }
+
+        assertNotNull(result)
+
+        val query =
+            result.allExtended<ConfigurationOptionSource>(
+                sel = { it.name.localName == "auth_strategy" },
+                mustSatisfy = {
+                    val field = it.underlyingNode as? FieldDeclaration
+                    val result = field?.evaluate().toString() == "keystone"
+                    QueryTree<Boolean>(
+                        result,
+                        stringRepresentation = "Component config: ${it.location?.artifactLocation}",
+                    )
+                },
+            )
+        println(query.printNicely())
     }
 }
