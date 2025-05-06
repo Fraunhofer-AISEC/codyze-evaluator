@@ -18,7 +18,7 @@ fun HttpEndpoint.shouldHaveAuthentication(): Boolean {
  * All HTTPEndpoints that are private should have authentication methods
  */
 fun statement1(tr: TranslationResult): QueryTree<Boolean> {
-    return tr.existsExtended<HttpEndpoint>(
+    return tr.allExtended<HttpEndpoint>(
         sel = { endpoint ->
             // Only endpoints that are private and therefore should have authentication
             endpoint.shouldHaveAuthentication()
@@ -26,7 +26,7 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
         // See if we find one that does not have authentication
         mustSatisfy = { endpoint ->
             QueryTree(
-                value = endpoint.authentication == null,
+                value = endpoint.authentication != null,
                 children = mutableListOf(QueryTree(endpoint)),
             )
         },
