@@ -11,7 +11,8 @@ import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.cpg.query.allExtended
+import de.fraunhofer.aisec.cpg.query.existsExtended
+import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
@@ -99,7 +100,7 @@ class AuthenticationPassTest {
     }
 
     @Test
-    fun testAllComponentEndpointsHaveAuthentication() {
+    fun testFoo() {
         val topLevel = Path("../projects/BYOK/components")
         val result =
             analyze(listOf(), topLevel, true) {
@@ -135,11 +136,11 @@ class AuthenticationPassTest {
         assertNotNull(result)
 
         val r =
-            result.allExtended<HttpEndpoint>(
+            result.existsExtended<HttpEndpoint>(
                 sel = { endpoint -> endpoint.shouldHaveAuthentication() },
                 mustSatisfy = { endpoint ->
                     QueryTree(
-                        value = endpoint.authentication != null,
+                        value = endpoint.authentication == null,
                         children = mutableListOf(QueryTree(endpoint)),
                     )
                 },

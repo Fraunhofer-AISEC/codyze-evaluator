@@ -4,7 +4,7 @@ components:
   - cinder
   - castellan
   - barbican
-legacyAssumptions:
+assumptions:
   - Third-party library code is correctly implemented
 objectives:
   - name: State-of-the-Art Encryption Algorithm

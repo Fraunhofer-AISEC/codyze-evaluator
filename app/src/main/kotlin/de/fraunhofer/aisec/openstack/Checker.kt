@@ -15,9 +15,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.persistence.persist
 import de.fraunhofer.aisec.openstack.passes.*
-import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
-import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import java.io.File
 import org.neo4j.driver.GraphDatabase
 import org.neo4j.driver.Session
@@ -37,11 +35,9 @@ class OpenstackCheckerCommand : ProjectCommand() {
                     it.registerPass<DiskEncryptionPass>()
                     it.registerPass<PythonMemoryPass>()
                     it.registerPass<HttpPecanLibPass>()
-                    it.registerPass<HttpWsgiPass>()
                     it.registerPass<SecureKeyRetrievalPass>()
                     it.registerPass<MakeThingsWorkPrototypicallyPass>()
                     it.registerPass<OsloConfigPass>()
-                    it.registerPass<AuthenticationPass>()
                     it.registerPass<IniFileConfigurationSourcePass>()
                     it.registerPass<PythonEntryPointPass>()
                     if (!projectOptions.directory.endsWith("BYOK")) {
