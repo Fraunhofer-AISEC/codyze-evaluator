@@ -8,8 +8,6 @@ This document is divided into two major parts: First, a general description of m
 
 ## Security-Relevant Elements in the OpenStack Ecosystem 
 
-- TODO add some documentation sources
-
 ### Contribution Process
 The OpenStack contribution process is a transparent framework that aims as balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. 
 
@@ -101,24 +99,16 @@ In the following, multiple ecosystem-related security criteria are described and
 ### G1: Checking Known Vulnerabilities
 Open vulnerabilities can be easily exploited by attackers and need to be addressed promptly. This check assesses if the project contains open, unresolved vulnerabilities in its codebase or dependencies. 
 
-For the purpose of assessing open vulnerabilities for OpenStack components, the OSV (Open Source Vulnerabilities) service can be used. A further possibility is to generate SBOMs and analyze them, using existing tooling.
+For the purpose of assessing open vulnerabilities for OpenStack components, the OSV (Open Source Vulnerabilities) service can be used. A further possibility is to generate SBOMs and analyze them using existing tooling. One existing tool is OWASP [Dependency Track](https://dependencytrack.org/). In this guideline, we focus on the OSV (Open Source Vulnerabilities) service which allows to review vulnerabilities in open-source projects. 
 
-The OSV (Open Source Vulnerabilities) service allows to review vulnerabilities in open-source projects. A [search for openstack vulnerabilities](https://osv.dev/list?q=OpenStack&ecosystem=) results in various potential vulnerabilities in different OpenStack-related packages.
-For severe security issues, OpenStack security advisories (OSSAs) are published. In 2024, five such OSSAs have been published.
 
-Guideline
-- TODO provide more detailed guide on how to use OSV etc.
-- Check KPIs:
-  - Contributors in the Current Release​: Total number of contributors involved in the current release​ (e.g. >2)
-  - Contributor Diversity​: Diversity of contributors based on affiliation ​(e.g. >2)
-  - “Do not merge” votings in the current release​: Number of votings with the worst assessment of a contribution, i.e. “Do not merge”​ (e.g. <5)
-  - Filed-to-resolved-bugs ratio​: How many bugs were filed vs how many were resolved​ (e.g. >33%​)
-  - Abandoned change requests in the current release​: Number of change requests that were contributed but abandoned​ (e.g. <10​)
-  - Number of Reviewers​: Total number of reviewers involved in the current release​ (e.g. >10​)
-  - Review Diversity​: Diversity of reviewers based on affiliation ​(e.g. >=2 companies​)
-  - Contribution Frequency​: Regularity and frequency of contributions by each contributor (e.g. top 10 contributors have been active for >12 months​)
-  - Code Review Participation​: Percentage of contributions that undergo peer review (e.g. 100%).
-- Set desired security target values and use tooling to assess the values
+#### HowTo:
+- Create a list of components to be used, e.g. Nova, Barbican, etc.
+- Use [osv.dev](osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
+- Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
+
+Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
+For severe security issues, [OpenStack security advisories](https://security.openstack.org/ossalist.html) (OSSAs) are published. In 2024, five such OSSAs have been published. It should thus also be checked if current OSSAs exist for the components that are planned to be used.
 
 
 ### G2: Checking Continuous Maintenance
@@ -128,35 +118,28 @@ Using a dependency update tool ensures that updates are done timely for all depe
 
 [A central list of all the requirements](https://docs.openstack.org/project-team-guide/dependency-management.html) that are allowed in OpenStack projects is globally maintained. The OpenStack [proposal bot](https://review.opendev.org/q/owner:proposal-bot) then automatically proposes updates to OpenStack dependencies. These proposals follow a defined workflow with reviews that verify that the proposed updates can be integrated. 
 
-Guideline: 
-- Check https://review.opendev.org/q/owner:proposal-bot to see if the OpenStack proposal bot is active / has been active in the past
+#### HowTo:
+- Verify that the proposal bot is in active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
+
+At the time of writing, the OpenStack proposal bot is in active use.
 
 #### Activity
 An inactive project may not receive patches, have its dependencies updated, or be actively tested and used. Some software, particularly smaller utility functions, typically doesn't require ongoing maintenance. However, OpenStack components can be expected to be actively maintained.
 
-This check assesses whether the project is actively maintained. In the OSSF check, an archived project receives the lowest score, while a project with at least one commit per week over the last 90 days earns the highest score. If there is activity on issues from collaborators, members, or owners, the project receives a partial score.
+This check assesses whether the project is actively maintained. In the respective OSSF check, an archived project receives the lowest score, while a project with at least one commit per week over the last 90 days earns the highest score. If there is activity on issues from collaborators, members, or owners, the project receives a partial score.
 
-There is a [list of designations for OpenStack projects](https://wiki.openstack.org/wiki/ProjectTypes) as follows:
-- Core: official projects with full access to OpenStack brand and assets
-- Incubated: projects that have been approved for the Incubator program which puts them on an official track to become core projects
-- Library: library projects are directly or indirectly used by the core projects
-- Gating: gating projects are used in the continuous integration processes, for example as integration test suites and specific deployment tools
-- Supporting: supporting projects are used for, e.g., documentation and development infrastructure
-- Related: related projects are unofficial projects are somehow associated with OpenStack but are not officially tied to OpenStack
+In the OpenStack ecosystem, projects are generally very active. Still, the projects that are planned to be used can be checked for their active maintenance. The OSSF Maintained check defines a threshold of a maximum of 90 days for the last maintenance activity. 
 
-The projects that can be considered to strictly follow the OpenStack security guidelines are thus the Core projects. Still, other projects are also actively maintained. The OSSF Maintained check defines a threshold of a maximum of 90 days for the last maintenance activity. A look at the list of OpenStack components on opendev.org, sorting them by _oldest_, [shows that all OpenStack components have been updated within the last day](https://opendev.org/openstack?q=&sort=oldest).
+#### HowTo:
+To perform this check, retrieve a list of OpenStack components on [opendev.org, sorting them by _oldest_](https://opendev.org/openstack?q=&sort=oldest).
 
-Guideline:
-- Identify relevant OpenStack components
-- Check their project type, verify that it is a Core project
-- Check the dates of their last commits; verify they have been actively maintained 
+At the time of writing, all OpenStack components have been updated recently.
 
 #### Security-Policy
-OpenStack maintains a general security policy for the projects. A security policy gives users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible.
+OpenStack maintains a general security policy for the projects. A security policy gives users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible. This check therefore examines the security policy checking for vulnerability process(es), disclosure timelines, and links (e.g., URL(s) and email(s)) to support users. 
 
-This check examines the contents of the security policy checking for vulnerability process(es), disclosure timelines, and links (e.g., URL(s) and email(s)) to support users.
-
-The requirements for the Security-Policy check (based on OSSF criteria) are as follows:
+#### HowTo:
+The requirements for the Security-Policy check (based on OSSF criteria) are as follows (based on the OSSF criteria):
 
 Linking Requirements (one or more):
 - A valid form of an email address to contact for vulnerabilities
@@ -179,16 +162,15 @@ OpenStack (Core) projects therefore fulfill the Security-Policy check at the tim
 A license provides users with details on how the source code can or cannot be used. The absence of a license hinders any security review or audit and poses a legal risk for potential users.
 This check therefore aims to identify if the project has a published license. It operates by utilizing hosting APIs or by examining standard locations for a file named according to common licensing conventions. 
 
+#### HowTo:
 According to OSSF, the license should be declared as follows:
 - There should be a LICENSE, COPYRIGHT, or COPYING filename, or license files in a LICENSES directory
 - The license file should be at the top-level directory
 - A FSF or OSI license should be specified
 
-In OpenStack projects, these files are contained in the opendev repositories.
-
 OpenStack components are published under the Apache 2.0 license which can be found in the LICENSE file in each repository, see, for example, https://opendev.org/openstack/nova/src/branch/master/LICENSE.
-The criteria listed above are all fulfilled for OpenStack components.
 
+The criteria listed above are all fulfilled for OpenStack components.
 
 ### G3: Checking CII Best Practices
 The OpenSSF Best Practices Badge Program specifies best practices for open-source projects and assesses whether they follow the best practices. It is therefore a valuable starting point for checking the security and reliability of an open-source project (since it also comprises security requirements). The program awards passing, silver, or gold level badges. The automatic OSSF evaluation utilizes the Git repository URL along with the OpenSSF Best Practices badge API. 
@@ -197,9 +179,12 @@ OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=
 - The project website, the repository, and the downloaded pages (if separate) MUST include key-hardening headers with non-permeable values
 - The project MUST apply at least one dynamic analysis tool to each upcoming major production release of the software produced by the project before its release.
 
-Note that some criteria are not clearly documented, e.g. _The project SHOULD support multiple cryptographic algorithms so that users can quickly switch if one is compromised._ 
+### HowTo:
+- Check the [OpenStack project on OpenSSF Best Practices](https://www.bestpractices.dev/de/projects/246)
+Thus, the security criteria that are explicitly _not fulfilled_ should be checked to see whether they present a significant security risk. 
+- Click on the levels that are not fulfilled (for OpenStack: silver and gold), check the security criteria, and check whether any security criteria are _not fulfilled_
+- Assess the criteria's impacts on the project's security
 
-Thus, the criteria that are explicitly _not fulfilled_ should be checked to see whether they present a significant security risk. 
 According to the CII assessment, there is one that is not fulfilled for Openstack, i.e. the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options should be set and maintained. These headers are used to prevent, e.g., cross-site scripting, man-in-the-middle, and clickjacking attacks. Since the headers CSP, HSTS, and X-Content-Type-Options are not set for opendev.org (see https://securityheaders.com/?q=opendev.org&followRedirects=on), they can present a security risk in the usage of the code repository.
 
 ### G4: Checking Continuous Testing
@@ -211,17 +196,24 @@ Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.o
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
-##### HowTo:
-On opendev check whether the component repository (assumption: project is created using [cookiecutter](https://opendev.org/openstack/cookiecutter)):
+For official OpenStack projects continuous testing is enforced with Gerrit and Zuul. Change requests must pass a `check` and a 
+`gate` pipeline prior merging ([s. developer documentation](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#automated-testing)).
 
-- contains `.zuul.yaml`
-- in `zuul.yaml`: defines component specific job-definitions ideally based on templates (s. example below)
+##### HowTo:
+In order to assure that a given OpenStack project performs test prior merging code changes, it needs to be verified that it is correctly configured and integrated
+in the Openstack CI/CD-Framework. In the following, we use `nova` as example for the necessary checks.
+
+- The project repository should be hosted on [opendev/openstack](https://opendev.org/openstack) (e.g. [nova](https://opendev.org/openstack/nova))
+- The repository should be based on the official [cookiecutter-template](https://opendev.org/openstack/cookiecutter)
+
+- The repository must contain a `.zuul.yaml` in the repository root (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/.zuul.yaml))
+- The `.zuul.yaml` should define project specific job-definitions ideally based on templates (s. example taken from nova below)
 ```yaml
 - job:
     name: nova-tox-functional-py39
     parent: openstack-tox-functional-py39 # inherit definitions from parent template
 ```
-- in `zuul.yaml`: `check` and `gate` pipeline are populated with jobs (s. example below)
+- In `.zuul.yaml`: ensure that the `check` and `gate` pipelines are populated with jobs (s. example taken from nova below)
 ```yaml
 - project:
     # Please try to keep the list of job names sorted alphabetically.
@@ -236,10 +228,10 @@ On opendev check whether the component repository (assumption: project is create
         - nova-tox-functional-py39
         - ...
 ```
-- contains `tox.ini`
-- contains a populated `tests` directory alongside the source code (e.g. `nova/tests`)
+- The repository must contain a `tox.ini` in the repository root (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/tox.ini))
+- The repository should contain a populated `tests` directory alongside the source code containing unit-test definitions (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/nova/tests))
 
-In gerrit (can be opened via "proposed changes"):
+In gerrit (can be opened via "proposed changes" in opendev repository, e.g. [nova](https://review.opendev.org/q/status:open+project:openstack/nova)):
 - assure that `Verified`and `Workflow` are part of the submit requirements of changes (these directly correspond to the testpipelines).
 ![](./images/nova_gerrit_change.png)
 
@@ -257,7 +249,7 @@ It is unclear, however, if it is mandatory to include SAST tools in the testing 
 
 #### HowTo:
 
-Check if `tox.ini` contains
+Check if the `tox.ini` in the repository root contains
 ```ini
 [testenv:bandit]
 extras =
@@ -265,7 +257,7 @@ commands = bandit -r <src-dir> -x tests -n 5 -ll
 # -r recurse into subdirs 
 # -x exclude path
 # -n num of lines printed for each found issue
-# -ll == level MEDIUM
+# -ll == level MEDIUM <-- report level
 ``` 
 
 ### G5: Checking CI/CD Security
@@ -273,15 +265,15 @@ commands = bandit -r <src-dir> -x tests -n 5 -ll
 Openstack manages its CI/CD infrastructure centrally for all core-projects. Thereby, security critical settings and configurations of the infrastructure should
 not be part of individual projects like nova or barbican. Official openstack projects should be integrated in the official infrastructure. 
 ##### HowTo:
-* `openstack/project-config`:
-    * check if project is listen in: https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml
-    * check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml
-    * check if there exists `gerrit/acls/<group>/<project>.config`
-    * check access rights in `<project>.config`
-        * assure, that `label-code-Review = -2..+2` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
-        * assure, that `label-Workflow = -1..+1` is only set for restricted groups 
-        (e.g. `<project>-core` and **not** `Registered Users`)
+- check if project is listed in: https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml (e.g. [nova](https://opendev.org/openstack/governance/src/branch/master/reference/projects.yaml#L942))
+- check if project is listed in: https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/projects.yaml#L4296))
+- in the [`openstack/project-config`](https://opendev.org/openstack/project-config) repository:
+  - check if there exists `gerrit/acls/openstack/<project>.config` (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config))
+  - check access rights in this `<project>.config`
+  - assure, that `label-code-Review = -2..+2` is only set for restricted groups
+        (e.g. `<project>-core` and **not** `Registered Users`, see [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config#L6))
+  - assure, that `label-Workflow = -1..+1` is only set for restricted groups 
+        (e.g. `<project>-core` and **not** `Registered Users`, see [nova](https://opendev.org/openstack/project-config/src/branch/master/gerrit/acls/openstack/nova.config#L10))
     
 #### Branch Protection
 Branches, especially the main project branches (e.g. `main or master`, `release`), should be protected such that a defined workflow pattern for applying changes is enforced. This is necessary to prevent malicious code changes.
@@ -303,12 +295,9 @@ Opendev Gerrit-Workflow ensures the following aspects:
 * code must pass automated testcases
 * if all conditions are met code gets automatically merged
 
-This corresponds to tier 4 according to ossf defintions.
+This corresponds to tier 4 according to ossf definitions.
 
-- TODO: idiomatic way to check repository settings for given openstack project\
-<span style="color: red;">**ISSUE**: according to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be 
-retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account 
-(s. https://review.opendev.org/admin/repos/All-Projects,access)</span>
+Note: According to https://gerrit-review.googlesource.com/Documentation/access-control.html this information can be retrieved via gerrit. Unfortunately, for openstack this information is not visible / accessable even with an account (see https://review.opendev.org/admin/repos/All-Projects,access).
 
 
 #### Dangerous Workflows
@@ -331,11 +320,11 @@ containing jobs to be executed. These are restricted in their capabilities to al
 triggered on untrusted code is the `check` pipeline which should **not** be able to merge code. Code is merged via the 
 `gate` pipeline which is only executed on explicit approval of a human reviewer.
 
-##### HowTo:
+#### HowTo:
 Assure that no unreviewed code can be merged upstream:
-* check, that project is listed in `openstack/project-config/zuul/main.yaml` in `tenant: name: openstack` in the field 
-`untrusted-projects`
-* check, that the pipeline definition of `check` in `openstack/project-config/zuul.d/pipelines.yaml` has **no** `submit: true` field (s. example)
+* check that project is listed in [`openstack/project-config/zuul/main.yaml`](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml) in `tenant: name: openstack` in the field 
+`untrusted-projects` (e.g. [nova](https://opendev.org/openstack/project-config/src/branch/master/zuul/main.yaml#L653))
+* check, that the pipeline definition of `check` in [`openstack/project-config/zuul.d/pipelines.yaml`](https://opendev.org/openstack/project-config/src/branch/master/zuul.d/pipelines.yaml) has **no** `submit: true` field (s. example); this is a global setting affecting **all** openstack projects
 ```yaml
 - pipeline:
     name: gate
@@ -356,7 +345,7 @@ repository content.
 OSSF scorecard currently is not capable of analysing Zuul related configuration files. Further investigation of the Zuul framework and its integration in opendev is necessary for understanding necessary access privileges. This is necessary in order to allow assessing whether pipeline scripts of a openstack component follow the principle of least privilege.
 
 See information in dangerous workflows above. Zuul pipeline should only have the privileges to merge code **after** 
-human review and approval.**TODO:** further investigation of Zuul access control and integration with gerrit. 
+human review and approval. Therefore the same checks apply. 
 
 
 ### G6: Checking Code Contributions and Reviews
@@ -370,15 +359,31 @@ Code changes need to be reported using Gerrit. Once visible, everyone is allowed
 via a voting system. Only core-reviewers are allowed to give a `+2` vote which is mandatory for approving changes. Per
 Openstack convention, at least two independent core-reviewers must provide such a vote in order to approve code changes for merging. Furthermore, before being merged code changes need to pass several test-pipelines. Merging is performed automatically using Zuul.
 
+##### HowTo:
+Prerequisites for any given OpenStack project: 
+
+- Check G4 CI Tests must be fullfilled
+- Check G5 Gerrit Settings must be fullfilled
+- Check G5 Dangerous Workflows must be fullfilled
+
+In gerrit (can be opened via "proposed changes" in an opendev repository, e.g. [nova](https://review.opendev.org/q/status:open+project:openstack/nova)):
+- filter for merged changes by setting the status value in the search field from `status:open` to `status:merged`
+![](./images/nova_gerrit.png)
+For the last changes (e.g. the last 10 changes) check by clicking on a change that:
+- `Code-Review` is part of the submit requirements of changes and at least one `+2` reviewer is present.
+![](./images/nova_gerrit_change.png)
+- click on `Comments` and verify whether reviewers left any comments or just approved changes. Rationale: Reviewers leaving ideally code-based comments are more likely to actually have looked into the code.
+
 
 #### Contributors
 Check whether project has contributors from different organizations. Knowledge about contributing organizations
 may help in deciding whether a project is trustworthy or not.
 
-Applying OSSF scorecards on the Github mirror of openstack-nova revealed a total of 47 different contributing organizations.
-Amongst them RedHat, Nvidia and IBM.
+OpenStack provides statistical insights into its projects via the platform [stackalytics](https://www.stackalytics.io/). Using this platform, various 
+different metrics on different scopes can be applied and viewed. For example one can get an overview over all companies which contributed to reviewing the [latest
+release](https://www.stackalytics.io/?metric=marks).
 
-Check KPIs:
+KPI Checks:
 - Contributors in the Current Release: Total number of contributors involved in the current release (e.g. >2)
 - Contributor Diversity: Diversity of contributors based on affiliation (e.g. >=2 companies)
 - “Do not merge” votings in the current release: Number of votings with the worst assessment of a contribution, i.e. “Do not merge” (e.g. <5)
@@ -389,7 +394,21 @@ Check KPIs:
 - Contribution Frequency: Regularity and frequency of contributions by each contributor (e.g. Top 10 contributors have been active for >12 months)
 - Code Review Participation: Percentage of contributions that undergo peer review (e.g. 100%)
 
-- TODO step-by-step guide on how to assess these KPIs (go to stackalytics, select filter XY, ...)
+##### HowTo:
+- open [stackalytics](https://www.stackalytics.io/)
+- under `Release` select the desired OpenStack release and as `Project Type` OpenStack
+- select the desired Openstack project under `Modules` (e.g. [nova](https://www.stackalytics.io/?module=opendev.org/openstack/nova))
+- select the desired metric under `Metric` (e.g. reviews in [nova](https://www.stackalytics.io/?project_type=openstack&release=epoxy&metric=marks&module=opendev.org/openstack/nova))
+
+- Metric `Reviews`
+  - by Company: More than one company? Well known companies?
+  - by Contributor: Several Contributors with a more or less equal amount of performed reviews?
+- Metric `Patch sets`
+  - by Company: More than one company? Well known companies?
+  - by Contributor: Several Contributors with a more or less equal amount of submitted patch sets?
+- Metric `Person-day Effort`
+  - by Company: Several companies with more or less equal shares? One or few well known companies with large(r) shares?
+  - by Contributor: Several contributors with more or less equal shares?
 
 ### G7: Checking Build Risks
 
@@ -398,6 +417,15 @@ The project repository should be free of executable binary artifacts (e.g. for P
 
 The repository of Openstack nova contains no binary artifacts. (OSSF tool applied on github mirror of nova).
 
+##### HowTo:
+- check if the repository contains any binary artifacts
+- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+  - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
+  - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+  - run scorecard tool binary-artifacts check on desired repository (e.g. nova):
+  ```
+  docker run -e GITHUB_AUTH_TOKEN=token gcr.io/openssf/scorecard:stable --show-details --checks=Binary-Artifacts --repo=https://github.com/openstack/nova
+  ```
 
 #### Pinned Dependencies
 The project should explicitly pin dependencies used for builds and releases not only by version but also with a
@@ -409,7 +437,19 @@ Applying OSSF scorecards on the Github mirror of openstack nova, no pinned depen
 A `requirements.txt` exits ([link](https://github.com/openstack/nova/blob/master/requirements.txt)), but only a minimum 
 version number is defined for each dependency. Furthermore, it is stateted in a comment that these lower bounds are only 
 kept up to date on a best effort basis. For passing the check, explicit hashes of the used versions would be necessary (see [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)).
+Openstack manages requirements globally for all projects, but also allows projects to define custom lower bounds (see [documentation](https://docs.openstack.org/project-team-guide/dependency-management.html)).
 
+##### HowTo:
+- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+  - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
+  - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
+  - run scorecard tool Pinned-Dependencies check on desired repository (e.g. nova):
+  ```
+  docker run -e GITHUB_AUTH_TOKEN=token gcr.io/openssf/scorecard:stable --show-details --checks=Pinned-Dependencies --repo=https://github.com/openstack/nova
+
+- alternatively check the `requirements.txt` file (e.g. [nova](https://opendev.org/openstack/nova/src/branch/master/requirements.txt)) in the project-root manually
+  - this file should contain a hash for each declared dependency as described in the [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)
+- the same applies for the the files listed in the [dependency management documentation](https://docs.openstack.org/project-team-guide/dependency-management.html) which can be found on [openstack/requirements](https://opendev.org/openstack/requirements)
 
 #### Packaging
 Check whether the project publishes packages. Packages make it easier for customers to install and use the latest 
@@ -417,10 +457,16 @@ version as well as receiving security critical patches.
 
 Opendev supports automatic publishing of releases on [PyPI](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-permission-to-publish-releases).
 
+##### HowTo:
+- official OpenStack projects should be released automatically on PyPi by the [openstackci](https://pypi.org/user/openstackci/) user as described in the [Project Creators Guide](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-exclusive-permission-to-publish-releases)
+- check for a given project wether it can be found on PyPi and is maintained the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
+
 #### Signed Releases
 Official project artifacts like packages should be accompanied with a cryptographic signature. This allows a user 
 to verify the provenance of artifacts as well as their integrity. This is crucial in order to establish trust 
 into such artifacts.
 
-[Releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Nevertheless, the signature is not visible on 
-https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/).
+##### HowTo:
+- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed, i.e., if cryptographic signature files are provided
+
+Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. The signature is not, however, visible on  https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
