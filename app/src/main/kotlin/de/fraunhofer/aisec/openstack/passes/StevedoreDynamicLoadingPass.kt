@@ -31,11 +31,13 @@ import de.fraunhofer.aisec.cpg.graph.types.Type
 import de.fraunhofer.aisec.cpg.helpers.Util.debugWithFileLocation
 import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
 import de.fraunhofer.aisec.cpg.passes.Pass
+import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.concepts.ConceptPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.python.stringValues
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
+import de.fraunhofer.aisec.cpg.passes.markDirty
 
 /**
  * Translates usages of `stevedore.driver.DriverManager` into dynamic loading concepts.
@@ -179,6 +181,10 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                     granularity = FullDataflowGranularity,
                     callingContext = CallingContextOut(constructDriver),
                 )
+
+                // We have new information that is relevant for the symbol resolver, trigger its
+                // execution again
+                accessDriver.markDirty<SymbolResolver>()
 
                 ops += load
             } else {
