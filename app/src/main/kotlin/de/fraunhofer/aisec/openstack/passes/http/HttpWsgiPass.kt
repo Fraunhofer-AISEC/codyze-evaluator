@@ -556,6 +556,8 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = path,
                     arguments = method.parameters,
                     authentication = null,
+                    authorization = null,
+                    requestContext = null,
                     connect = true,
                 )
                 .apply {

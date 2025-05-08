@@ -4,6 +4,7 @@
 package auth
 
 import analyze
+import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
@@ -22,6 +23,7 @@ class AuthorizationPassTest {
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
                 it.registerPass<AuthorizationPass>()
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpWsgiPass>()
@@ -32,25 +34,34 @@ class AuthorizationPassTest {
                 it.includePath("../external/webob")
                 it.includePath("../external/oslo.config")
                 it.includePath("../external/oslo.policy")
+                it.includePath("../external/oslo.context")
                 it.softwareComponents(
                     mutableMapOf(
-                        "cinder" to listOf(topLevel.resolve("cinder/cinder").toFile())
-                        //                        "barbican" to
+                        "cinder" to
+                            listOf(
+                                topLevel.resolve("cinder/cinder/api").toFile(),
+                                topLevel.resolve("cinder/cinder/backup").toFile(),
+                                topLevel.resolve("cinder/cinder/policies").toFile(),
+                                topLevel.resolve("cinder/cinder/context.py").toFile(),
+                                topLevel.resolve("cinder/cinder/policy.py").toFile(),
+                            ), //                        "barbican" to
                         // listOf(topLevel.resolve("barbican/barbican/api").toFile()),
                         //                        "keystonemiddleware" to
                         //                            listOf(
                         //
                         // Path("../external/keystonemiddleware/keystonemiddleware").toFile()
                         //                            ),
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
                     )
                 )
                 it.topLevels(
                     mapOf(
-                        "cinder" to topLevel.resolve("cinder").toFile()
+                        "cinder" to topLevel.resolve("cinder").toFile(),
                         //                        "barbican" to
                         // topLevel.resolve("barbican").toFile(),
                         //                        "keystonemiddleware" to
                         // Path("../external/keystonemiddleware").toFile(),
+                        "conf" to topLevel.resolve("conf").toFile(),
                     )
                 )
             }

@@ -6,15 +6,16 @@ package de.fraunhofer.aisec.openstack.concepts.auth
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
 import de.fraunhofer.aisec.cpg.graph.concepts.Operation
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext
 
 /**
- * Represents a request context.
+ * Represents a request context. It is an inheritance of [RequestContext]
  *
  * @param underlyingNode The underlying CPG node.
  * @param token The token.
  */
-class RequestContext(underlyingNode: Node? = null, val token: Node? = null) :
-    Concept(underlyingNode = underlyingNode) {
+class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node? = null) :
+    RequestContext(underlyingNode = underlyingNode) {
     var userInfo: UserInfo? = null
 }
 

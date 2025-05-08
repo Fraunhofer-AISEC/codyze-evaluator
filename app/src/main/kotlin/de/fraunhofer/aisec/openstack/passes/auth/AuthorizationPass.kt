@@ -5,38 +5,54 @@ package de.fraunhofer.aisec.openstack.passes.auth
 
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.Backward
+import de.fraunhofer.aisec.cpg.graph.GraphToFollow
+import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
+import de.fraunhofer.aisec.cpg.graph.calls
+import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.VariableDeclaration
 import de.fraunhofer.aisec.cpg.graph.firstParentOrNull
+import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
+import de.fraunhofer.aisec.cpg.graph.records
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.KeyValueExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.openstack.concepts.auth.Policy
 import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorization
+import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorize
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 
+/**
+ * A pass that processes registered policies to identify and attach authorization requirements. If
+ * an authorization is required within an `HttpEndpoint`, it creates and connects the corresponding
+ * authorization concepts and operations.
+ */
 @DependsOn(HttpPecanLibPass::class)
 @DependsOn(HttpWsgiPass::class)
 @DependsOn(OsloPolicyPass::class)
 class AuthorizationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
-    override fun cleanup() {
-        // nothing to do
-    }
-
     override fun accept(p0: TranslationResult) {
         val policies = p0.conceptNodes.filterIsInstance<Policy>()
-        if (policies.isEmpty()) return
-
-        handlePolicies(policies = policies)
+        if (policies.isEmpty()) {
+            log.warn("Could not find any policy concept")
+            return
+        }
+        handlePolicies(policies = policies, tr = p0)
     }
 
-    private fun handlePolicies(policies: List<Policy>) {
+    /** For each `Policy`, finds its associated authorize calls. */
+    private fun handlePolicies(policies: List<Policy>, tr: TranslationResult) {
         policies.forEach { policy ->
             val policyArg = (policy.underlyingNode as? ConstructExpression)?.arguments?.getOrNull(0)
             when (policyArg) {
@@ -49,24 +65,91 @@ class AuthorizationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                     val authorizeCalls =
                         nameVariable.usages.mapNotNull { usage ->
                             val call = usage.astParent as? MemberCallExpression
-                            if (call?.name?.localName == "authorize") call else null
+                            if (
+                                call?.name?.localName == "authorize" &&
+                                    call.code?.startsWith("context") == true
+                            )
+                                call
+                            else null
                         }
                     authorizeCalls.forEach { authorizeCall ->
-                        applyAuthorization(policy = policy, call = authorizeCall)
+                        applyAuthorization(policy = policy, call = authorizeCall, tr = tr)
                     }
                 }
             }
         }
     }
 
-    private fun applyAuthorization(policy: Policy, call: MemberCallExpression) {
-        val authorization = newAuthorization(underlyingNode = call, policy = policy, connect = true)
-        // We need to find out if `authorize` is called in a method which belongs to
-        // an HTTPEndpoint
-        val method = call.astParent?.firstParentOrNull<MethodDeclaration>()
-        if (method != null) {
-            val httpEndpoint = method.allChildrenWithOverlays<HttpEndpoint>().singleOrNull()
-            // httpEndpoint.authorization += authorization
+    private fun applyAuthorization(
+        policy: Policy,
+        call: MemberCallExpression,
+        tr: TranslationResult,
+    ) {
+        val authorization = newAuthorization(underlyingNode = call, connect = true)
+
+        // At the moment we don´t know the type of `context.authorize` so we search
+        // manually while assuming that
+        // the type of context is `RequestContext`
+        val requestContext =
+            tr.records.singleOrNull {
+                it.name.localName == "RequestContext" && it.component == ctx.currentComponent
+            }
+        if (requestContext != null) {
+            val authorize =
+                requestContext.methods.singleOrNull { it.name.localName == call.name.localName }
+            val policyAuthorize =
+                authorize.calls.singleOrNull {
+                    it.name.localName == "authorize" && it.name.parent?.localName == "policy"
+                } ?: return
+
+            val targets = extractTargets(policyAuthorize) ?: return
+            newAuthorize(
+                underlyingNode = policyAuthorize,
+                concept = authorization,
+                policy = policy,
+                targets = targets,
+                connect = true,
+            )
+
+            // We need to find out if `authorize` is called in a method which belongs to
+            // an HTTPEndpoint
+            val method = call.astParent?.firstParentOrNull<MethodDeclaration>()
+            if (method != null) {
+                val httpEndpoint = method.allChildrenWithOverlays<HttpEndpoint>().singleOrNull()
+                httpEndpoint?.authorization = authorization
+            }
         }
+    }
+
+    /**
+     * Extracts the target fields `user_id` and `project_id` from the second argument of the call
+     * `policy.authorize(..)`.
+     */
+    private fun extractTargets(policyAuthorize: CallExpression): List<Node>? {
+        val targetArg = policyAuthorize.arguments.getOrNull(2) ?: return null
+        val paths =
+            targetArg.followDFGEdgesUntilHit(
+                collectFailedPaths = false,
+                direction = Backward(GraphToFollow.DFG),
+            ) {
+                it is KeyValueExpression
+            }
+
+        val targets = mutableListOf<Node>()
+        paths.fulfilled.forEach { path ->
+            val keyValue = path.lastOrNull() as? KeyValueExpression ?: return@forEach
+            val memberExpr = keyValue.value as? MemberExpression ?: return@forEach
+            val field = memberExpr.refersTo as? FieldDeclaration ?: return@forEach
+
+            when (memberExpr.name.localName) {
+                "project_id",
+                "user_id" -> targets.add(field)
+            }
+        }
+        return targets
+    }
+
+    override fun cleanup() {
+        // nothing to do
     }
 }

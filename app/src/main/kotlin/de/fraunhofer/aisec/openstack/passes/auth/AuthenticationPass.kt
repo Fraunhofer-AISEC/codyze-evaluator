@@ -6,6 +6,7 @@ package de.fraunhofer.aisec.openstack.passes.auth
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.newAuthenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.newTokenBasedAuth
@@ -25,7 +26,7 @@ import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
-import de.fraunhofer.aisec.openstack.concepts.auth.RequestContext
+import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.concepts.auth.newRequestContext
 import de.fraunhofer.aisec.openstack.concepts.auth.newUserInfo
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
@@ -69,7 +70,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         // The authentication strategy (e.g., "keystone")
         val authStrategyValue =
             getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
-
+        val requestContext =
+            registerRequestContext(t = t, conf = apiPasteConfig, authStrategy = authStrategyValue)
+                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = apiPasteConfig, authStrategy = authStrategyValue)
@@ -79,9 +82,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 configSource = apiPasteConfig,
                 componentName = "cinder",
                 apiVersionWithAuth = apiVersionWithAuth,
+                requestContext = requestContext,
             )
         }
-        registerRequestContext(t = t, conf = apiPasteConfig, authStrategy = authStrategyValue)
     }
 
     /**
@@ -100,6 +103,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         // Extract the authentication strategy
         val authStrategyValue =
             getConfigOptionValue(conf = barbicanConfig, optionName = "/v1") ?: return
+        val requestContext =
+            registerRequestContext(t = t, conf = barbicanConfig, authStrategy = authStrategyValue)
+                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = barbicanConfig, authStrategy = authStrategyValue)
@@ -109,18 +115,19 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 configSource = barbicanConfig,
                 componentName = "barbican",
                 apiVersionWithAuth = apiVersionWithAuth,
+                requestContext = requestContext,
             )
         }
-        registerRequestContext(t = t, conf = barbicanConfig, authStrategy = authStrategyValue)
     }
 
     private fun registerRequestContext(
         t: TranslationResult,
         conf: ConfigurationSource,
         authStrategy: String,
-    ) {
+    ): RequestContext? {
         // We need to extract the name of the context from the pipeline
-        val pipeline = getPipelineWithAuthtoken(conf = conf, authStrategy).firstOrNull() ?: return
+        val pipeline =
+            getPipelineWithAuthToken(conf = conf, authStrategy).firstOrNull() ?: return null
         val context =
             pipeline.evaluate().toString().split(" ").firstOrNull {
                 it.contains("context", ignoreCase = true)
@@ -128,42 +135,48 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val contextOptionValue = getConfigOptionValueByGroupName(conf = conf, groupName = context)
         if (contextOptionValue == null) {
             warnWithFileLocation(conf, log, "Could not find '{}' in configuration", context)
-            return
+            return null
         }
         val adjustedContextOptionValue = contextOptionValue.replace(":", ".")
         val contextClass =
             t.records.singleOrNull { adjustedContextOptionValue.contains(it.name.toString()) }
                 as? RecordDeclaration
 
-        // TODO: Need to find a way how to reach the RequestContext from the context class we
-        // reached from the config
+        // TODO: Need to find a way how to reach the RequestContext from the context class (which we
+        // get from the config)
         //  for now we assume that the RequestContext is set in the same file and we know that
         // `context.RequestContext.from_environ(req.environ, **kwargs)`
-        // is called, therefore we search manually for that call
+        // is called, therefore we search for that call manually
         val fromEnvironCall =
             contextClass?.astParent.mcalls.singleOrNull { it.name.localName == "from_environ" }
         val requestContext =
             fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.lastOrNull()
                 as? RecordDeclaration
         if (requestContext != null) {
-            val token =
-                requestContext.fields.singleOrNull { it.name.localName == "auth_token" } ?: return
-            val reqContext =
-                newRequestContext(underlyingNode = requestContext, token = token, connect = true)
-
             // Here we normally should follow the data flow of the token through the middleware and
             // keystone. For now we assume that
-            // the validation is done and we can access the user data at the base RequestContext
-            // class from oslo.context
+            // the validation is done and we can access the user data of the RequestContext
+            // base class from oslo.context
             val baseRequestContext =
                 requestContext.superTypeDeclarations.firstOrNull() as? RecordDeclaration
             if (baseRequestContext != null) {
+                val token =
+                    baseRequestContext.fields.singleOrNull { it.name.localName == "auth_token" }
+                        ?: return null
+                val reqContext =
+                    newRequestContext(
+                        underlyingNode = requestContext,
+                        token = token,
+                        connect = true,
+                    )
                 registerUserInfo(record = baseRequestContext, requestContext = reqContext)
+                return reqContext
             }
         }
+        return null
     }
 
-    fun registerUserInfo(record: RecordDeclaration, requestContext: RequestContext) {
+    fun registerUserInfo(record: RecordDeclaration, requestContext: ExtendedRequestContext) {
         val userId = record.fields.singleOrNull { it.name.localName == "user_id" } ?: return
         val projectId = record.fields.singleOrNull { it.name.localName == "project_id" } ?: return
         val roles = record.fields.singleOrNull { it.name.localName == "roles" } ?: return
@@ -191,6 +204,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         configSource: ConfigurationSource,
         componentName: String,
         apiVersionWithAuth: ConfigurationOptionSource,
+        requestContext: RequestContext,
     ) {
         val middlewareClass = resolveMiddlewareHandler(t = t, configSource = configSource) ?: return
         val tokenBasedAuth = registerTokenAuthentication(middlewareClass = middlewareClass, t = t)
@@ -200,12 +214,13 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 // Apply authentication to endpoints that match the API version
                 if (it.path.contains(apiVersionWithAuth.name.localName)) {
                     it.authentication = tokenBasedAuth
+                    it.requestContext = requestContext
                 }
             }
         }
     }
 
-    private fun getPipelineWithAuthtoken(
+    private fun getPipelineWithAuthToken(
         conf: ConfigurationSource,
         authStrategy: String?,
     ): List<ConfigurationOptionSource> {
@@ -243,7 +258,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         conf: ConfigurationSource,
         authStrategy: String?,
     ): ConfigurationOptionSource? {
-        val matchingOptions = getPipelineWithAuthtoken(conf = conf, authStrategy = authStrategy)
+        val matchingOptions = getPipelineWithAuthToken(conf = conf, authStrategy = authStrategy)
         val relevantGroupNames =
             conf.groups
                 .filter { group -> group.options.any { it in matchingOptions } }
