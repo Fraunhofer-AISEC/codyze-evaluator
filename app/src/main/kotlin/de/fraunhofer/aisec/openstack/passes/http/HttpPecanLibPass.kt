@@ -105,7 +105,6 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = "${requestHandler.basePath}/$methodName",
                     arguments = method.parameters,
                     authentication = null,
-                    authorization = null,
                     connect = true,
                 )
                 .apply {
@@ -211,7 +210,6 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = requestHandler.basePath,
                     arguments = method.parameters,
                     authentication = null,
-                    authorization = null,
                     connect = true,
                 )
                 .apply {
