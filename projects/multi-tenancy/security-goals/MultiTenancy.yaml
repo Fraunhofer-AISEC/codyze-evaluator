@@ -20,6 +20,11 @@ objectives:
 #    statements:
 #      - When an access token is generated, its context is tied to the user’s domain/project.
 #
+  - name: Authorization check based on user's domain/project
+    description: Authorization must be based on the user's domain and project
+    statements:
+      - When authorizing a request, the caller's domain/project is used in the authorization check
+
 #  - name: Sensitive information restricted to user´s domain
 #    description: Access to sensitive information must be restricted to the user's domain
 #    statements:
