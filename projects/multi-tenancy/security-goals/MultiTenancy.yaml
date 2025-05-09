@@ -1,0 +1,42 @@
+name: Multi-tenancy
+description: This describes security requirements for tenant isolation in OpenStack environments.
+legacyAssumptions:
+  - Keystone is used as the authentication provider.
+objectives:
+  - name: All endpoints must have authentication
+    description: All private endpoints must only be accessible after authentication.
+    statements:
+      - Access to private endpoints must be restricted to authenticated users, i.e., each private REST API must be connected to an Authentication concept.
+    restrictions:
+      - The config must be configured such that all private cinder endpoints are found in "/v3" and all private barbican endpoints are found in "/v1".
+
+#  - name: Use Keystone for authentication
+#    description: All OpenStack components must use Keystone as the authentication provider.
+#    statements:
+#      - Keystone is set as the authentication provider for all components.
+#
+#  - name: Tie access token context to the user's domain/project
+#    description: Access tokens must be tied to the user’s domain and project identifiers.
+#    statements:
+#      - When an access token is generated, its context is tied to the user’s domain/project.
+#
+#  - name: Sensitive information restricted to user´s domain
+#    description: Access to sensitive information must be restricted to the user's domain
+#    statements:
+#      - Given a user request for sensitive data, only data from the user´s domain or project is accessible
+#
+#  - name: Database query filtering by user's domain/project
+#    description: When a user reads data from or writes data to a database, the user’s domain is used as a filter in the database query
+#    statements:
+#      - Given a database query for data, the query must include the user’s domain as a filter.
+#
+#  - name: Data flow isolation
+#    description: Data flows from user requests are not stored in global variables (since they are assumed to be domain-independent) – or they are deleted after the request is answered.
+#    statements:
+#      - Given a user request, data must not be stored in global variables, unless it is specific to the user's domain
+#      - Any domain-specific data stored temporarily should be deleted after the request is processed.
+#
+#  - name: Unauthorized access response
+#    description: Access to resources from another domain must result in an "unauthorized" response without revealing indirect information leaks.
+#    statements:
+#      - Access to resources from a different domain must be denied with an "unauthorized" response.

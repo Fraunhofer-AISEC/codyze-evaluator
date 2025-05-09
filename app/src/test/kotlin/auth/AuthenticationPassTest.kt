@@ -101,7 +101,7 @@ class AuthenticationPassTest {
 
     @Test
     fun testAllComponentEndpointsHaveAuthentication() {
-        val topLevel = Path("../projects/BYOK/components")
+        val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
@@ -111,7 +111,6 @@ class AuthenticationPassTest {
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.exclusionPatterns("tests", "drivers")
-                it.includePath("../external/webob")
                 it.softwareComponents(
                     mutableMapOf(
                         "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
