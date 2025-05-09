@@ -21,6 +21,7 @@ import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -104,7 +105,7 @@ class AuthenticationPassTest {
     }
 
     @Test
-    fun authStrategyTest() {
+    fun testAuthStrategyProvider() {
         val topLevel = Path("../projects/BYOK/components")
         val result =
             analyze(listOf(), topLevel, true) {
@@ -143,5 +144,6 @@ class AuthenticationPassTest {
                 },
             )
         println(query.printNicely())
+        assertEquals(true, query.value)
     }
 }
