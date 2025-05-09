@@ -18,12 +18,12 @@ abstract class AuthorizationOperation(underlyingNode: Node? = null, concept: Con
  * @param underlyingNode The underlying CPG node.
  * @param concept The associated [Authorization] concept.
  * @param policy The [Policy] used for authorization.
- * @param targets A list of nodes representing the target of the action. This typically includes
+ * @param targets A set of nodes representing the target of the action. This typically includes
  *   fields such as `project_id` and `user_id`.
  */
 class Authorize(
     underlyingNode: Node? = null,
     concept: Authorization,
     val policy: Policy,
-    val targets: List<Node>,
+    val targets: Set<Node>,
 ) : AuthorizationOperation(underlyingNode = underlyingNode, concept = concept)

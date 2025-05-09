@@ -176,6 +176,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         return null
     }
 
+    /** Registers user information into the provided request context. */
     fun registerUserInfo(record: RecordDeclaration, requestContext: ExtendedRequestContext) {
         val userId = record.fields.singleOrNull { it.name.localName == "user_id" } ?: return
         val projectId = record.fields.singleOrNull { it.name.localName == "project_id" } ?: return
@@ -211,7 +212,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         if (tokenBasedAuth != null) {
             val component = t.components.singleOrNull { it.name.localName == componentName }
             component?.allChildrenWithOverlays<HttpEndpoint>()?.forEach {
-                // Apply authentication to endpoints that match the API version
                 if (it.path.contains(apiVersionWithAuth.name.localName)) {
                     it.authentication = tokenBasedAuth
                     it.requestContext = requestContext
@@ -220,6 +220,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         }
     }
 
+    /**
+     * Retrieves the pipeline containing the authentication token from the [ConfigurationSource].
+     */
     private fun getPipelineWithAuthToken(
         conf: ConfigurationSource,
         authStrategy: String?,

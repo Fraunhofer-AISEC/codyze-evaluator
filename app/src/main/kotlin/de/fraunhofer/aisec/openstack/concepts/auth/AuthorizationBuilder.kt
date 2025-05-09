@@ -27,7 +27,7 @@ fun MetadataProvider.newAuthorization(underlyingNode: Node, connect: Boolean) =
  * @param underlyingNode The underlying CPG node.
  * @param concept The [Authorization] concept to associate the operation with.
  * @param policy The [Policy] to use for authorization.
- * @param targets The list of target nodes for the operation.
+ * @param targets The set of target nodes for the operation.
  * @param connect If `true`, the created [Concept] will be connected to the underlying node by
  *   setting its `underlyingNode`.
  * @return The created [Authorize] operation.
@@ -36,7 +36,7 @@ fun MetadataProvider.newAuthorize(
     underlyingNode: Node,
     concept: Authorization,
     policy: Policy,
-    targets: List<Node>,
+    targets: Set<Node>,
     connect: Boolean,
 ) =
     newOperation(
