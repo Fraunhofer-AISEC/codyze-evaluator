@@ -104,7 +104,7 @@ For the purpose of assessing open vulnerabilities for OpenStack components, the 
 
 #### HowTo:
 - Create a list of components to be used, e.g. Nova, Barbican, etc.
-- Use [osv.dev](osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
+- Use [osv.dev](http://osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
 - Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
 
 Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
@@ -119,7 +119,7 @@ Using a dependency update tool ensures that updates are done timely for all depe
 [A central list of all the requirements](https://docs.openstack.org/project-team-guide/dependency-management.html) that are allowed in OpenStack projects is globally maintained. The OpenStack [proposal bot](https://review.opendev.org/q/owner:proposal-bot) then automatically proposes updates to OpenStack dependencies. These proposals follow a defined workflow with reviews that verify that the proposed updates can be integrated. 
 
 #### HowTo:
-- Verify that the proposal bot is in active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
+- Verify that the proposal bot is active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
 
 At the time of writing, the OpenStack proposal bot is in active use.
 
@@ -139,7 +139,7 @@ At the time of writing, all OpenStack components have been updated recently.
 OpenStack maintains a general security policy for the projects. A security policy gives users information about what constitutes a vulnerability and how to report one securely so that information about a bug is not publicly visible. This check therefore examines the security policy checking for vulnerability process(es), disclosure timelines, and links (e.g., URL(s) and email(s)) to support users. 
 
 #### HowTo:
-The requirements for the Security-Policy check (based on OSSF criteria) are as follows (based on the OSSF criteria):
+The requirements for the Security-Policy check (based on OSSF criteria) are as follows:
 
 Linking Requirements (one or more):
 - A valid form of an email address to contact for vulnerabilities
@@ -151,7 +151,7 @@ Free Form Text:
 
 Security Policy Specific Text:
 - Specific text providing basic or general information about vulnerability and disclosure practices, expectations, and/or timelines
-- Text should include a total of 2 or more hits which match (case-insensitive) vuln and as in "Vulnerability" or "vulnerabilities"; disclos as "Disclosure" or "disclose"; and numbers which convey expectations of times, e.g., 30 days or 90 days
+- Text should include a total of 2 or more hits which match (case-insensitive) vuln as in "Vulnerability" or "vulnerabilities"; disclos as in "Disclosure" or "disclose"; and numbers which convey expectations of times, e.g., 30 days or 90 days
 
 OpenStack has a vulnerability management team [with four members](https://security.openstack.org/vmt.html) and a documented [Vulnerability Management Process](https://security.openstack.org/vmt-process.html). Email addresses to contact in relation to vulnerabilities are published on the respective web pages.
 The Free Form Text criterion as well as the Security Policy Specific Text criterion are thus also fulfilled by the OpenStack [Vulnerability Management Process](https://security.openstack.org/vmt-process.html) (VMP). The VMP also defines time periods, for example for the disclosure to downstream stakeholders. However, to the best of the authors' knowledge, no time frame is defined for the patch development and review.
@@ -176,7 +176,7 @@ The criteria listed above are all fulfilled for OpenStack components.
 The OpenSSF Best Practices Badge Program specifies best practices for open-source projects and assesses whether they follow the best practices. It is therefore a valuable starting point for checking the security and reliability of an open-source project (since it also comprises security requirements). The program awards passing, silver, or gold level badges. The automatic OSSF evaluation utilizes the Git repository URL along with the OpenSSF Best Practices badge API. 
 
 OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=openstack), which is the lowest of three levels. Some of the criteria that are not fulfilled or are not clearly assessed for the silver and gold badges, [include the following](https://www.bestpractices.dev/de/projects/246?criteria_level=2):
-- The project website, the repository, and the downloaded pages (if separate) MUST include key-hardening headers with non-permeable values
+- The project website, the repository, and the download site (if separate) MUST include key-hardening headers with non-permeable values
 - The project MUST apply at least one dynamic analysis tool to each upcoming major production release of the software produced by the project before its release.
 
 ### HowTo:
@@ -401,14 +401,16 @@ KPI Checks:
 - select the desired metric under `Metric` (e.g. reviews in [nova](https://www.stackalytics.io/?project_type=openstack&release=epoxy&metric=marks&module=opendev.org/openstack/nova))
 
 - Metric `Reviews`
-  - by Company: More than one company? Well known companies?
-  - by Contributor: Several Contributors with a more or less equal amount of performed reviews?
+  - by Company: More than one company? Well known companies? (e.g. >2)
+  - by Contributor: Several Contributors with a similar amount of performed reviews? (e.g. >10)
 - Metric `Patch sets`
-  - by Company: More than one company? Well known companies?
-  - by Contributor: Several Contributors with a more or less equal amount of submitted patch sets?
+  - by Company: More than one company? Well known companies? (e.g. >2)
+  - by Contributor: Several Contributors with a similar amount of submitted patch sets? (e.g. >10)
 - Metric `Person-day Effort`
-  - by Company: Several companies with more or less equal shares? One or few well known companies with large(r) shares?
-  - by Contributor: Several contributors with more or less equal shares?
+  - by Company: Several companies with similar shares? One or few well known companies with large(r) shares? (e.g. >2)
+  - by Contributor: Several contributors with similar size of shares? (e.g. >5 days)
+
+Note that the example values for the review metrics above should be adapted according to the size of the project.
 
 ### G7: Checking Build Risks
 
@@ -419,7 +421,7 @@ The repository of Openstack nova contains no binary artifacts. (OSSF tool applie
 
 ##### HowTo:
 - check if the repository contains any binary artifacts
-- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+- checking this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
   - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
   - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
   - run scorecard tool binary-artifacts check on desired repository (e.g. nova):
@@ -459,7 +461,7 @@ Opendev supports automatic publishing of releases on [PyPI](https://docs.opendev
 
 ##### HowTo:
 - official OpenStack projects should be released automatically on PyPi by the [openstackci](https://pypi.org/user/openstackci/) user as described in the [Project Creators Guide](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-exclusive-permission-to-publish-releases)
-- check for a given project wether it can be found on PyPi and is maintained the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
+- check for a given project whether it can be found on PyPi and is maintained by the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
 
 #### Signed Releases
 Official project artifacts like packages should be accompanied with a cryptographic signature. This allows a user 
@@ -469,4 +471,4 @@ into such artifacts.
 ##### HowTo:
 - Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed, i.e., if cryptographic signature files are provided
 
-Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. The signature is not, however, visible on  https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
+Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. However, the signature is not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
