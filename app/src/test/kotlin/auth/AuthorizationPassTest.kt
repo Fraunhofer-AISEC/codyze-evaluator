@@ -6,7 +6,20 @@ package auth
 import analyze
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
+import de.fraunhofer.aisec.cpg.graph.Name
+import de.fraunhofer.aisec.cpg.graph.Node
+import de.fraunhofer.aisec.cpg.graph.conceptNodes
+import de.fraunhofer.aisec.cpg.graph.concepts.Concept
+import de.fraunhofer.aisec.cpg.graph.concepts.Operation
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
+import de.fraunhofer.aisec.cpg.passes.concepts.with
+import de.fraunhofer.aisec.cpg.query.QueryTree
+import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
@@ -61,4 +74,56 @@ class AuthorizationPassTest {
             }
         assertNotNull(result)
     }
+
+    @Test
+    fun testDatabaseQueryFilter() {
+        val topLevel = Path("../projects/BYOK/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.exclusionPatterns("tests", "drivers", "migrations")
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag =
+                            tag {
+                                each<CallExpression>("model_query").with {
+                                    DatabaseAccess(underlyingNode = node)
+                                }
+                                each<MemberCallExpression>(
+                                        Name("filter_by", parent = Name("UNKNOWN"))
+                                    )
+                                    .with {
+                                        val concept =
+                                            node.conceptNodes
+                                                .filterIsInstance<DatabaseAccess>()
+                                                .single()
+                                        val by = node.arguments.first()
+                                        Filter(underlyingNode = node, concept = concept, by = by)
+                                    }
+                            }
+                    )
+                )
+                it.softwareComponents(
+                    mutableMapOf(
+                        "cinder" to
+                            listOf(topLevel.resolve("cinder/cinder/db/sqlalchemy/api.py").toFile())
+                    )
+                )
+                it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
+            }
+
+        assertNotNull(result)
+        // When a user reads data from or writes data to a database, the user’s domain is used as a
+        // filter in the database query
+        val q =
+            result.allExtended<DatabaseAccess>(
+                mustSatisfy = { QueryTree<Boolean>(it.ops.any { it is Filter }) }
+            )
+    }
 }
+
+class DatabaseAccess(underlyingNode: Node? = null) : Concept(underlyingNode)
+
+class Filter(underlyingNode: Node?, concept: DatabaseAccess, val by: Node) :
+    Operation(underlyingNode, concept)
