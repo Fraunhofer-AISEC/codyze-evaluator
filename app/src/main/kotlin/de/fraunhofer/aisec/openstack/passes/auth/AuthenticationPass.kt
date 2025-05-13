@@ -14,6 +14,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
@@ -105,7 +106,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             getConfigOptionValue(conf = barbicanConfig, optionName = "/v1") ?: return
         val requestContext =
             registerRequestContext(t = t, conf = barbicanConfig, authStrategy = authStrategyValue)
-                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = barbicanConfig, authStrategy = authStrategyValue)
@@ -205,7 +205,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         configSource: ConfigurationSource,
         componentName: String,
         apiVersionWithAuth: ConfigurationOptionSource,
-        requestContext: RequestContext,
+        requestContext: RequestContext?,
     ) {
         val middlewareClass = resolveMiddlewareHandler(t = t, configSource = configSource) ?: return
         val tokenBasedAuth = registerTokenAuthentication(middlewareClass = middlewareClass, t = t)
@@ -351,11 +351,13 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 .filter { it.name.localName == "token" }
                 .flatMap { group -> group.options.filter { it.name.localName == "provider" } }
                 .singleOrNull() ?: return null
+        val tokenProviderField = tokenProvider.underlyingNode as? FieldDeclaration ?: return null
         val tokenProviderValue = getConfigOptionValue(conf = keystoneConf, optionName = "provider")
 
         return when (tokenProviderValue) {
             "fernet" -> {
-                val tokenBasedAuth = newTokenBasedAuth(tokenProvider, tokenProperty, connect = true)
+                val tokenBasedAuth =
+                    newTokenBasedAuth(tokenProviderField, tokenProperty, connect = true)
                 if (tokenValidation != null) {
                     newAuthenticate(tokenValidation, tokenBasedAuth, tokenProperty, connect = true)
                     tokenBasedAuth

@@ -34,12 +34,12 @@ class AuthenticationPassTest {
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
-                it.exclusionPatterns("tests", "drivers")
+                it.exclusionPatterns("tests", "drivers", "sqlalchemy")
                 it.includePath("../external/oslo.context")
                 it.softwareComponents(
                     mutableMapOf(
-                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
-                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican").toFile()),
                         "keystonemiddleware" to
                             listOf(
                                 topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
@@ -61,6 +61,7 @@ class AuthenticationPassTest {
         assertNotNull(tokenBasedAuths, "At least one TokenBasedAuth concept should be created")
 
         val cinderComponent = result.components.singleOrNull { it.name.localName == "cinder" }
+        assertNotNull(cinderComponent)
         val cinderEndpoints = cinderComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(cinderEndpoints)
         cinderEndpoints.forEach { endpoint ->
@@ -80,6 +81,7 @@ class AuthenticationPassTest {
         }
 
         val barbicanComponent = result.components.singleOrNull { it.name.localName == "barbican" }
+        assertNotNull(barbicanComponent)
         val barbicanEndpoints = barbicanComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(barbicanEndpoints)
         barbicanEndpoints.forEach { endpoint ->
