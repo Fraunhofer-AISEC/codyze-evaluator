@@ -6,8 +6,7 @@ package auth
 import analyze
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
-import de.fraunhofer.aisec.cpg.graph.conceptNodes
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
@@ -29,8 +28,8 @@ import org.junit.jupiter.api.Test
 
 class AuthenticationPassTest {
     @Test
-    fun authenticationPass() {
-        val topLevel = Path("../projects/BYOK/components")
+    fun testAuthenticationPass() {
+        val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
@@ -39,15 +38,15 @@ class AuthenticationPassTest {
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
-                it.exclusionPatterns("tests", "drivers")
-                it.includePath("../external/webob")
+                it.exclusionPatterns("tests", "drivers", "sqlalchemy")
+                it.includePath("../external/oslo.context")
                 it.softwareComponents(
                     mutableMapOf(
-                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
-                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican").toFile()),
                         "keystonemiddleware" to
                             listOf(
-                                Path("../external/keystonemiddleware/keystonemiddleware").toFile()
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
                             ),
                         "conf" to listOf(topLevel.resolve("conf").toFile()),
                     )
@@ -56,7 +55,7 @@ class AuthenticationPassTest {
                     mapOf(
                         "cinder" to topLevel.resolve("cinder").toFile(),
                         "barbican" to topLevel.resolve("barbican").toFile(),
-                        "keystonemiddleware" to Path("../external/keystonemiddleware").toFile(),
+                        "keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile(),
                         "conf" to topLevel.resolve("conf").toFile(),
                     )
                 )
@@ -66,6 +65,7 @@ class AuthenticationPassTest {
         assertNotNull(tokenBasedAuths, "At least one TokenBasedAuth concept should be created")
 
         val cinderComponent = result.components.singleOrNull { it.name.localName == "cinder" }
+        assertNotNull(cinderComponent)
         val cinderEndpoints = cinderComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(cinderEndpoints)
         cinderEndpoints.forEach { endpoint ->
@@ -85,6 +85,7 @@ class AuthenticationPassTest {
         }
 
         val barbicanComponent = result.components.singleOrNull { it.name.localName == "barbican" }
+        assertNotNull(barbicanComponent)
         val barbicanEndpoints = barbicanComponent.allChildrenWithOverlays<HttpEndpoint>()
         assertNotNull(barbicanEndpoints)
         barbicanEndpoints.forEach { endpoint ->
@@ -102,6 +103,63 @@ class AuthenticationPassTest {
                 )
             }
         }
+    }
+
+    @Test
+    fun testAllComponentEndpointsHaveAuthentication() {
+        val topLevel = Path("../projects/multi-tenancy/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<AuthenticationPass>()
+                it.registerPass<HttpPecanLibPass>()
+                it.registerPass<HttpWsgiPass>()
+                it.exclusionPatterns("tests", "drivers")
+                it.includePath("../external/oslo.context")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                        "keystonemiddleware" to
+                            listOf(
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
+                            ),
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "cinder" to topLevel.resolve("cinder").toFile(),
+                        "barbican" to topLevel.resolve("barbican").toFile(),
+                        "keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile(),
+                        "conf" to topLevel.resolve("conf").toFile(),
+                    )
+                )
+            }
+
+        assertNotNull(result)
+
+        val r =
+            result.allExtended<HttpEndpoint>(
+                sel = { endpoint -> endpoint.shouldHaveAuthentication() },
+                mustSatisfy = { endpoint ->
+                    QueryTree(
+                        value = endpoint.authentication != null,
+                        children = mutableListOf(QueryTree(endpoint)),
+                    )
+                },
+            )
+        assertTrue(r.value)
+        println(r.printNicely())
+    }
+
+    fun HttpEndpoint.shouldHaveAuthentication(): Boolean {
+        return (this.underlyingNode?.component?.name?.localName == "cinder" &&
+            this.path.startsWith("/v3/")) ||
+            (this.underlyingNode?.component?.name?.localName == "barbican" &&
+                this.path.startsWith("/v1/"))
     }
 
     @Test

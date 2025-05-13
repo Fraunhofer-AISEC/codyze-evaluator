@@ -556,6 +556,8 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     path = path,
                     arguments = method.parameters,
                     authentication = null,
+                    authorization = null,
+                    requestContext = null,
                     connect = true,
                 )
                 .apply {
@@ -582,8 +584,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     //  https://docs.openstack.org/api-ref/block-storage/v3/. Check how it is handed
                     //  over on the client side. In cinder its the lib python-cinderclient. In
                     //  ProjectMapper.resource() (openstack/__init__.py), the project_id will
-                    // already
-                    //  be retrieved from the CONF.
+                    //  already be retrieved from the CONF.
 
                     // replace for now
                     return path.toString().replace("%s/", "")

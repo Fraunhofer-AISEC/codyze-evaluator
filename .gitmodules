@@ -57,3 +57,11 @@
 	path = external/webob
 	url = https://github.com/Pylons/webob
 	branch = stable/2024.2
+[submodule "external/oslo.policy"]
+	path = external/oslo.policy
+	url = https://github.com/openstack/oslo.policy
+	branch = stable/2024.2
+[submodule "external/oslo.context"]
+	path = external/oslo.context
+	url = https://github.com/openstack/oslo.context.git
+    branch = stable/2024.2
