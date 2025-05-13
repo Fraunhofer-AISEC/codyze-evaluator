@@ -13,14 +13,20 @@ The OpenStack contribution process is a transparent framework that aims as balan
 
 The starting point for OpenStack contributors is its [Contributor Guide](https://docs.openstack.org/contributors/code-and-documentation/index.html).
 
-- TODO: Describe briefly the most important contents of the contributor guide
-- TODO: Step-by-step description of how to get a contribution accepted
+To most important aspects of being able to contribute to an openstack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on openstack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between openstack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
+
+Major steps for getting a contribution accepted:
+
+1. Commit changes according to [guideline](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#committing-changes)
+2. Submit change for review with `git review`
+3. Pass initial [automated testing](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#automated-testing): get a `Verified +1` by passing the check-pipeline
+4. Update change according to test-results and [peer-review process](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
+5. If there are positive `+1` reviews, try to get attention of core-developers via [IRC](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
+6. Get `+2` reviews from two different core-developers and a `Workflow +1` from one core developer in order to trigger the `gate-pipeline`
+7. If the change passes the [gate](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review), it is merged automatically
 
 ### CI/CD Architecture
 The CI/CD architecture employs automated testing pipelines that run unit tests, integration tests, and security checks on every code change before it is merged. This systematic approach helps identify vulnerabilities early in the development cycle, reducing the risk of security issues in production. Tools like Zuul facilitate this automation, ensuring that only code that passes all tests is deployed.
-
-- TODO: Describe the zuul architecture/hierarchy, e.g. which configs are included in the individual projects, and which configs are maintained in the central repository for zuul configs 
-
 
 - Openstack development infrastructure: 
 
@@ -61,7 +67,16 @@ For private reports, patches are developed privately and pre-approved by core re
  
 ![The OpenStack Vulnerability Management Process](./images/vmt-process.png)
 
-- TODO: Describe step-by-step how to report a security issue
+How to report a security issue:  
+See the [official recommendations](https://security.openstack.org/reporting.html).
+
+Major aspects:
+- assure private reporting by either sending an encrypted email or checking the respective `private` and `security related` checkboxes for a [bug report](https://security.openstack.org/reporting.html)
+- reports are embargoed for a maximum of 90 days before being made public, regardless the resolution state
+
+Example bug report for `nova`
+![](./images/nova_launchpad_bug_1.png)
+![](./images/nova_launchpad_bug_2.png)
 
 ## Guideline for Security Assessment
 In the following, multiple ecosystem-related security criteria are described and analyzed for various OpenStack components. Some of the checks are based on the [Open Source Security Foundation checks](https://scorecard.dev/#the-checks) for open-source repositories. This OSSF scorecard, however, cannot be applied to OpenStack components without limitations. Below, a table shows which of the automated OSSF checks can be used for the OpenStack GitHub mirrors.
@@ -192,7 +207,13 @@ According to the CII assessment, there is one that is not fulfilled for Openstac
 Executing tests allows developers to identify errors at an early stage, which can reduce the number of vulnerabilities that enter a project. This check therefore aims to verify whether tests are executed prior to merging pull requests. 
 
 OpenStack projects use [Zuul](https://zuul-ci.org/). Also, the OpenStack documentation gives insight into the [testing procedures](https://docs.openstack.org/project-team-guide/testing.html).
-Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of success and failures.
+Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of success and failures.\
+For example to get the Zuul results for nova, one needs to filter the field `project` for `openstack/nova`:
+![](./images/nova_opensearch.png)
+In order to only see not successfull builds, one can filter the field `build_status`:
+![](./images/nova_opensearch_failed.png)
+In order to see a visualization of the build-status of a given project (e.g. `nova`), one can choose`build_status` in the tab `visualization` and filter for the desired project:
+![](./images/nova_opensearch_visual.png)
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
@@ -286,8 +307,6 @@ Potential checks (OSSF groups these in different tiers) include:
 * require branch to be up to date before pushing
 * require approval of the most recent reviewable push
 * require automated checks for approval
-
-Open issues: Verification that official workflow can not be easily bypassed (e.g. missing api restrictions).
 
 Opendev Gerrit-Workflow ensures the following aspects:
 * Code must be approved by at least one core-reviewer
