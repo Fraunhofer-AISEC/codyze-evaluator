@@ -73,7 +73,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
         val requestContext =
             registerRequestContext(t = t, conf = apiPasteConfig, authStrategy = authStrategyValue)
-                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = apiPasteConfig, authStrategy = authStrategyValue)
