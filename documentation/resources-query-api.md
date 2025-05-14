@@ -12,7 +12,99 @@ The Query API is mostly defined in three files in the module `cpg-analysis`:
 Note: A `QueryTree` serves as a wrapper around the results and the sub-statements which were used to retrieve the result.
 It also contains the assumptions which were collected on evaluation and a human-readable string representation.
 
-## concepts and operations?
+## `Concept`s and `Operation`s?
 
 We provide a list of current concepts and operations under [./concepts-and-operations.md].
-To update this list, you can run ... ( TODO @KuechA look up the tool again )
+To generate/update this list, you can run the program `de.fraunhofer.aisec.openstack.ConceptListerCommand` which is part of the `openstack-checker`.
+
+# How do I write a query?
+
+## Starting point: Choosing between `allExtended` and `existsExtended`
+
+You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
+If a certain property should be fulfilled at least once in the whole codebase, you can use `existsExtended`, while `allExtended` serves to check if the property is fulfilled for all nodes (which you select).
+Both functions receive the following arguments:
+* The type of node to consider is provided by the type-parameter `T`. E.g. `existsExtended<Secret>` will only consider nodes of type `Secret`.
+* The optional parameter `sel` can be used to further filter these start nodes.
+  If no value is provided, all nodes of type `T` will be considered.
+  `sel` expects a function receiving a node of type `T` and returning a boolean value.
+  You can provide this in curly braces, e.g. `{secret -> secret.name.localName == "mySecret"}` will consider only secrets with local name `mySecret`.
+* The mandatory requirement `mustSatisfy` is a function which receives a node of type `T` and returns an object of type `QueryTree<Boolean>`.
+  This function is the property which has to be fulfilled for one or all nodes which have been selected so far.
+  Again, you can provide this in curly braces.
+
+Few notes on Kotlin:
+* The default name of a lambda's parameter is `it`, but you can also provide a name for the parameter followed by an arrow, like `secret` in the example above.
+* If you use the default parameter name `it`, you can omit the parameter name and arrow in the lambda, e.g. `{ it.name.localName == "mySecret" }`.
+* Kotlin has named arguments, which means that you can provide the name of the parameter followed by `=` and the value.
+  E.g., `n.allExtended<Secret>(mustSatisfy = { min(it.keySize) ge const(256) })` is equivalent to `n.allExtended<Secret>({ min(it.keySize) ge const(256) })`.
+* Kotlin allows you to move the last argument out of the brackets if it's a lambda function. E.g., `n.allExtended<Secret> { min(it.keySize) ge const(256) }` is equivalent to `n.allExtended<Secret>({ min(it.keySize) ge const(256) })` which is again equivalent to `allExtended<Secret>(mustSatisfy = { min(it.keySize) ge const(256) })`.
+
+## Flow-based functions of the Query API
+
+Currently, following four functions of the Query API can be used to reason about the flow of data or control in the program:
+`dataFlow`, `dataFlowWithValidator`, `executionPath` and `alwaysFlowsTo`.
+A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [./program-analysis-basics.md].
+The remaining parameters are explained in this section.
+
+```kotlin
+fun dataFlow(
+    startNode: Node,
+    direction: AnalysisDirection = Forward(GraphToFollow.DFG),
+    type: AnalysisType = May,
+    vararg sensitivities: AnalysisSensitivity = FieldSensitive + ContextSensitive,
+    scope: AnalysisScope = Interprocedural(),
+    earlyTermination: ((Node) -> Boolean)? = null,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+```
+
+Goal of the function:
+
+Parameters:
+* `startNode`: The node from which the data flow should be followed.
+* `earlyTermination`:
+* `predicate`:
+
+```kotlin
+fun dataFlowWithValidator(
+    source: Node,
+    validatorPredicate: (Node) -> Boolean,
+    sinkPredicate: (Node) -> Boolean,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity,
+): QueryTree<Boolean>
+```
+
+
+
+```kotlin
+fun executionPath(
+    startNode: Node,
+    direction: AnalysisDirection = Forward(GraphToFollow.EOG),
+    type: AnalysisType = May,
+    scope: AnalysisScope = Interprocedural(),
+    earlyTermination: ((Node) -> Boolean)? = null,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+```
+
+
+
+```kotlin
+fun Node.alwaysFlowsTo(
+    allowOverwritingValue: Boolean = false,
+    earlyTermination: ((Node) -> Boolean)? = null,
+    identifyCopies: Boolean = true,
+    stopIfImpossible: Boolean = true,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity =
+        ContextSensitive + FieldSensitive + FilterUnreachableEOG,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+```
+
+## Creating a `QueryTree` object
+
+
+# Multiple concepts or operations for a single node?
