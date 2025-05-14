@@ -89,24 +89,18 @@ In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
 * `startNode`: The node from which the data flow should be followed.
 * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
   analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
-* `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop and return `true`.
+* `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
 
 </td>
 </tr>
 </table>
 
+### `executionPath`
 
-```kotlin
-fun dataFlowWithValidator(
-    source: Node,
-    validatorPredicate: (Node) -> Boolean,
-    sinkPredicate: (Node) -> Boolean,
-    scope: AnalysisScope,
-    vararg sensitivities: AnalysisSensitivity,
-): QueryTree<Boolean>
-```
-
-
+<table>
+<tr>
+<td> Signature </td>
+<td>
 
 ```kotlin
 fun executionPath(
@@ -119,7 +113,75 @@ fun executionPath(
 ): QueryTree<Boolean>
 ```
 
+</td>
+<tr><td>Goal of the function</td>
+<td>Follows the Execution Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
 
+The interpretation of the analysis result can be configured as must or may analysis by setting the type parameter.
+
+This function reasons about execution paths in the program and can be used to determine whether a specific action or condition is reachable during execution.
+</td>
+</tr>
+<tr><td>Parameters:</td>
+<td>
+
+* `startNode`: The node from which the execution path should be followed.
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
+
+</td>
+</tr>
+</table>
+
+
+### `dataFlowWithValidator`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
+```kotlin
+fun dataFlowWithValidator(
+    source: Node,
+    validatorPredicate: (Node) -> Boolean,
+    sinkPredicate: (Node) -> Boolean,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity,
+): QueryTree<Boolean>
+```
+
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
+
+Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+* `source`: The node from which the dataflow path should be followed.
+* `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `true`.
+* `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
+  If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+
+</td>
+</tr>
+</table>
+
+### `alwaysFlowsTo`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
 
 ```kotlin
 fun Node.alwaysFlowsTo(
@@ -133,6 +195,24 @@ fun Node.alwaysFlowsTo(
     predicate: (Node) -> Boolean,
 ): QueryTree<Boolean>
 ```
+
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+*
+
+</td>
+</tr>
+</table>
 
 ## Creating a `QueryTree` object
 
