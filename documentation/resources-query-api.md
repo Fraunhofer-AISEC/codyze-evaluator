@@ -47,6 +47,13 @@ Currently, following four functions of the Query API can be used to reason about
 A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [./program-analysis-basics.md].
 The remaining parameters are explained in this section.
 
+### `dataFlow`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
 ```kotlin
 fun dataFlow(
     startNode: Node,
@@ -57,14 +64,37 @@ fun dataFlow(
     earlyTermination: ((Node) -> Boolean)? = null,
     predicate: (Node) -> Boolean,
 ): QueryTree<Boolean>
+
 ```
 
-Goal of the function:
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
 
-Parameters:
+Follows the `Dataflow` edges from `startNode` in the given `direction` until reaching a node fulfilling `predicate`.
+
+The interpretation of the analysis result can be configured as must or may analysis by setting the `type` parameter.
+
+Note that this function only reasons about existing DFG paths, and it might not be sufficient if you actually want a guarantee that some action always happens with the data.
+In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
 * `startNode`: The node from which the data flow should be followed.
-* `earlyTermination`:
-* `predicate`:
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop and return `true`.
+
+</td>
+</tr>
+</table>
+
 
 ```kotlin
 fun dataFlowWithValidator(
