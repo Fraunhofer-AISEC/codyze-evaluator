@@ -115,7 +115,7 @@ fun executionPath(
 
 </td>
 <tr><td>Goal of the function</td>
-<td>Follows the Execution Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
+<td>Follows the Evaluation Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
 
 The interpretation of the analysis result can be configured as must or may analysis by setting the type parameter.
 
@@ -129,48 +129,6 @@ This function reasons about execution paths in the program and can be used to de
 * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
   analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
 * `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
-
-</td>
-</tr>
-</table>
-
-
-### `dataFlowWithValidator`
-
-<table>
-<tr>
-<td> Signature </td>
-<td>
-
-```kotlin
-fun dataFlowWithValidator(
-    source: Node,
-    validatorPredicate: (Node) -> Boolean,
-    sinkPredicate: (Node) -> Boolean,
-    scope: AnalysisScope,
-    vararg sensitivities: AnalysisSensitivity,
-): QueryTree<Boolean>
-```
-
-</td>
-</tr>
-<tr>
-<td>Goal of the function</td>
-<td>
-
-Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
-
-</td>
-</tr>
-<tr>
-<td>Parameters:</td>
-<td>
-
-* `source`: The node from which the dataflow path should be followed.
-* `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
-  analysis/traversal of this path will stop and return `true`.
-* `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
-  If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
 
 </td>
 </tr>
@@ -202,13 +160,67 @@ fun Node.alwaysFlowsTo(
 <td>Goal of the function</td>
 <td>
 
+Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
+
 </td>
 </tr>
 <tr>
 <td>Parameters:</td>
 <td>
 
-*
+* `allowOverwritingValue`: If set to `true`, the value of a variable can be changed before reaching `predicate` but the function would still return `true`.
+  If set to `false`, overwriting the value held in `this` before reaching a sink specified by `predicate` will lead to a `false` result.
+* `identifyCopies`: If set to `true`, the query will aim to figure out if the dataflow of one object is copied to another object which requires separate tracking of the instances (e.g. if they require separate deletion, or other clearing/validating actions).
+* `stopIfImpossible`: If set to `true`, the analysis will stop if it is impossible to reach a node fulfilling `predicate`.
+  This is useful for performance reasons, as it avoids unnecessary iterations.
+  In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of a combined dataflow and execution path.
+  If this function returns `true`, the analysis/traversal of this path will stop.
+
+</td>
+</tr>
+</table>
+
+### `dataFlowWithValidator`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
+```kotlin
+fun dataFlowWithValidator(
+    source: Node,
+    validatorPredicate: (Node) -> Boolean,
+    sinkPredicate: (Node) -> Boolean,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity,
+): QueryTree<Boolean>
+```
+
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
+
+Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
+
+This function always runs a forward analysis and combines the DFG and EOG.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+* `source`: The node from which the dataflow path should be followed.
+* `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `true`.
+* `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
+  If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
 
 </td>
 </tr>
