@@ -1,89 +1,252 @@
-# How to analyze your project
+# How do I write a query?
 
-The OpenStack Checker is a tool that helps you identify security issues in your OpenStack project by analyzing the code
-and checking it against a set of predefined queries.
-This document describes how to use the OpenStack Checker to analyze your project, how to structure an analysis project
-and how to write those queries.
+## Starting point: Choosing between `allExtended` and `existsExtended`
 
-## Project structure
+You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
+If a certain property should be fulfilled at least once in the whole codebase, you can use `existsExtended`, while `allExtended` serves to check if the property is fulfilled for all nodes (which you select).
+Both functions receive the following arguments:
+* The type of node to consider is provided by the type-parameter `T`. E.g. `existsExtended<Secret>` will only consider nodes of type `Secret`.
+* The optional parameter `sel` can be used to further filter these start nodes.
+  If no value is provided, all nodes of type `T` will be considered.
+  `sel` expects a function receiving a node of type `T` and returning a boolean value.
+  You can provide this in curly braces, e.g. `{secret -> secret.name.localName == "mySecret"}` will consider only secrets with local name `mySecret`.
+* The mandatory requirement `mustSatisfy` is a function which receives a node of type `T` and returns an object of type `QueryTree<Boolean>`.
+  This function is the property which has to be fulfilled for one or all nodes which have been selected so far.
+  Again, you can provide this in curly braces.
 
-Currently, the OpenStack Checker requires a fixed project structure. It expects the following:
+Few notes on Kotlin:
+* The default name of a lambda's parameter is `it`, but you can also provide a name for the parameter followed by an arrow, like `secret` in the example above.
+* If you use the default parameter name `it`, you can omit the parameter name and arrow in the lambda, e.g. `{ it.name.localName == "mySecret" }`.
+* Kotlin has named arguments, which means that you can provide the name of the parameter followed by `=` and the value.
+  E.g., `n.allExtended<Secret>(mustSatisfy = { min(it.keySize) ge const(256) })` is equivalent to `n.allExtended<Secret>({ min(it.keySize) ge const(256) })`.
+* Kotlin allows you to move the last argument out of the brackets if it's a lambda function. E.g., `n.allExtended<Secret> { min(it.keySize) ge const(256) }` is equivalent to `n.allExtended<Secret>({ min(it.keySize) ge const(256) })` which is again equivalent to `allExtended<Secret>(mustSatisfy = { min(it.keySize) ge const(256) })`.
 
-    .                                     # Project root
-    ├── components                        # This directory contains the components of your project which should be analyzed.
-        ├── component1                    # The first component of your project
-        └── component2                    # The second component of your project
-    ├── libraries                         # This directory contains the libraries which are used by your project but which are not the primary target of the analysis. They are integrated in the analysis if needed.
-    ├── queries                           # The individual queries are structured in the `query.kts` files in this directory
-        ├── security-objective1.query.kts # This files contains the queries for one of the security objectives. The filename must be the name of the objective but with dashes instead of whitespace and written in lowercase. File ending must be `query.kts`.
-        └── security-objective2.query.kts # This files contains the queries for one of the security objectives. The filename must be the name of the objective but with dashes instead of whitespace and written in lowercase. File ending must be `query.kts`.
-    ├── security-goals                    # In this directory, you can specify the security goals of your project in one or multiple yaml-file
-        └── Your-Security-Goals.yaml      # This files contains a human-readable list of security objectives and statements
+## Flow-based functions of the Query API
 
-## The security goals yaml
+Currently, following four functions of the Query API can be used to reason about the flow of data or control in the program:
+`dataFlow`, `dataFlowWithValidator`, `executionPath` and `alwaysFlowsTo`.
+A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [./program-analysis-basics.md].
+The remaining parameters are explained in this section.
 
-This file contains a human-readable list of security objectives and statements. The file is structured in a way that
-each security goal is a top-level entry, and each security goal can have multiple components, assumptions, and
-objectives.
+### `dataFlow`
 
-It has to comply with the following structure:
-
-```yml
-name: This field describes the name of your analysis project
-description: Provides a short description
-components: # This will typically be the same as the directory `components`
-  - component1
-  - component2
-assumptions: # This list can be used to note down some generic assumptions which have to hold so that the analysis is meaningful
-  - assumption 1
-  - assumption 2
-objectives: # This is the list of security objectives which are relevant for your project. It has to be in-line with the filenames in the `queries` directory
-  - name: Security Objective1
-    description: This provides a high-level human-readable description of the objective.
-    statements:
-      - This is a human-readable description of a security statement. One query has to be written in the respective query.kts file.
-      - This is another human-readable description of a security statement. One query has to be written in the respective query.kts file.
-    components: # A list of the affected components.
-      - cinder
-  - name: Security Objective2
-    description: This provides a high-level human-readable description of the objective.
-    statements:
-      - This is a human-readable description of a security statement. One query has to be written in the respective query.kts file.
-      - This is another human-readable description of a security statement. One query has to be written in the respective query.kts file.
-    components: # A list of the affected components.
-      - cinder
-```
-
-## Writing the security statements in the `query.kts` file
-
-The `query.kts` file represents a single security objective.
-It contains one function for each statement belonging to this objective. This function expects a `TranslationResult` as
-an input and must return a `QueryTree<Boolean>` object.
-The function representing the statement is simply called `statementN`, where `N` is the number/counter of the statement.
-This leads to the following "signature":
+<table>
+<tr>
+<td> Signature </td>
+<td>
 
 ```kotlin
-fun statement1(translationResult: TranslationResult): QueryTree<Boolean> {
-    // The implementation of the query
-}
+fun dataFlow(
+    startNode: Node,
+    direction: AnalysisDirection = Forward(GraphToFollow.DFG),
+    type: AnalysisType = May,
+    vararg sensitivities: AnalysisSensitivity = FieldSensitive + ContextSensitive,
+    scope: AnalysisScope = Interprocedural(),
+    earlyTermination: ((Node) -> Boolean)? = null,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+
 ```
 
-Besides one such function per statement of the respective objective, it is possible to write any kotlin code in this
-file which will later be executed.
-This can be used to define helper functions or easily configurable variables which are needed for the implementation of
-the queries or which may be useful to keep the queries' code cleaner and easier to read and adapt.
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
 
-To write those queries, you should be familiar with the Kotlin programming language and the CPG's structure and Query
-API.
-A set of initial resources could be:
+Follows the `Dataflow` edges from `startNode` in the given `direction` until reaching a node fulfilling `predicate`.
 
-* [Documentation of the Query API](https://fraunhofer-aisec.github.io/cpg/GettingStarted/query/). Note that you have to
-  use the "extended" version here
-* [The CPG's shortcuts](https://fraunhofer-aisec.github.io/cpg/GettingStarted/shortcuts/). These can be useful to
-  quickly access interesting properties of the program under test.
-* [The Kotlin Language Documentation](https://kotlinlang.org/docs/home.html). This is the official documentation of the
-  Kotlin programming language. It lists all features of the language with various examples. The section "Concepts"
-  should be the most relevant one.
+The interpretation of the analysis result can be configured as must or may analysis by setting the `type` parameter.
+
+Note that this function only reasons about existing DFG paths, and it might not be sufficient if you actually want a guarantee that some action always happens with the data.
+In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+* `startNode`: The node from which the data flow should be followed.
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
+
+</td>
+</tr>
+</table>
+
+### `executionPath`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
+```kotlin
+fun executionPath(
+    startNode: Node,
+    direction: AnalysisDirection = Forward(GraphToFollow.EOG),
+    type: AnalysisType = May,
+    scope: AnalysisScope = Interprocedural(),
+    earlyTermination: ((Node) -> Boolean)? = null,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+```
+
+</td>
+<tr><td>Goal of the function</td>
+<td>Follows the Evaluation Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
+
+The interpretation of the analysis result can be configured as must or may analysis by setting the type parameter.
+
+This function reasons about execution paths in the program and can be used to determine whether a specific action or condition is reachable during execution.
+</td>
+</tr>
+<tr><td>Parameters:</td>
+<td>
+
+* `startNode`: The node from which the execution path should be followed.
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
+
+</td>
+</tr>
+</table>
+
+### `alwaysFlowsTo`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
+```kotlin
+fun Node.alwaysFlowsTo(
+    allowOverwritingValue: Boolean = false,
+    earlyTermination: ((Node) -> Boolean)? = null,
+    identifyCopies: Boolean = true,
+    stopIfImpossible: Boolean = true,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity =
+        ContextSensitive + FieldSensitive + FilterUnreachableEOG,
+    predicate: (Node) -> Boolean,
+): QueryTree<Boolean>
+```
+
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
+
+Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+* `allowOverwritingValue`: If set to `true`, the value of a variable can be changed before reaching `predicate` but the function would still return `true`.
+  If set to `false`, overwriting the value held in `this` before reaching a sink specified by `predicate` will lead to a `false` result.
+* `identifyCopies`: If set to `true`, the query will aim to figure out if the dataflow of one object is copied to another object which requires separate tracking of the instances (e.g. if they require separate deletion, or other clearing/validating actions).
+* `stopIfImpossible`: If set to `true`, the analysis will stop if it is impossible to reach a node fulfilling `predicate`.
+  This is useful for performance reasons, as it avoids unnecessary iterations.
+  In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
+* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+* `predicate`: This function marks the desired end of a combined dataflow and execution path.
+  If this function returns `true`, the analysis/traversal of this path will stop.
+
+</td>
+</tr>
+</table>
+
+### `dataFlowWithValidator`
+
+<table>
+<tr>
+<td> Signature </td>
+<td>
+
+```kotlin
+fun dataFlowWithValidator(
+    source: Node,
+    validatorPredicate: (Node) -> Boolean,
+    sinkPredicate: (Node) -> Boolean,
+    scope: AnalysisScope,
+    vararg sensitivities: AnalysisSensitivity,
+): QueryTree<Boolean>
+```
+
+</td>
+</tr>
+<tr>
+<td>Goal of the function</td>
+<td>
+
+Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
+
+This function always runs a forward analysis and combines the DFG and EOG.
+
+</td>
+</tr>
+<tr>
+<td>Parameters:</td>
+<td>
+
+* `source`: The node from which the dataflow path should be followed.
+* `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+  analysis/traversal of this path will stop and return `true`.
+* `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
+  If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+
+</td>
+</tr>
+</table>
+
+## The class `QueryTree`
+
+The class `de.fraunhofer.aisec.cpg.query.QueryTree` serves as a wrapper around the result of a query and the sub-statements which were used to retrieve the result.
+It is parametrized with a type `T` which is the type of the field `value`.
+
+Fields:
+* `value`: The result of the query, which is of type `T`. Frequent values are boolean values which determine if the query was successful or not, lists of nodes which were found by the query (i.e., representing paths), or other values representing a possible value of a variable.
+* `children`: A list of sub-queries which were evaluated to retrieve the result in `value`.
+* `stringRepresentation`: A human-readable string representation of the query's result.
+  It typically includes the operation/function which was performed, its inputs and the computed result which is now held in `value`.
+* `assumptions`: A list of assumptions which were collected on evaluation.
+
+Numerous methods allow to evaluate the queries while keeping track of all the steps.
+Currently, the following operations are supported:
+* **eq**: Equality of two values.
+* **ne**: Inequality of two values.
+* **IN**: Checks if a value is contained in a [Collection]
+* **IS**: Checks if a value implements a type ([Class]).
+
+Additionally, some functions are available only for certain types of values.
+
+For boolean values:
+
+* **and**: Logical and operation (&&)
+* **or**: Logical or operation (||)
+* **xor**: Logical exclusive or operation (xor)
+* **implies**: Logical implication
+
+For numeric values:
+
+* **gt**: Grater than (>)
+* **ge**: Grater than or equal (>=)
+* **lt**: Less than (<)
+* **le**: Less than or equal (<=)
+
+The top-level result of any query must be a `QueryTree<Boolean>`.
+However, it is sometimes necessary to aggregate the results of multiple sub-queries with methods of the kotlin standard library (such as `map` for collections), which does not return a `QueryTree<Boolean>` itself.
+In this case, you can simply create a `QueryTree<Boolean>` by calling the constructor.
+It may be handy to implement some helper functions for frequent purposes as part of the OpenStack-Checker and import these extensions in the query scripts.
+
 
 ### Hints on writing queries
 
