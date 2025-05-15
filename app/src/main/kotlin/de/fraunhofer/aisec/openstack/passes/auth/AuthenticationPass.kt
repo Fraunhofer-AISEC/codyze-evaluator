@@ -177,12 +177,11 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
 
     /** Registers user information into the provided request context. */
     fun registerUserInfo(record: RecordDeclaration, requestContext: ExtendedRequestContext) {
-        val userId = record.fields.singleOrNull { it.name.localName == "user_id" } ?: return
-        val projectId = record.fields.singleOrNull { it.name.localName == "project_id" } ?: return
-        val roles = record.fields.singleOrNull { it.name.localName == "roles" } ?: return
-        val systemScope =
-            record.fields.singleOrNull { it.name.localName == "system_scope" } ?: return
-        val domainId = record.fields.singleOrNull { it.name.localName == "domain_id" } ?: return
+        val userId = record.fields["user_id"] ?: return
+        val projectId = record.fields["project_id"] ?: return
+        val roles = record.fields["roles"] ?: return
+        val systemScope = record.fields["system_scope"] ?: return
+        val domainId = record.fields["domain_id"] ?: return
         newUserInfo(
             underlyingNode = record,
             concept = requestContext,
