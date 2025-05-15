@@ -54,14 +54,11 @@
     </mxGraphModel>
   </diagram>
   <diagram id="TYI9E6sU0CO1NQXqSOyD" name="Page-2">
-    <mxGraphModel dx="2074" dy="1204" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
+    <mxGraphModel dx="1160" dy="793" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="1654" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
         <mxCell id="vDY9TQcYffj6j2nIrHVJ-1" value="project-config" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
-          <mxGeometry x="520" y="210" width="120" height="60" as="geometry" />
-        </mxCell>
-        <mxCell id="vDY9TQcYffj6j2nIrHVJ-2" value="governance" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
           <mxGeometry x="670" y="320" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="vDY9TQcYffj6j2nIrHVJ-3" value="openstack-zuul-jobs" style="rounded=1;whiteSpace=wrap;html=1;" parent="1" vertex="1">
@@ -76,31 +73,25 @@
             <mxPoint x="400" y="460" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="vDY9TQcYffj6j2nIrHVJ-6" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="vDY9TQcYffj6j2nIrHVJ-1" target="vDY9TQcYffj6j2nIrHVJ-4" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="340" y="480" as="sourcePoint" />
-            <mxPoint x="390" y="430" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="vDY9TQcYffj6j2nIrHVJ-7" value="" style="endArrow=classic;html=1;rounded=0;entryX=1;entryY=0;entryDx=0;entryDy=0;exitX=0;exitY=1;exitDx=0;exitDy=0;" parent="1" source="vDY9TQcYffj6j2nIrHVJ-2" target="vDY9TQcYffj6j2nIrHVJ-4" edge="1">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="720" y="380" as="sourcePoint" />
-            <mxPoint x="720" y="510" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="_XIWKQGDv7nmWlHFDAag-1" value="&lt;div class=&quot;flex-item-leading&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;zuul/zuul-jobs&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;flex-item-main&quot;&gt;&lt;br&gt;&#x9;&#x9;&#x9;&#x9;&lt;/div&gt;&lt;br&gt;&#x9;&#x9;&#x9;&#x9;&lt;div class=&quot;flex-item-trailing&quot;&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f5f5f5;fontColor=#333333;strokeColor=#666666;" vertex="1" parent="1">
+        <mxCell id="_XIWKQGDv7nmWlHFDAag-1" value="&lt;div class=&quot;flex-item-leading&quot;&gt;&lt;br&gt;&lt;br&gt;&lt;span style=&quot;background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;zuul/zuul-jobs&lt;/span&gt;&lt;/div&gt;&lt;div class=&quot;flex-item-main&quot;&gt;&lt;br&gt;&#x9;&#x9;&#x9;&#x9;&lt;/div&gt;&lt;br&gt;&#x9;&#x9;&#x9;&#x9;&lt;div class=&quot;flex-item-trailing&quot;&gt;&lt;/div&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillStyle=dashed;fillColor=light-dark(#030303, #ededed);" parent="1" vertex="1">
           <mxGeometry x="370" y="210" width="120" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="_XIWKQGDv7nmWlHFDAag-2" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="vDY9TQcYffj6j2nIrHVJ-1" target="vDY9TQcYffj6j2nIrHVJ-3">
-          <mxGeometry width="50" height="50" relative="1" as="geometry">
-            <mxPoint x="330" y="550" as="sourcePoint" />
-            <mxPoint x="380" y="500" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="_XIWKQGDv7nmWlHFDAag-3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="_XIWKQGDv7nmWlHFDAag-1" target="vDY9TQcYffj6j2nIrHVJ-3">
+        <mxCell id="_XIWKQGDv7nmWlHFDAag-3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" parent="1" source="_XIWKQGDv7nmWlHFDAag-1" target="vDY9TQcYffj6j2nIrHVJ-3" edge="1">
           <mxGeometry width="50" height="50" relative="1" as="geometry">
             <mxPoint x="380" y="510" as="sourcePoint" />
             <mxPoint x="410" y="310" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UBsjZDnq4vhWJKdfuB6H-3" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=1;exitDx=0;exitDy=0;entryX=1;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="vDY9TQcYffj6j2nIrHVJ-1" target="vDY9TQcYffj6j2nIrHVJ-4">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="560" y="430" as="sourcePoint" />
+            <mxPoint x="610" y="380" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="UBsjZDnq4vhWJKdfuB6H-4" value="" style="endArrow=classic;html=1;rounded=0;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="vDY9TQcYffj6j2nIrHVJ-1" target="vDY9TQcYffj6j2nIrHVJ-3">
+          <mxGeometry width="50" height="50" relative="1" as="geometry">
+            <mxPoint x="530" y="300" as="sourcePoint" />
+            <mxPoint x="580" y="250" as="targetPoint" />
           </mxGeometry>
         </mxCell>
       </root>

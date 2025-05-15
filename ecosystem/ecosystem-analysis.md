@@ -13,7 +13,7 @@ The OpenStack contribution process is a transparent framework that aims as balan
 
 The starting point for OpenStack contributors is its [Contributor Guide](https://docs.openstack.org/contributors/code-and-documentation/index.html).
 
-To most important aspects of being able to contribute to an openstack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on openstack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between openstack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
+The most important aspects of being able to contribute to an openstack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on openstack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between openstack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
 
 Major steps for getting a contribution accepted:
 
@@ -32,7 +32,7 @@ The CI/CD architecture employs automated testing pipelines that run unit tests, 
 
 ![](./images/Overview_Openstack_Devops.svg)
 
-- High level processes for code changes: (also available via `contributing.rst` in component repository)
+- High level processes for code changes:
     * Gerrit based workflow:
         1. Submit change for review
         2. review process:
@@ -42,14 +42,13 @@ The CI/CD architecture employs automated testing pipelines that run unit tests, 
             * workflow: +1 (only core-reviewers) -> indicates approval for gate pipeline
         3. ZUUL merges changes automatically if prerequisites are met
 
-- Openstack Zuul config hierarchy:
-  - zuul/zuul-jobs: opendev-global definitions / templates for zuul jobs and roles
-  - openstack-zuul-roles: ansible roles
-  - openstack-zuul-jobs: openstack-global definitions / templates for zuul-jobs
-  - project-config: central repository for all infra related configs (two folders: `zuul.d`, `zuul`)
+- OpenStack Zuul config hierarchy (arrows symbolize dependencies):
+  - [zuul/zuul-jobs](https://opendev.org/zuul/zuul-jobs): opendev-global definitions / templates for zuul jobs and roles
+  - [openstack-zuul-jobs](https://opendev.org/openstack/openstack-zuul-jobs): OpenStack-global definitions / templates for zuul-jobs
+  - [project-config](https://opendev.org/openstack/project-config): central repository for all infrastructure related OpenStack configs (two folders: `zuul.d`, `zuul`)
       - `zuul`: `main.yaml` defines tenants, integrates all projects
-      - `zuul.d`: pipeline definition, secrets, job-templates, openstack global jobs, ...
-  - project(e.g. nova): project-specific settings in `.zuul.yaml`
+      - `zuul.d`: pipeline definition, secrets, job-templates, OpenStack global jobs, ...
+  - project(e.g. [nova](https://opendev.org/openstack/nova)): project-specific settings in `.zuul.yaml`
       - job-definitions
       - which jobs are performed in which pipeline
 
@@ -74,9 +73,7 @@ Major aspects:
 - assure private reporting by either sending an encrypted email or checking the respective `private` and `security related` checkboxes for a [bug report](https://security.openstack.org/reporting.html)
 - reports are embargoed for a maximum of 90 days before being made public, regardless the resolution state
 
-Example bug report for `nova`
-![](./images/nova_launchpad_bug_1.png)
-![](./images/nova_launchpad_bug_2.png)
+Example security bug report for `nova`: <https://bugs.launchpad.net/nova/+bug/2071734>
 
 ## Guideline for Security Assessment
 In the following, multiple ecosystem-related security criteria are described and analyzed for various OpenStack components. Some of the checks are based on the [Open Source Security Foundation checks](https://scorecard.dev/#the-checks) for open-source repositories. This OSSF scorecard, however, cannot be applied to OpenStack components without limitations. Below, a table shows which of the automated OSSF checks can be used for the OpenStack GitHub mirrors.
@@ -122,7 +119,7 @@ For the purpose of assessing open vulnerabilities for OpenStack components, the 
 - Use [osv.dev](http://osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
 - Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
 
-Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
+Result: A [search for OpenStack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
 For severe security issues, [OpenStack security advisories](https://security.openstack.org/ossalist.html) (OSSAs) are published. In 2024, five such OSSAs have been published. It should thus also be checked if current OSSAs exist for the components that are planned to be used.
 
 
@@ -207,13 +204,12 @@ According to the CII assessment, there is one that is not fulfilled for Openstac
 Executing tests allows developers to identify errors at an early stage, which can reduce the number of vulnerabilities that enter a project. This check therefore aims to verify whether tests are executed prior to merging pull requests. 
 
 OpenStack projects use [Zuul](https://zuul-ci.org/). Also, the OpenStack documentation gives insight into the [testing procedures](https://docs.openstack.org/project-team-guide/testing.html).
-Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of success and failures.\
-For example to get the Zuul results for nova, one needs to filter the field `project` for `openstack/nova`:
-![](./images/nova_opensearch.png)
-In order to only see not successfull builds, one can filter the field `build_status`:
-![](./images/nova_opensearch_failed.png)
-In order to see a visualization of the build-status of a given project (e.g. `nova`), one can choose`build_status` in the tab `visualization` and filter for the desired project:
-![](./images/nova_opensearch_visual.png)
+Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of success and failures.
+
+Examples (links require previous login into opensearch):
+- to get the Zuul results for nova, one needs to filter the field `project` for `openstack/nova`: [link](https://opensearch.logs.openstack.org/_dashboards/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'94869730-aea8-11ec-9e6a-83741af3fdcd',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_q=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova)))),query:(language:kuery,query:'')))
+- to only see not successfull builds, one can filter the field `build_status`: [link](https://opensearch.logs.openstack.org/_dashboards/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'94869730-aea8-11ec-9e6a-83741af3fdcd',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_q=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:build_status,negate:!t,params:(query:SUCCESS),type:phrase),query:(match_phrase:(build_status:SUCCESS)))),query:(language:kuery,query:'')))
+- to see a visualization of the build-status of a given project (e.g. `nova`), one can choose`build_status` in the tab `visualization` and filter for the desired project: [link](https://opensearch.logs.openstack.org/_dashboards/app/visualize#/edit/0a602da0-ab88-11ec-a51d-47e50a820c7c?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova)))),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(field:build_uuid.keyword),schema:metric,type:cardinality),(enabled:!t,id:'2',params:(customLabel:'Build%20status',field:build_status.keyword,missingBucket:!f,missingBucketLabel:Missing,order:desc,orderBy:'1',otherBucket:!f,otherBucketLabel:Other,size:5),schema:segment,type:terms)),params:(addLegend:!t,addTooltip:!t,isDonut:!t,labels:(last_level:!t,show:!f,truncate:100,values:!t),legendPosition:right,type:pie),title:'Build%20status',type:pie)))
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
@@ -461,7 +457,7 @@ kept up to date on a best effort basis. For passing the check, explicit hashes o
 Openstack manages requirements globally for all projects, but also allows projects to define custom lower bounds (see [documentation](https://docs.openstack.org/project-team-guide/dependency-management.html)).
 
 ##### HowTo:
-- this is possible by applying the OSSF scorecards tool on the github mirror of a given project.
+- apply the OSSF scorecards tool on the github mirror of a given project
   - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
   - [create personal github access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
   - run scorecard tool Pinned-Dependencies check on desired repository (e.g. nova):
@@ -488,6 +484,6 @@ to verify the provenance of artifacts as well as their integrity. This is crucia
 into such artifacts.
 
 ##### HowTo:
-- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed, i.e., if cryptographic signature files are provided
+- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed for if cryptographic signature files are provided
 
 Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. However, the signature is not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
