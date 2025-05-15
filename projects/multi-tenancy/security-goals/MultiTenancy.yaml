@@ -10,10 +10,10 @@ objectives:
     restrictions:
       - The config must be configured such that all private cinder endpoints are found in "/v3" and all private barbican endpoints are found in "/v1".
 
-#  - name: Use Keystone for authentication
-#    description: All OpenStack components must use Keystone as the authentication provider.
-#    statements:
-#      - Keystone is set as the authentication provider for all components.
+  - name: Use Keystone for authentication
+    description: All OpenStack components must use Keystone as the authentication provider.
+    statements:
+      - Keystone is set as the authentication provider for all components.
 #
 #  - name: Tie access token context to the user's domain/project
 #    description: Access tokens must be tied to the user’s domain and project identifiers.

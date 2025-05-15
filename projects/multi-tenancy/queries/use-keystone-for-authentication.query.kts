@@ -1,5 +1,5 @@
-import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
+import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 
 
 fun statement1(tr: TranslationResult): QueryTree<Boolean> {
