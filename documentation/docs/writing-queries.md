@@ -5,6 +5,7 @@
 You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
 If a certain property should be fulfilled at least once in the whole codebase, you can use `existsExtended`, while `allExtended` serves to check if the property is fulfilled for all nodes (which you select).
 Both functions receive the following arguments:
+
 * The type of node to consider is provided by the type-parameter `T`. E.g. `existsExtended<Secret>` will only consider nodes of type `Secret`.
 * The optional parameter `sel` can be used to further filter these start nodes.
   If no value is provided, all nodes of type `T` will be considered.
@@ -15,6 +16,7 @@ Both functions receive the following arguments:
   Again, you can provide this in curly braces.
 
 Few notes on Kotlin:
+ 
 * The default name of a lambda's parameter is `it`, but you can also provide a name for the parameter followed by an arrow, like `secret` in the example above.
 * If you use the default parameter name `it`, you can omit the parameter name and arrow in the lambda, e.g. `{ it.name.localName == "mySecret" }`.
 * Kotlin has named arguments, which means that you can provide the name of the parameter followed by `=` and the value.
@@ -30,182 +32,143 @@ The remaining parameters are explained in this section.
 
 ### `dataFlow`
 
-<table>
-<tr>
-<td> Signature </td>
-<td>
+<div class="grid" markdown>
 
-```kotlin
-fun dataFlow(
-    startNode: Node,
-    direction: AnalysisDirection = Forward(GraphToFollow.DFG),
-    type: AnalysisType = May,
-    vararg sensitivities: AnalysisSensitivity = FieldSensitive + ContextSensitive,
-    scope: AnalysisScope = Interprocedural(),
-    earlyTermination: ((Node) -> Boolean)? = null,
-    predicate: (Node) -> Boolean,
-): QueryTree<Boolean>
+=== "Signature"
 
-```
+    ```kotlin
+    fun dataFlow(
+        startNode: Node,
+        direction: AnalysisDirection = Forward(GraphToFollow.DFG),
+        type: AnalysisType = May,
+        vararg sensitivities: AnalysisSensitivity = FieldSensitive + ContextSensitive,
+        scope: AnalysisScope = Interprocedural(),
+        earlyTermination: ((Node) -> Boolean)? = null,
+        predicate: (Node) -> Boolean,
+    ): QueryTree<Boolean>
+    ```
 
-</td>
-</tr>
-<tr>
-<td>Goal of the function</td>
-<td>
+=== "Goal of the function"
 
-Follows the `Dataflow` edges from `startNode` in the given `direction` until reaching a node fulfilling `predicate`.
+    Follows the `Dataflow` edges from `startNode` in the given `direction` until reaching a node fulfilling `predicate`.
 
-The interpretation of the analysis result can be configured as must or may analysis by setting the `type` parameter.
+    The interpretation of the analysis result can be configured as must or may analysis by setting the `type` parameter.
 
-Note that this function only reasons about existing DFG paths, and it might not be sufficient if you actually want a guarantee that some action always happens with the data.
-In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
+    Note that this function only reasons about existing DFG paths, and it might not be sufficient if you actually want a guarantee that some action always happens with the data.
+    In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
 
-</td>
-</tr>
-<tr>
-<td>Parameters:</td>
-<td>
+=== "Parameters"
 
-* `startNode`: The node from which the data flow should be followed.
-* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
-  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
-* `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
+    * `startNode`: The node from which the data flow should be followed.
+    * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+      analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+    * `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
 
-</td>
-</tr>
-</table>
+</div>
 
 ### `executionPath`
 
-<table>
-<tr>
-<td> Signature </td>
-<td>
+<div class="grid" markdown>
 
-```kotlin
-fun executionPath(
-    startNode: Node,
-    direction: AnalysisDirection = Forward(GraphToFollow.EOG),
-    type: AnalysisType = May,
-    scope: AnalysisScope = Interprocedural(),
-    earlyTermination: ((Node) -> Boolean)? = null,
-    predicate: (Node) -> Boolean,
-): QueryTree<Boolean>
-```
+=== "Signature"
 
-</td>
-<tr><td>Goal of the function</td>
-<td>Follows the Evaluation Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
+    ```kotlin
+    fun executionPath(
+        startNode: Node,
+        direction: AnalysisDirection = Forward(GraphToFollow.EOG),
+        type: AnalysisType = May,
+        scope: AnalysisScope = Interprocedural(),
+        earlyTermination: ((Node) -> Boolean)? = null,
+        predicate: (Node) -> Boolean,
+    ): QueryTree<Boolean>
+    ```
 
-The interpretation of the analysis result can be configured as must or may analysis by setting the type parameter.
+=== "Goal of the function"
 
-This function reasons about execution paths in the program and can be used to determine whether a specific action or condition is reachable during execution.
-</td>
-</tr>
-<tr><td>Parameters:</td>
-<td>
+    Follows the Evaluation Order Graph (EOG) edges from startNode in the given direction until reaching a node fulfilling predicate.
 
-* `startNode`: The node from which the execution path should be followed.
-* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
-  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
-* `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
+    The interpretation of the analysis result can be configured as must or may analysis by setting the type parameter.
 
-</td>
-</tr>
-</table>
+    This function reasons about execution paths in the program and can be used to determine whether a specific action or condition is reachable during execution.
+
+=== "Parameters"
+
+    * `startNode`: The node from which the execution path should be followed.
+    * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+      analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+    * `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
+
+</div>
 
 ### `alwaysFlowsTo`
 
-<table>
-<tr>
-<td> Signature </td>
-<td>
+<div class="grid" markdown>
 
-```kotlin
-fun Node.alwaysFlowsTo(
-    allowOverwritingValue: Boolean = false,
-    earlyTermination: ((Node) -> Boolean)? = null,
-    identifyCopies: Boolean = true,
-    stopIfImpossible: Boolean = true,
-    scope: AnalysisScope,
-    vararg sensitivities: AnalysisSensitivity =
-        ContextSensitive + FieldSensitive + FilterUnreachableEOG,
-    predicate: (Node) -> Boolean,
-): QueryTree<Boolean>
-```
+=== "Signature"
 
-</td>
-</tr>
-<tr>
-<td>Goal of the function</td>
-<td>
+    ```kotlin
+    fun Node.alwaysFlowsTo(
+        allowOverwritingValue: Boolean = false,
+        earlyTermination: ((Node) -> Boolean)? = null,
+        identifyCopies: Boolean = true,
+        stopIfImpossible: Boolean = true,
+        scope: AnalysisScope,
+        vararg sensitivities: AnalysisSensitivity =
+            ContextSensitive + FieldSensitive + FilterUnreachableEOG,
+        predicate: (Node) -> Boolean,
+    ): QueryTree<Boolean>
+    ```
 
-Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
+=== "Goal of the function"
 
-</td>
-</tr>
-<tr>
-<td>Parameters:</td>
-<td>
+    Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
 
-* `allowOverwritingValue`: If set to `true`, the value of a variable can be changed before reaching `predicate` but the function would still return `true`.
-  If set to `false`, overwriting the value held in `this` before reaching a sink specified by `predicate` will lead to a `false` result.
-* `identifyCopies`: If set to `true`, the query will aim to figure out if the dataflow of one object is copied to another object which requires separate tracking of the instances (e.g. if they require separate deletion, or other clearing/validating actions).
-* `stopIfImpossible`: If set to `true`, the analysis will stop if it is impossible to reach a node fulfilling `predicate`.
-  This is useful for performance reasons, as it avoids unnecessary iterations.
-  In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
-* `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
-  analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
-* `predicate`: This function marks the desired end of a combined dataflow and execution path.
-  If this function returns `true`, the analysis/traversal of this path will stop.
+=== "Parameters"
 
-</td>
-</tr>
-</table>
+    * `allowOverwritingValue`: If set to `true`, the value of a variable can be changed before reaching `predicate` but the function would still return `true`.
+      If set to `false`, overwriting the value held in `this` before reaching a sink specified by `predicate` will lead to a `false` result.
+    * `identifyCopies`: If set to `true`, the query will aim to figure out if the dataflow of one object is copied to another object which requires separate tracking of the instances (e.g. if they require separate deletion, or other clearing/validating actions).
+    * `stopIfImpossible`: If set to `true`, the analysis will stop if it is impossible to reach a node fulfilling `predicate`.
+      This is useful for performance reasons, as it avoids unnecessary iterations.
+      In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
+    * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+      analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+    * `predicate`: This function marks the desired end of a combined dataflow and execution path.
+      If this function returns `true`, the analysis/traversal of this path will stop.
+
+</div>
 
 ### `dataFlowWithValidator`
 
-<table>
-<tr>
-<td> Signature </td>
-<td>
+<div class="grid" markdown>
 
-```kotlin
-fun dataFlowWithValidator(
-    source: Node,
-    validatorPredicate: (Node) -> Boolean,
-    sinkPredicate: (Node) -> Boolean,
-    scope: AnalysisScope,
-    vararg sensitivities: AnalysisSensitivity,
-): QueryTree<Boolean>
-```
+=== "Signature"
 
-</td>
-</tr>
-<tr>
-<td>Goal of the function</td>
-<td>
+    ```kotlin
+    fun dataFlowWithValidator(
+        source: Node,
+        validatorPredicate: (Node) -> Boolean,
+        sinkPredicate: (Node) -> Boolean,
+        scope: AnalysisScope,
+        vararg sensitivities: AnalysisSensitivity,
+    ): QueryTree<Boolean>
+    ```
 
-Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
+=== "Goal of the function"
 
-This function always runs a forward analysis and combines the DFG and EOG.
+    Checks that the data originating from `source` are validated by a validator (fulfilling `validatorPredicate`) on each execution path before reaching a sink marked by `sinkPredicate`.
 
-</td>
-</tr>
-<tr>
-<td>Parameters:</td>
-<td>
+    This function always runs a forward analysis and combines the DFG and EOG.
 
-* `source`: The node from which the dataflow path should be followed.
-* `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
-  analysis/traversal of this path will stop and return `true`.
-* `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
-  If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+=== "Parameters"
 
-</td>
-</tr>
-</table>
+    * `source`: The node from which the dataflow path should be followed.
+    * `validatorPredicate`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
+      analysis/traversal of this path will stop and return `true`.
+    * `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
+      If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+
+</div>
 
 ## The class `QueryTree`
 
@@ -213,6 +176,7 @@ The class `de.fraunhofer.aisec.cpg.query.QueryTree` serves as a wrapper around t
 It is parametrized with a type `T` which is the type of the field `value`.
 
 Fields:
+
 * `value`: The result of the query, which is of type `T`. Frequent values are boolean values which determine if the query was successful or not, lists of nodes which were found by the query (i.e., representing paths), or other values representing a possible value of a variable.
 * `children`: A list of sub-queries which were evaluated to retrieve the result in `value`.
 * `stringRepresentation`: A human-readable string representation of the query's result.
@@ -221,6 +185,7 @@ Fields:
 
 Numerous methods allow to evaluate the queries while keeping track of all the steps.
 Currently, the following operations are supported:
+
 * **eq**: Equality of two values.
 * **ne**: Inequality of two values.
 * **IN**: Checks if a value is contained in a [Collection]
