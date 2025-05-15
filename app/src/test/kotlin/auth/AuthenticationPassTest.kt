@@ -17,12 +17,21 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.evaluate
+import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
+import de.fraunhofer.aisec.cpg.passes.concepts.with
+import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.existsExtended
 import de.fraunhofer.aisec.cpg.query.or
+import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.openstack.concepts.auth.UserInfo
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
@@ -347,3 +356,87 @@ class AuthenticationPassTest {
         )
     }
 }
+
+    @Test
+    fun testAccessToken() {
+        // When an access token is validated, its context is tied to the user’s domain/project
+        val topLevel = Path("../projects/multi-tenancy/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.includePath("../external/keystoneauth")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "keystonemiddleware" to
+                            listOf(
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
+                            )
+                    )
+                )
+                it.topLevels(
+                    mapOf("keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile())
+                )
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag =
+                            tag {
+                                each<CallExpression>(
+                                        predicate = { it.name.localName == "_do_fetch_token" }
+                                    )
+                                    .with {
+                                        TokenValidation(
+                                            underlyingNode = node,
+                                            token = node.arguments[0],
+                                        )
+                                    }
+                                each<RecordDeclaration>(
+                                        predicate = { it.name.localName == "AccessInfoV3" }
+                                    )
+                                    .withMultiple {
+                                        val overlays = mutableListOf<OverlayNode>()
+                                        val token = node.constructors.first().parameters[1]
+                                        val reqContext =
+                                            ExtendedRequestContext(
+                                                underlyingNode = node,
+                                                token = token,
+                                            )
+                                        val userInfo =
+                                            UserInfo(
+                                                node,
+                                                userId = node.methods["user_id"],
+                                                projectId = node.methods["project_id"],
+                                                domainId = node.methods["domain_id"],
+                                            )
+                                        reqContext.userInfo = userInfo
+                                        overlays.add(reqContext)
+                                        overlays
+                                    }
+                            }
+                    )
+                )
+            }
+
+        assertNotNull(result)
+        val q =
+            result.allExtended<TokenValidation>(
+                mustSatisfy = {
+                    dataFlow(
+                        startNode = it.token,
+                        predicate = {
+                            it.overlays.filterIsInstance<ExtendedRequestContext>().any {
+                                it.userInfo?.userId != null &&
+                                    it.userInfo?.projectId != null &&
+                                    it.userInfo?.domainId != null
+                            }
+                        },
+                    )
+                }
+            )
+        // _do_fetch_token is called also in other auth types. We may need another operation/concept
+        // for access.create
+        //        assertTrue(q.value)
+    }
+}
+
+class TokenValidation(underlyingNode: Node?, val token: Node) : Concept(underlyingNode)
