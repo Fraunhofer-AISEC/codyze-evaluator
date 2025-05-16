@@ -3,12 +3,12 @@ description: This describes security requirements for tenant isolation in OpenSt
 legacyAssumptions:
   - Keystone is used as the authentication provider.
 objectives:
-#  - name: All endpoints must have authentication
-#    description: All private endpoints must only be accessible after authentication.
-#    statements:
-#      - Access to private endpoints must be restricted to authenticated users, i.e., each private REST API must be connected to an Authentication concept.
-#    restrictions:
-#      - The config must be configured such that all private cinder endpoints are found in "/v3" and all private barbican endpoints are found in "/v1".
+  - name: All endpoints must have authentication
+    description: All private endpoints must only be accessible after authentication.
+    statements:
+      - Access to private endpoints must be restricted to authenticated users, i.e., each private REST API must be connected to an Authentication concept.
+    restrictions:
+      - The config must be configured such that all private cinder endpoints are found in "/v3" and all private barbican endpoints are found in "/v1".
 
 #  - name: Use Keystone for authentication
 #    description: All OpenStack components must use Keystone as the authentication provider.
