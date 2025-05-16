@@ -1,14 +1,8 @@
 # Documentation
 
-This folder contains the user documentation of the OpenStack checker. This is an initial version and it will be greatly expanded.
+This folder contains the user documentation of the OpenStack checker.
 
-The following chapters are currently available:
-
-* [How to analyze a project](analyzing-project.md),
-* [How to write queries](writing-queries.md),
-* [How to interpret the results](understanding-results.md),
-* [Information on implementing concepts and operations and how they are linked to the code](concepts-and-operations.md),
-* [A list of concepts and operations](list-concepts-and-operations.md),
-* [A concept for categorizing assumptions of the analysis](assumptions-concept.md),
-* [The tradeoff between assumptions and manual analysis](assumptions-tradeoff.md), and
-* [A list of further resources](more-resources.md).
+The overall goal of this project is described in the chapter [Goal](goal.md).
+The methodology of assessing the compliance of a concrete instance of OpenStack with respect to security goals and security claims is described in the chapter [Methodology](methodology.md).
+The [User Guide](user-guide.md) provides information on how to write rules for the OpenStack Checker and how to "tag" program code with semantic labels.
+Finally, the [Ecosystem Analysis](ecosystem-analysis.md) chapter provides information on how to analyze the ecosystem of OpenStack and its development workflow.

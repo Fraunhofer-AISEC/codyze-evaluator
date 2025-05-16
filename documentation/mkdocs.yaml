@@ -155,16 +155,20 @@ markdown_extensions:
 
 nav:
   - "Home": index.md
-  - "Analyzing a project": analyzing-project.md
-  - "Queries":
-    - "Writing queries": writing-queries.md
-  - "Concepts and Operations":
-    - "Implementing Concepts and Operations": concepts-and-operations.md
-    - "List": list-concepts-and-operations.md
-    - "Tagging DSL": tagging-dsl.md
-  - "Assumptions":
-    - "Concept for categorizing assumptions of the analysis": assumptions-concept.md
-    - "Tradeoff between assumptions and manual analysis": assumptions-tradeoff.md
-  - "Interpreting Results": interpreting-results.md
-  - "Providing negative test results": negative-tests.md
-  - "Further resources": more-resources.md
+  - "Goal": goal.md
+  - "Methodology": methodology.md
+  - "User Guide":
+      - "Analyzing a project": analyzing-project.md
+      - "Queries":
+        - "Writing queries": writing-queries.md
+      - "Concepts and Operations":
+        - "Implementing Concepts and Operations": concepts-and-operations.md
+        - "List": list-concepts-and-operations.md
+        - "Tagging DSL": tagging-dsl.md
+      - "Assumptions":
+        - "Concept for categorizing assumptions of the analysis": assumptions-concept.md
+        - "Tradeoff between assumptions and manual analysis": assumptions-tradeoff.md
+      - "Interpreting Results": understanding-results.md
+      - "Providing negative test results": negative-tests.md
+      - "Further resources": more-resources.md
+  - "Ecosystem Analysis": ecosystem-analysis.md
