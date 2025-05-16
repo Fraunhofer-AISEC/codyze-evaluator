@@ -8,7 +8,7 @@ index 80baa2b5..a6e824ba 100644
          key_file = tempfile.NamedTemporaryFile(mode="w+")
 -        key_file.write(encodeutils.safe_decode(
 -            magnum_cert.get_decrypted_private_key()))
-+        os.chmod(key_file, 0o600)
++        os.chmod(key_file.name, 0o600)
 +        private_key = magnum_cert.get_decrypted_private_key()
 +        key_file.write(encodeutils.safe_decode(private_key))
          key_file.flush()
