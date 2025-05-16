@@ -1,5 +1,7 @@
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
+
 
 /**
  * Access to Barbican keys must be restricted to authenticated
