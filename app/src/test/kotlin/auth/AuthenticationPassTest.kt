@@ -10,7 +10,6 @@ import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -164,7 +163,7 @@ class AuthenticationPassTest {
 
     @Test
     fun testAuthStrategyProvider() {
-        val topLevel = Path("../projects/BYOK/components")
+        val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
@@ -193,10 +192,8 @@ class AuthenticationPassTest {
             result.allExtended<ConfigurationOptionSource>(
                 sel = { it.name.localName == "auth_strategy" },
                 mustSatisfy = {
-                    val field = it.underlyingNode as? FieldDeclaration
-                    val result = field?.evaluate().toString() == "keystone"
                     QueryTree<Boolean>(
-                        result,
+                        value = it.evaluate().toString() == "keystone",
                         stringRepresentation = "Component config: ${it.location?.artifactLocation}",
                     )
                 },
