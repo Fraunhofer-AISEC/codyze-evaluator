@@ -54,4 +54,11 @@ We are using development builds of CPG and Codyze, which are hosted in the GitHu
 
 ## Further documentation
 
-A user facing documentation is available in the [`documentation`](./documentation/index.md) folder.
+A user facing documentation is available in the [`documentation`](documentation/docs/index.md) folder.
+
+The page can be rendered with mkdocs and using docker as follows:
+```bash
+cd documentation
+docker build -t mkdocs-material .
+docker run --rm -it -p 8000:8000 -v ${PWD}:/docs mkdocs-material
+```

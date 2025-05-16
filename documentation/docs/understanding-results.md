@@ -19,7 +19,7 @@ To use this feature, please follow these steps:
 
 1. Install Visual Studio Code if you haven't already.
 2. Install the SARIF Viewer extension from the Visual Studio Code marketplace if you haven't already.
-3. Run the openstack-checker as described in the [README](../README.md).
+3. Run the openstack-checker as described in the [README](../../README.md).
 4. Copy the `findings.sarif` file to the directory of the codebase you analyzed. E.g. this could be the directory `./external` or `./projects/BYOK` or `./projects/magnum-cve`.
 5. Now, open Visual Studio Code and open the directory containing the codebase and the SARIF-file. In the navigation bar on the left, you should see a file `findings.sarif`.
 6. Open the file `findings.sarif` by double-clicking. Instead of the JSON representation of the file, you should now see a nicely formatted view of the results.
@@ -40,7 +40,7 @@ By clicking on the individual items in the list, you can get highlighting of the
 ## The Web-UI
 
 To avoid installing separate tools, the openstack-checker comes with its own Web-UI which allows to visualize the results.
-To use the Web-UI, please run the analysis with the `--console=true` as indicated in the [README](../README.md).
+To use the Web-UI, please run the analysis with the `--console=true` as indicated in the [README](../../README.md).
 This will start a web server on your local machine which can be accessed via the URL `http://localhost:8080` once the analysis has finished.
 Open this URL in your browser, and you should see a sections containing the Findings at the bottom of the page.
 Each finding has its "kind" (pass or fail), the rule and the location of the finding.
