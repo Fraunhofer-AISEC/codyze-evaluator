@@ -4,6 +4,11 @@ A query is a piece of code which retrieves information from the CPG (or a part o
 
 The main sources for the implementation can be found in the files `Query.kt`, `FlowQueries.kt` and `QueryTree.kt` in the module `cpg-analysis`.
 
+## Where to add Queries
+
+To ensure that the queries are executed after all concepts and operations have been tagged in the CPG and the CPG is stable (i.e., won't be modified any further), the queries should be added to the files with ending `.query.kts`.
+These are kotlin scripts which are executed last and whose results are collected for the evaluation.
+
 ## Starting point: Choosing between `allExtended` and `existsExtended`
 
 You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
