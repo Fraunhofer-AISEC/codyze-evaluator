@@ -31,8 +31,9 @@ This section describes
 
 * the CPG as representation of source code,
 * how we integrate the configuration of the TOE,
-* the CPG's extension to model program semantics, and
-* the meaning of assumptions in the context of the analysis
+* the CPG's extension to model program semantics,
+* the meaning of assumptions in the context of the analysis, and
+* how the compliance checks are run as queries on the CPG.
 
 ### The Code Property Graph (CPG) as Source Code Representation
 
@@ -131,6 +132,17 @@ Frequent properties are a specific configuration of concepts and operations, or 
 To simplify such queries, the CPG provides a set of methods to traverse the graph and perform reachability analyses.
 
 The result of each query is a verdict if it holds together with a list of all steps which have been conducted to reach to this conclusion, as well as the assumptions which have to be accepted.
+
+### Summarized Workflow
+
+In total, the internal workflow of the OpenStack Checker can be summarized as follows:
+First, the source code is parsed to an abstract syntax tree (AST) and enriched by several passes to a CPG.
+Then, the "tagging" logic is applied to the CPG, which adds semantic information to the code and may trigger re-evaluating sub-graphs in the passes.
+This results in the final version of the CPG which is then used to run all the queries.
+These should no longer modify the graph to avoid any side effects.
+The results of the queries are collected and returned to the user.
+
+![Internal Workflow](assets/img/osc-internal.png)
 
 ## User Roles and Skills
 
