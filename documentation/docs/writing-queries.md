@@ -27,7 +27,7 @@ Few notes on Kotlin:
 
 Currently, following four functions of the Query API can be used to reason about the flow of data or control in the program:
 `dataFlow`, `dataFlowWithValidator`, `executionPath` and `alwaysFlowsTo`.
-A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [./program-analysis-basics.md].
+A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [program-analysis-basics.md](program-analysis-basics.md).
 The remaining parameters are explained in this section.
 
 ### `dataFlow`
@@ -58,6 +58,8 @@ The remaining parameters are explained in this section.
     In this case, you may need to check the `executionPath` or `alwaysFlowsTo`.
 
 === "Parameters"
+
+    TODO: Links to basics page for the "normal" parameters
 
     * `startNode`: The node from which the data flow should be followed.
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the

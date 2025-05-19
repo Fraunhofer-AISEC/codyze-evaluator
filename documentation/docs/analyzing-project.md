@@ -85,4 +85,4 @@ A set of initial resources could be:
   Kotlin programming language. It lists all features of the language with various examples. The section "Concepts"
   should be the most relevant one.
 
-The files [./list-concepts-and-operations.md], [./writing-queries.md], and [./more-resources.md] provide further documentation on existing concepts and operations, writing queries with the Query API, and point to additional resources.
+The files [list-concepts-and-operations.md](list-concepts-and-operations.md), [writing-queries.md](writing-queries.md), and [more-resources.md](more-resources.md) provide further documentation on existing concepts and operations, writing queries with the Query API, and point to additional resources.
