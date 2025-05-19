@@ -161,6 +161,7 @@ nav:
       - "Analyzing a project": analyzing-project.md
       - "Queries":
         - "Writing queries": writing-queries.md
+        - "Basics of Program Analysis": program-analysis-basics.md
       - "Concepts and Operations":
         - "Implementing Concepts and Operations": concepts-and-operations.md
         - "List": list-concepts-and-operations.md
