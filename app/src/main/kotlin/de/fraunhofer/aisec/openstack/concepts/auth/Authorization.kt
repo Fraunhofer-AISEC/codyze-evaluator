@@ -21,7 +21,7 @@ abstract class AuthorizationOperation(underlyingNode: Node? = null, concept: Con
  * @param targets A set of nodes representing the target of the action. This typically includes
  *   fields such as `project_id` and `user_id`.
  */
-class Authorize(
+open class Authorize(
     underlyingNode: Node? = null,
     concept: Authorization,
     val policy: Policy,
