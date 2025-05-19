@@ -8,7 +8,9 @@ import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
+import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
@@ -17,6 +19,7 @@ import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
+import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -156,5 +159,46 @@ class AuthenticationPassTest {
             this.path.startsWith("/v3/")) ||
             (this.underlyingNode?.component?.name?.localName == "barbican" &&
                 this.path.startsWith("/v1/"))
+    }
+
+    @Test
+    fun testAuthStrategyProvider() {
+        val topLevel = Path("../projects/multi-tenancy/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.exclusionPatterns("tests", "drivers")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "conf" to topLevel.resolve("conf").toFile(),
+                        "cinder" to topLevel.resolve("cinder/api").toFile(),
+                        "barbican" to topLevel.resolve("barbican/api").toFile(),
+                    )
+                )
+            }
+
+        assertNotNull(result)
+
+        val query =
+            result.allExtended<ConfigurationOptionSource>(
+                sel = { it.name.localName == "auth_strategy" },
+                mustSatisfy = {
+                    QueryTree<Boolean>(
+                        value = it.evaluate().toString() == "keystone",
+                        stringRepresentation = "Component config: ${it.location?.artifactLocation}",
+                    )
+                },
+            )
+        println(query.printNicely())
+        assertEquals(true, query.value)
     }
 }
