@@ -32,7 +32,6 @@ Few notes on Kotlin:
 Currently, following four functions of the Query API can be used to reason about the flow of data or control in the program:
 `dataFlow`, `dataFlowWithValidator`, `executionPath` and `alwaysFlowsTo`.
 A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [program-analysis-basics.md](program-analysis-basics.md).
-The remaining parameters are explained in this section.
 
 ### `dataFlow`
 
