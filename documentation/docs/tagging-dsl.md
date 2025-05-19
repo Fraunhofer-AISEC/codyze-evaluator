@@ -6,6 +6,15 @@ In addition, the DSL allows a more convenient way to add the respective tags to 
 
 The tagging DSL is defined in the module `codyze-core` in the file `codyze-core/src/main/kotlin/de/fraunhofer/aisec/codyze/ConceptScriptDefinition.kt`.
 
+## Where to add Concepts and Tags
+
+The user can define own `Concept`s and `Operation`s in files with the ending `.concept.kts`.
+These are kotlin script files which are executed during the translation of the source code.
+
+TODO @oxisto: is there a difference to `query.kts`? I assume, they won't be assessed in-time to feed them into the Concept Tagging Pass?
+
+## Tagging the code
+
 To tag the source code, the user can use the following syntax:
 
 ```kotlin
@@ -44,3 +53,10 @@ The node itself is available as `this.node` inside the function.
 The tagging itself is conducted inside a Pass iterating through the EOG and computing a fixed-point (intraprocedurally).
 
 While the user can access the lattice and state used during the fixed-point iteration, we strongly discourage using it unless the user really knows what he/she is doing.
+
+!!! note
+
+    The ordering of the tagging is important.
+    If you want to build upon existing tags of a node, you should make sure that this also happens in the correct order within the file.
+
+    TODO @oxisto: Is this correct? Are multiple files supported and how is the order determined there?
