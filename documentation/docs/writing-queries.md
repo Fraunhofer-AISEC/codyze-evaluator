@@ -1,5 +1,9 @@
 # How do I write a query?
 
+A query is a piece of code which retrieves information from the CPG (or a part of it) to assess if a statement holds or not.
+
+The main sources for the implementation can be found in the files `Query.kt`, `FlowQueries.kt` and `QueryTree.kt` in the module `cpg-analysis`.
+
 ## Starting point: Choosing between `allExtended` and `existsExtended`
 
 You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
@@ -59,9 +63,11 @@ The remaining parameters are explained in this section.
 
 === "Parameters"
 
-    TODO: Links to basics page for the "normal" parameters
-
     * `startNode`: The node from which the data flow should be followed.
+    * `direction`: See the [explanation of class `AnalysisDirection`](program-analysis-basics.md/#analysisdirection)
+    * `type`: See the [explanation of class `AnalysisType`](program-analysis-basics.md/#analysistype)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
     * `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
@@ -96,6 +102,10 @@ The remaining parameters are explained in this section.
 === "Parameters"
 
     * `startNode`: The node from which the execution path should be followed.
+    * `direction`: See the [explanation of class `AnalysisDirection`](program-analysis-basics.md/#analysisdirection)
+    * `type`: See the [explanation of class `AnalysisType`](program-analysis-basics.md/#analysistype)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
     * `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
@@ -135,6 +145,8 @@ The remaining parameters are explained in this section.
       In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
     * `predicate`: This function marks the desired end of a combined dataflow and execution path.
       If this function returns `true`, the analysis/traversal of this path will stop.
 
@@ -169,6 +181,8 @@ The remaining parameters are explained in this section.
       analysis/traversal of this path will stop and return `true`.
     * `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
       If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
 
 </div>
 
