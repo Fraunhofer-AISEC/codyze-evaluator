@@ -152,6 +152,41 @@ We currently consider the following roles:
   The product expert should be able to point out implementation details of the TOE and describe how they relate to the security goals.
   The product expert may also be involved in the development of new queries and tagging the code with semantic concepts and operations.
 
-  
+## Generalization
+
+The OpenStack Checker is designed to be extensible and customizable which makes it ideal to not only serve as a tool for evaluating OpenStack instances but also for other software projects.
+The underlying CPG library already supports various programming languages, and provides the interface to add new languages easily.
+Hence, it is only necessary to adapt the OpenStack Checker Configuration for a new project.
+This configuration can be adapted to assess the fulfillment of security goals in any software project.
+If the security goals (in terms of queries) are formulated in a general way, as it is the case for queries using concepts and operations, they can be applied to any software project with the same goals.
+Similarly, framework-specific "tagging" logic and queries (e.g., to check the correct usage of a certain framework) can be used across all projects which use the same framework.
+
+Obviously, highly customized queries and tagging logic are not portable to other projects.
+This might be the case when using specific names of functions, classes, or variables of the respective project, or when relying on any other specific implementation details of the project.
+
+## Integration into the Evaluation Process
+
+The OpenStack Checker may be integrated into existing evaluation processes which currently rely on manual documentation and code reviews.
+An example for such a process is the Common Criteria (CC) Evaluation, which is a widely used standard for evaluating the security of IT products.
+
+As mentioned above, in the scenario of a CC evaluation, two main sources can be used to extract the security goals:
+
+* The Protection Profile to which the TOE claims compliance.
+* The Security Target of the TOE, in particular the Security Functional Requirements (SFRs) and the details on their implementation.
+  Obviously, if compliance to certain standards is claimed, the respective standards should also be used to derive the OpenStack Checker Configuration.
+
+Once a catalogue of security goals has been derived, the Evaluator may simply select the applicable goals for the product.
+
+In addition to the selection of the correct security goals, the tagging of the code with concepts and operations is a main task during the evaluation process.
+Currently, the vendor/developer of the product needs to describe the security feature and how they are implemented in the code.
+This makes the Product Expert, who may be part of the development team, the ideal candidate for this task.
+Rather than writing a document, the product expert can provide the tagging logic of the code with concepts and operations.
+The evaluator would then review the tagging logic.
+
+The OpenStack Checker can then be used to check the compliance of the OpenStack instance with respect to the security goals and thus assess if they hold.
+This may reduce the need for extensive description and documentation of development processes and implementation details and how they are beneficial to fulfill the security goals in the product.
+Instead, the OpenStack Checker could be used to check the implementation of the security goals and provide a detailed report on the findings.
+
+
 [^1]: https://fraunhofer-aisec.github.io/cpg/CPG/specs/
 [^2]: Yamaguchi, Fabian, et al. "Modeling and discovering vulnerabilities with code property graphs." 2014 IEEE Symposium on Security and Privacy (S&P). IEEE, 2014.
