@@ -14,6 +14,11 @@ objectives:
     description: All OpenStack components must use Keystone as the authentication provider.
     statements:
       - Keystone is set as the authentication provider for all components.
+
+  - name: Token based authentication
+    description: All endpoints have token-based authentication.
+    statements:
+      - Token-based authentication is set for all endpoints.
 #
 #  - name: Tie access token context to the user's domain/project
 #    description: Access tokens must be tied to the user’s domain and project identifiers.

@@ -24,14 +24,15 @@ fun isTokenProvider(tr: TranslationResult, provider: Set<String>): Boolean {
         .first
 }
 
+val tokenProvider = setOf("fernet", "jws")
 fun statement1(tr: TranslationResult): QueryTree<Boolean> {
-    val tokenProvider = setOf("fernet", "jws")
-    result.allExtended<HttpEndpoint>(
-        sel = { endpoint -> endpoint.shouldHaveAuthentication() && isTokenProvider(result, provider = tokenProvider) },
+    return tr.allExtended<HttpEndpoint>(
+        sel = { endpoint -> endpoint.shouldHaveAuthentication() && isTokenProvider(tr, provider = tokenProvider) },
         mustSatisfy = { endpoint ->
             QueryTree(
                 value = endpoint.authentication is TokenBasedAuth,
                 children = mutableListOf(QueryTree(endpoint)),
             )
         },
+    )
 }

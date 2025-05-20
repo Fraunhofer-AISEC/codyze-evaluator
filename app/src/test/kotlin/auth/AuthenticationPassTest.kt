@@ -210,7 +210,7 @@ class AuthenticationPassTest {
 
     @Test
     fun testTokenBasedAuthentication() {
-        val topLevel = Path("../projects/BYOK/components")
+        val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
@@ -220,14 +220,13 @@ class AuthenticationPassTest {
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.exclusionPatterns("tests", "drivers")
-                it.includePath("../external/webob")
                 it.softwareComponents(
                     mutableMapOf(
                         "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
                         "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
                         "keystonemiddleware" to
                             listOf(
-                                Path("../external/keystonemiddleware/keystonemiddleware").toFile()
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
                             ),
                         "conf" to listOf(topLevel.resolve("conf").toFile()),
                     )
@@ -236,7 +235,7 @@ class AuthenticationPassTest {
                     mapOf(
                         "cinder" to topLevel.resolve("cinder").toFile(),
                         "barbican" to topLevel.resolve("barbican").toFile(),
-                        "keystonemiddleware" to Path("../external/keystonemiddleware").toFile(),
+                        "keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile(),
                         "conf" to topLevel.resolve("conf").toFile(),
                     )
                 )
