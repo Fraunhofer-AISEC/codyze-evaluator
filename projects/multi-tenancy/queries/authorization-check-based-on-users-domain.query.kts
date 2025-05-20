@@ -2,7 +2,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
 
-
 fun statement1(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<HttpEndpoint>(
         sel = { it.authorization != null },
