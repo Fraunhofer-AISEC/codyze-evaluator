@@ -30,15 +30,15 @@ class EncryptWithTexts(underlyingNode: Node?, concept: Cipher, key: Secret, val 
 /** Secrets used as keys and all things derived from it must not be persisted (except from ciphertexts). */
 fun secretKeysDoNotLeaveTheSystem (tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<Secret>(
-        sel = { secret ->
+        sel = { secret -> true
             // The secret is a key if it's used in an encryption function.
-            dataFlow(
+            /* dataFlow(
                 startNode = secret,
                 type = May,
                 direction = Bidirectional(GraphToFollow.DFG),
                 scope = Interprocedural(),
                 predicate = { it is Encrypt },
-            ).value
+            ).value */
         },
         mustSatisfy = { secret ->
             // The secret-dependent value must not leave the system except if it is the ciphertext where the secret was used as key.
@@ -70,7 +70,7 @@ fun onlyUsedAsKey(tr: TranslationResult, node: Node, secret: Secret): Boolean {
                     direction = Bidirectional(GraphToFollow.DFG),
                     scope = Interprocedural(),
                     predicate = { it != enc.key},
-                )
+                    )
             ).value
         },
         mustSatisfy = { encrypt ->
@@ -89,9 +89,11 @@ class PlaintextBackupEndpoint(underlyingNode: FunctionDeclaration? = null, httpM
                               authentication: Authentication?,
                               authorization: Authorization?): HttpEndpoint(underlyingNode, httpMethod, path, arguments, authentication, authorization)
 
+
 tag {
     each<Node>( predicate = {it.overlays.any { it is BlockCipherKey } })
         .with { Secret() }
 
-    each<FunctionDeclaration>(predicate = TODO()).with { PlaintextBackupEndpoint() }
+    each<FunctionDeclaration>(predicate = TODO())
+        .with { PlaintextBackupEndpoint() }
 }
