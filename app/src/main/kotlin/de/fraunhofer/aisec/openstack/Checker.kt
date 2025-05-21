@@ -38,10 +38,10 @@ class OpenstackCheckerCommand : ProjectCommand() {
                     it.registerPass<PythonMemoryPass>()
                     it.registerPass<HttpPecanLibPass>()
                     it.registerPass<HttpWsgiPass>()
+                    it.registerPass<AuthenticationPass>()
                     it.registerPass<SecureKeyRetrievalPass>()
                     it.registerPass<MakeThingsWorkPrototypicallyPass>()
                     it.registerPass<OsloConfigPass>()
-                    it.registerPass<AuthenticationPass>()
                     it.registerPass<IniFileConfigurationSourcePass>()
                     it.registerPass<PythonEntryPointPass>()
                     if (!projectOptions.directory.endsWith("BYOK")) {
