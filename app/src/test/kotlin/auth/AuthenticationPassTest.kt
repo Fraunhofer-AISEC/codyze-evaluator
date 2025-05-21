@@ -21,7 +21,6 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
-import de.fraunhofer.aisec.cpg.query.exists
 import de.fraunhofer.aisec.cpg.query.existsExtended
 import de.fraunhofer.aisec.cpg.query.or
 import de.fraunhofer.aisec.openstack.passes.*
@@ -261,20 +260,6 @@ class AuthenticationPassTest {
             )
         assertTrue(r.value)
         println(r.printNicely())
-    }
-
-    fun isTokenProvider(tr: TranslationResult, provider: Set<String>): Boolean {
-        return tr.exists<ConfigurationSource>(
-                sel = { config -> config.name.toString() == "keystone.conf" },
-                mustSatisfy = { config ->
-                    config.groups
-                        .flatMap { group ->
-                            group.options.filter { it.name.localName == "provider" }
-                        }
-                        .singleOrNull { it.evaluate().toString() in provider } != null
-                },
-            )
-            .first
     }
 
     /**
