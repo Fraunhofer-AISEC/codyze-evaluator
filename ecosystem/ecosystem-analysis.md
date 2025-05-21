@@ -46,8 +46,8 @@ The CI/CD architecture employs automated testing pipelines that run unit tests, 
   - [zuul/zuul-jobs](https://opendev.org/zuul/zuul-jobs): opendev-global definitions / templates for zuul jobs and roles
   - [openstack-zuul-jobs](https://opendev.org/openstack/openstack-zuul-jobs): OpenStack-global definitions / templates for zuul-jobs
   - [project-config](https://opendev.org/openstack/project-config): central repository for all infrastructure related OpenStack configs (two folders: `zuul.d`, `zuul`)
-      - `zuul`: `main.yaml` defines tenants, integrates all projects
-      - `zuul.d`: pipeline definition, secrets, job-templates, OpenStack global jobs, ...
+      - [zuul](https://opendev.org/openstack/project-config/src/branch/master/zuul): main entrypoint for OpenStack Zuul configuration (s. [documentation](https://docs.opendev.org/opendev/system-config/latest/zuul.html))
+      - [zuul.d](https://opendev.org/openstack/project-config/src/branch/master/zuul.d): pipeline definitions, secrets, job-templates, OpenStack global jobs, etc.
   - project(e.g. [nova](https://opendev.org/openstack/nova)): project-specific settings in `.zuul.yaml`
       - job-definitions
       - which jobs are performed in which pipeline
@@ -484,6 +484,8 @@ to verify the provenance of artifacts as well as their integrity. This is crucia
 into such artifacts.
 
 ##### HowTo:
-- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed for if cryptographic signature files are provided
+- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if cryptographic signatures are provided for release files
 
-Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. However, the signature is not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
+Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Furthermore, OpenStack documents [processes for cryptographic signatures](https://releases.openstack.org/#cryptographic-signatures)
+and maintains a [signing system](https://docs.opendev.org/opendev/system-config/latest/signing.html). 
+However, the signatures are not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
