@@ -1,6 +1,6 @@
 name: Generic Security Requirements
 description: This describes generic security requirements for all OpenStack components.
-assumptions:
+legacyAssumptions:
   - Third-party library code is correctly implemented
 objectives:
   - name: Apply Restrictive File Permissions
