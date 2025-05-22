@@ -129,7 +129,7 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
         val targets = mutableSetOf<Node>()
         paths.fulfilled.forEach { path ->
-            val keyValue = path.lastOrNull() as? KeyValueExpression ?: return@forEach
+            val keyValue = path.nodes.lastOrNull() as? KeyValueExpression ?: return@forEach
             val memberExpr = keyValue.value as? MemberExpression ?: return@forEach
             val field = memberExpr.refersTo as? FieldDeclaration ?: return@forEach
 
