@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.query.QueryTree
 
 
 /*
-Let this class open to enable the evaluator to differentiate between different kind of logs and their expected destination
+Let this class be open to enable the evaluator to differentiate between different kind of logs and their expected destination
  */
 open class LoggableEvent(un: Node?) : Concept(un)
 

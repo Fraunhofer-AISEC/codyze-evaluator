@@ -1,5 +1,6 @@
 package de.bund.bsi.catalgoue.cryptography
 
+import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
 import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
@@ -73,6 +74,11 @@ open class RandomnessSource(un: Node?) : Concept(un) {
 open class Hashfunction(un: Node?) : Concept(un)
 open class EntropyPreservingFunction(un: Node?) : Concept(un)
 
+//meta-security
+/**
+ * Makes sure, that a key is not used in a way conflicting with a security policy
+ */
+open class UsageRestrictingModule(un: Node?) : Concept(un)
 
 /*
     Derived Concepts
@@ -81,6 +87,18 @@ class FrodoKEM(un: Node?) : AsymmetricScheme(un)
 class FrodoKEMCiphertext(un: Node?) : AsymmetricCiphertext(un)
 class AES256Encrypt(un: Node?) : SymmetricEncrypt(un)
 class HMAC(un: Node?) : EntropyPreservingFunction(un) //TODO: Must also be a MessageAuthenticationCode!! Maybe tagging every node that is hmac with MAC using the tagging api afterwards?
+
+
+/*
+
+    Protocols
+
+ */
+
+//Wireguard
+open class Wireguard_CryptoKeyRoutingTable(un: Node?) : Concept(un)
+open class Wireguard_KeyStore
+
 
 /*
     Generic Tags & Queries
