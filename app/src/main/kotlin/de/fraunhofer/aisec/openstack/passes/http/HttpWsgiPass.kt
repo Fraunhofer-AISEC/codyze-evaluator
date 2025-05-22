@@ -228,7 +228,7 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
         return when (controllerArg) {
             is Reference -> {
                 val construct =
-                    controllerArg.followPrevDFG { it is ConstructExpression }?.lastOrNull()
+                    controllerArg.followPrevDFG { it is ConstructExpression }?.nodes?.lastOrNull()
                         as? ConstructExpression
 
                 if (construct != null) {
@@ -241,10 +241,11 @@ class HttpWsgiPass(ctx: TranslationContext) : ComponentPass(ctx) {
                             }
                             .fulfilled
                             .firstOrNull()
+                            ?.nodes
                             ?.lastOrNull() as? InitializerListExpression
 
                     initializerList?.initializers?.filterIsInstance<Reference>()?.mapNotNull {
-                        it.followPrevDFG { node -> node is RecordDeclaration }?.lastOrNull()
+                        it.followPrevDFG { node -> node is RecordDeclaration }?.nodes?.lastOrNull()
                             as? RecordDeclaration
                     } ?: emptyList()
                 }

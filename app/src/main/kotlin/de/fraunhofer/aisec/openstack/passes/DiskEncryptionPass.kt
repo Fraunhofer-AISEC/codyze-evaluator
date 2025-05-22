@@ -77,7 +77,7 @@ class DiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                             it is GetSecret
                         }
                         .fulfilled
-                        .map { it.last() }
+                        .map { it.nodes.last() }
                 }
                 ?.firstOrNull()
 

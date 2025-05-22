@@ -149,7 +149,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val fromEnvironCall =
             contextClass?.astParent.mcalls.singleOrNull { it.name.localName == "from_environ" }
         val requestContext =
-            fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.lastOrNull()
+            fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.nodes?.lastOrNull()
                 as? RecordDeclaration
         if (requestContext != null) {
             // Here we normally should follow the data flow of the token through the middleware and
@@ -294,8 +294,10 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             t.functions.firstOrNull { it.name.toString() == middlewareFunctionName } ?: return null
 
         val construct =
-            middlewareFilterFunction.followPrevDFG { it is ConstructExpression }?.lastOrNull()
-                as? ConstructExpression
+            middlewareFilterFunction
+                .followPrevDFG { it is ConstructExpression }
+                ?.nodes
+                ?.lastOrNull() as? ConstructExpression
         val middlewareClass = construct?.instantiates as? RecordDeclaration
         return middlewareClass?.superClasses?.firstOrNull()?.recordDeclaration
     }
@@ -385,7 +387,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                     it is MemberExpression && it.name.localName == tokenProperty.name.localName
                 }
                 ?.fulfilled
-                ?.map { it.last() }
+                ?.map { it.nodes.last() }
 
         return tokenUsages
             ?.singleOrNull() { it.astParent?.name?.localName?.contains("fetch_token") == true }
