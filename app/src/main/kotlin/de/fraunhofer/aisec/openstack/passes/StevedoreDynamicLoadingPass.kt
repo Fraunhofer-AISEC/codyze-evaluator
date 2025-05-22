@@ -90,7 +90,7 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
                 it is ConstructExpression
             }
         return paths.fulfilled
-            .mapNotNull { it.last() as? ConstructExpression }
+            .mapNotNull { it.nodes.last() as? ConstructExpression }
             .flatMap {
                 return handleStevedoreDriverManager(it, me)
             }

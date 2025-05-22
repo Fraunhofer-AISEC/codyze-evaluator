@@ -50,14 +50,15 @@ class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 it is InitializerListExpression
             }
         paths.fulfilled.mapNotNull {
-            val initializerListExpr = it.lastOrNull() as? InitializerListExpression
+            val initializerListExpr = it.nodes.lastOrNull() as? InitializerListExpression
             initializerListExpr?.initializers?.forEach { initializer ->
                 // Expect a `DocumentedRuleDefault` or `RuleDefault`
                 val ruleConstruct = initializer as? ConstructExpression ?: return@forEach
-                val ruleName = ruleConstruct.arguments.firstOrNull() ?: return@forEach
+                val rule = ruleConstruct.arguments.firstOrNull() ?: return@forEach
                 policies +=
                     newPolicy(underlyingNode = ruleConstruct, connect = true).also {
-                        it.name = Name(ruleName.evaluate().toString())
+                        it.name = Name(rule.evaluate().toString())
+                        it.prevDFG += rule
                     }
             }
         }

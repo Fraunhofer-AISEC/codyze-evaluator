@@ -13,6 +13,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
+import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
@@ -30,6 +31,7 @@ class AuthenticationPassTest {
                 it.registerLanguage<PythonLanguage>()
                 it.registerLanguage<IniFileLanguage>()
                 it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<PreAuthorizationPass>()
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
