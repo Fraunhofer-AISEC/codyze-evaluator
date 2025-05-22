@@ -83,7 +83,7 @@ class HttpBarbicanClientPass(ctx: TranslationContext) : TranslationResultPass(ct
                                     it is RecordDeclaration
                                 }
                                 .fulfilled
-                                .map { it.last() }
+                                .map { it.nodes.last() }
                                 .firstOrNull()
 
                         val field =

@@ -96,7 +96,7 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                             it.overlays.any { it is Secret }
                         }
                         ?.fulfilled
-                        ?.map { it.last() }
+                        ?.map { it.nodes.last() }
                         ?.flatMap { it.overlays.filterIsInstance<Secret>() }
 
                 // There are two keys (one is dervied from the other), we need to take the "new_key"
