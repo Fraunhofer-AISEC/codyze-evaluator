@@ -74,14 +74,18 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
     private fun applyAuthorization(policy: Policy, call: MemberCallExpression) {
         val authorize = call.invokes.firstOrNull() as? MethodDeclaration ?: return
+        val policyRef = call.arguments.getOrNull(0) ?: return
         val policyAuthorize =
             authorize.calls.singleOrNull {
                 it.name.localName == "authorize" && it.name.parent?.localName == "policy"
             } ?: return
 
-        val action = policyAuthorize.arguments.getOrNull(0) ?: return
+        val action = policyAuthorize.arguments.getOrNull(1) ?: return
         val targets = extractTargets(policyAuthorize) ?: return
-        val authorization = newAuthorization(underlyingNode = call, policy = policy, connect = true)
+        val authorization =
+            newAuthorization(underlyingNode = call, policy = policy, connect = true).also {
+                policy.policyRef = policyRef
+            }
         newAuthorize(
             underlyingNode = policyAuthorize,
             concept = authorization,
