@@ -6,3 +6,8 @@ import de.fraunhofer.aisec.cpg.graph.concepts.Concept
 
 open class ImmutableObject(un: Node?) : Concept(un)
 open class InjectiveFunction(un: Node?) : Concept(un)
+
+open class Asset_Confidentiality(un: Node?) : Concept(un)
+open class Asset_Integrity(un: Node?) : Concept(un)
+open class Asset_Availability(un: Node?) : Concept(un)
+

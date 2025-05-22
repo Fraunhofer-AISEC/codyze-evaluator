@@ -78,7 +78,7 @@ fun onlyUsedAsKey(tr: TranslationResult, node: Node, secret: Secret): Boolean {
         }).value
 }
 
-// Use of variables which should be used in the queries. Benefit: No need to change the queries if the variables/State of the art change.
+// Use of variables which should be used in the queries. Benefit: No need to change the queries if the variables/State-of-the-art change.
 val goodCrypto = listOf<String>("AES", "X25519", "Ed25519", "SHA256", "SHA512")
 
 class BlockCipherKey(underlyingNode: Node? = null): Concept(underlyingNode)
