@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Run Example Evaluation &quot;Hardened OpenStack&quot;" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="example.MainKt" />
+    <module name="openstack-checker.evaluate-hardened-openstack.main" />
+    <shortenClasspath name="NONE" />
+    <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/examples/evaluate-hardened-openstack" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

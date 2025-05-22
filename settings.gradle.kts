@@ -18,3 +18,5 @@ plugins {
 
 rootProject.name = "openstack-checker"
 include("app")
+include("evaluate-hardened-openstack")
+project(":evaluate-hardened-openstack").projectDir = file("examples/evaluate-hardened-openstack")
