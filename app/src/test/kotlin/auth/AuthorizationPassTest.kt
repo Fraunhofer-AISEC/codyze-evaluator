@@ -51,16 +51,16 @@ class AuthorizationPassTest {
                 it.softwareComponents(
                     mutableMapOf(
                         "cinder" to
-                                listOf(
-                                    topLevel.resolve("cinder/cinder/api").toFile(),
-                                    topLevel.resolve("cinder/cinder/policies").toFile(),
-                                    topLevel.resolve("cinder/cinder/context.py").toFile(),
-                                    topLevel.resolve("cinder/cinder/policy.py").toFile(),
-                                ),
+                            listOf(
+                                topLevel.resolve("cinder/cinder/api").toFile(),
+                                topLevel.resolve("cinder/cinder/policies").toFile(),
+                                topLevel.resolve("cinder/cinder/context.py").toFile(),
+                                topLevel.resolve("cinder/cinder/policy.py").toFile(),
+                            ),
                         "keystonemiddleware" to
-                                listOf(
-                                    topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
-                                ),
+                            listOf(
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
+                            ),
                         "conf" to listOf(topLevel.resolve("conf").toFile()),
                     )
                 )
@@ -111,8 +111,8 @@ class AuthorizationPassTest {
                                     DatabaseAccess(underlyingNode = node)
                                 }
                                 each<MemberCallExpression>(
-                                    Name("filter_by", parent = Name("UNKNOWN"))
-                                )
+                                        Name("filter_by", parent = Name("UNKNOWN"))
+                                    )
                                     .with {
                                         val concept =
                                             node.conceptNodes
@@ -127,7 +127,7 @@ class AuthorizationPassTest {
                 it.softwareComponents(
                     mutableMapOf(
                         "cinder" to
-                                listOf(topLevel.resolve("cinder/cinder/db/sqlalchemy/api.py").toFile())
+                            listOf(topLevel.resolve("cinder/cinder/db/sqlalchemy/api.py").toFile())
                     )
                 )
                 it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
