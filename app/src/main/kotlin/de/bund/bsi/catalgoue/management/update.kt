@@ -1,3 +1,6 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
 package de.bund.bsi.catalgoue.management
 
 import de.fraunhofer.aisec.cpg.graph.Node
