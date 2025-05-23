@@ -11,7 +11,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.Concept
  *
  * @param underlyingNode The underlying CPG node.
  */
-class Policy(underlyingNode: Node? = null) : Concept(underlyingNode = underlyingNode) {
+open class Policy(underlyingNode: Node? = null) : Concept(underlyingNode = underlyingNode) {
     var rule: PolicyRule? = null
 }
 
@@ -21,7 +21,7 @@ class Policy(underlyingNode: Node? = null) : Concept(underlyingNode = underlying
  * @param underlyingNode The underlying CPG node.
  * @param roles The roles for this rule.
  */
-class PolicyRule(underlyingNode: Node? = null, val roles: Set<Role> = emptySet()) :
+open class PolicyRule(underlyingNode: Node? = null, val roles: Set<Role> = emptySet()) :
     Concept(underlyingNode = underlyingNode)
 
 /**

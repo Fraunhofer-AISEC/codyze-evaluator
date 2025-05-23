@@ -14,7 +14,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext
  * @param underlyingNode The underlying CPG node.
  * @param token The token.
  */
-class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node? = null) :
+open class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node? = null) :
     RequestContext(underlyingNode = underlyingNode) {
     var userInfo: UserInfo? = null
 }
@@ -29,7 +29,7 @@ class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node? = nu
  * @param systemScope The system scope.
  * @param domainId The domain ID.
  */
-class UserInfo(
+open class UserInfo(
     underlyingNode: Node? = null,
     val userId: Node,
     val projectId: Node,
@@ -53,5 +53,5 @@ abstract class UserInfoOperation(underlyingNode: Node?, concept: Concept) :
  * @param underlyingNode The underlying CPG node.
  * @param userInfo The user info to populate.
  */
-class PopulateUserInfo(underlyingNode: Node? = null, var userInfo: UserInfo) :
+open class PopulateUserInfo(underlyingNode: Node? = null, var userInfo: UserInfo) :
     UserInfoOperation(underlyingNode = underlyingNode, concept = userInfo)

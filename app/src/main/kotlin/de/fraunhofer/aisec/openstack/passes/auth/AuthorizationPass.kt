@@ -25,7 +25,6 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
-import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.openstack.concepts.auth.Policy
 import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorization
 import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorize
@@ -35,7 +34,6 @@ import de.fraunhofer.aisec.openstack.concepts.auth.newAuthorize
  * an authorization is required within an `HttpEndpoint`, it creates and connects the corresponding
  * authorization concepts and operations.
  */
-@DependsOn(OsloPolicyPass::class)
 class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun accept(t: Component) {
         val policies = t.conceptNodes.filterIsInstance<Policy>()
@@ -131,7 +129,7 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
 
         val targets = mutableSetOf<Node>()
         paths.fulfilled.forEach { path ->
-            val keyValue = path.lastOrNull() as? KeyValueExpression ?: return@forEach
+            val keyValue = path.nodes.lastOrNull() as? KeyValueExpression ?: return@forEach
             val memberExpr = keyValue.value as? MemberExpression ?: return@forEach
             val field = memberExpr.refersTo as? FieldDeclaration ?: return@forEach
 

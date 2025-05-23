@@ -15,7 +15,7 @@ val headerWithStars = """/*
 
 spotless {
     kotlin {
-        //targetExclude("**/*.query.kts")
+        target("**/*.kt", "**/*.codyze.kts")
         ktfmt().kotlinlangStyle()
         licenseHeader(headerWithStars).yearSeparator(" - ")
     }

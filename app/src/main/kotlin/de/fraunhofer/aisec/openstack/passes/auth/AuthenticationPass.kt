@@ -14,6 +14,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationGroupSource
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.declarations.FieldDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
@@ -72,7 +73,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             getConfigOptionValue(conf = cinderConfig, optionName = "auth_strategy") ?: return
         val requestContext =
             registerRequestContext(t = t, conf = apiPasteConfig, authStrategy = authStrategyValue)
-                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = apiPasteConfig, authStrategy = authStrategyValue)
@@ -105,7 +105,6 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             getConfigOptionValue(conf = barbicanConfig, optionName = "/v1") ?: return
         val requestContext =
             registerRequestContext(t = t, conf = barbicanConfig, authStrategy = authStrategyValue)
-                ?: return
         // Get the API version with authentication applied
         val apiVersionWithAuth =
             findApiVersionNameWithAuth(conf = barbicanConfig, authStrategy = authStrategyValue)
@@ -150,7 +149,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         val fromEnvironCall =
             contextClass?.astParent.mcalls.singleOrNull { it.name.localName == "from_environ" }
         val requestContext =
-            fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.lastOrNull()
+            fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.nodes?.lastOrNull()
                 as? RecordDeclaration
         if (requestContext != null) {
             // Here we normally should follow the data flow of the token through the middleware and
@@ -178,12 +177,11 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
 
     /** Registers user information into the provided request context. */
     fun registerUserInfo(record: RecordDeclaration, requestContext: ExtendedRequestContext) {
-        val userId = record.fields.singleOrNull { it.name.localName == "user_id" } ?: return
-        val projectId = record.fields.singleOrNull { it.name.localName == "project_id" } ?: return
-        val roles = record.fields.singleOrNull { it.name.localName == "roles" } ?: return
-        val systemScope =
-            record.fields.singleOrNull { it.name.localName == "system_scope" } ?: return
-        val domainId = record.fields.singleOrNull { it.name.localName == "domain_id" } ?: return
+        val userId = record.fields["user_id"] ?: return
+        val projectId = record.fields["project_id"] ?: return
+        val roles = record.fields["roles"] ?: return
+        val systemScope = record.fields["system_scope"] ?: return
+        val domainId = record.fields["domain_id"] ?: return
         newUserInfo(
             underlyingNode = record,
             concept = requestContext,
@@ -205,7 +203,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         configSource: ConfigurationSource,
         componentName: String,
         apiVersionWithAuth: ConfigurationOptionSource,
-        requestContext: RequestContext,
+        requestContext: RequestContext?,
     ) {
         val middlewareClass = resolveMiddlewareHandler(t = t, configSource = configSource) ?: return
         val tokenBasedAuth = registerTokenAuthentication(middlewareClass = middlewareClass, t = t)
@@ -296,8 +294,10 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             t.functions.firstOrNull { it.name.toString() == middlewareFunctionName } ?: return null
 
         val construct =
-            middlewareFilterFunction.followPrevDFG { it is ConstructExpression }?.lastOrNull()
-                as? ConstructExpression
+            middlewareFilterFunction
+                .followPrevDFG { it is ConstructExpression }
+                ?.nodes
+                ?.lastOrNull() as? ConstructExpression
         val middlewareClass = construct?.instantiates as? RecordDeclaration
         return middlewareClass?.superClasses?.firstOrNull()?.recordDeclaration
     }
@@ -351,11 +351,13 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                 .filter { it.name.localName == "token" }
                 .flatMap { group -> group.options.filter { it.name.localName == "provider" } }
                 .singleOrNull() ?: return null
+        val tokenProviderField = tokenProvider.underlyingNode as? FieldDeclaration ?: return null
         val tokenProviderValue = getConfigOptionValue(conf = keystoneConf, optionName = "provider")
 
         return when (tokenProviderValue) {
             "fernet" -> {
-                val tokenBasedAuth = newTokenBasedAuth(tokenProvider, tokenProperty, connect = true)
+                val tokenBasedAuth =
+                    newTokenBasedAuth(tokenProviderField, tokenProperty, connect = true)
                 if (tokenValidation != null) {
                     newAuthenticate(tokenValidation, tokenBasedAuth, tokenProperty, connect = true)
                     tokenBasedAuth
@@ -385,7 +387,7 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
                     it is MemberExpression && it.name.localName == tokenProperty.name.localName
                 }
                 ?.fulfilled
-                ?.map { it.last() }
+                ?.map { it.nodes.last() }
 
         return tokenUsages
             ?.singleOrNull() { it.astParent?.name?.localName?.contains("fetch_token") == true }

@@ -77,7 +77,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 it is Configuration || it is ConfigurationGroup
             }
         return paths.fulfilled.mapNotNull {
-            val last = it.lastOrNull()
+            val last = it.nodes.lastOrNull()
             when (last) {
                 is Configuration -> {
                     val group = last.groups.find { it.name.localName == me.name.localName }
@@ -157,7 +157,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
             }
 
         // Gather components that import this ConfigOpts object
-        val components = paths.fulfilled.map { it.lastOrNull()?.component }.toSet()
+        val components = paths.fulfilled.map { it.nodes.lastOrNull()?.component }.toSet()
 
         // And create one configuration for each component. We will attach it to the construct
         // expression, so if someone is interested in which configuration he is using, he can
@@ -217,7 +217,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                     it is Configuration
                 }
                 ?.fulfilled
-                ?.mapNotNull { it.lastOrNull() as? Configuration }
+                ?.mapNotNull { it.nodes.lastOrNull() as? Configuration }
                 ?.toSet()
         return confs?.flatMap { conf -> handleRegisterOptsForConfiguration(registerOptsCall, conf) }
     }
@@ -241,7 +241,7 @@ class OsloConfigPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 it is CallExpression && it.name.toString() in optNames
             }
         paths?.fulfilled?.forEach { path ->
-            val optionCall = path.lastOrNull() as? CallExpression ?: return@forEach
+            val optionCall = path.nodes.lastOrNull() as? CallExpression ?: return@forEach
             var group = registerGroupIfNotExists(registerOptsCall, conf, ops)
 
             val keyArgument = optionCall.arguments.getOrNull(0)

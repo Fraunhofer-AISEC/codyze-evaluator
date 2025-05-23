@@ -19,6 +19,7 @@ import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
+import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteBefore
 import de.fraunhofer.aisec.openstack.concepts.auth.Policy
 import de.fraunhofer.aisec.openstack.concepts.auth.PolicyRule
 import de.fraunhofer.aisec.openstack.concepts.auth.Role
@@ -27,6 +28,7 @@ import de.fraunhofer.aisec.openstack.concepts.auth.newPolicyRule
 
 /** A pass to register policies for OpenStack components using the `oslo.policy` package. */
 @DependsOn(SymbolResolver::class)
+@ExecuteBefore(AuthorizationPass::class)
 class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun accept(p0: Component) {
         /** The entry point of `oslo.policy` to register default policies */
@@ -48,7 +50,7 @@ class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 it is InitializerListExpression
             }
         paths.fulfilled.mapNotNull {
-            val initializerListExpr = it.lastOrNull() as? InitializerListExpression
+            val initializerListExpr = it.nodes.lastOrNull() as? InitializerListExpression
             initializerListExpr?.initializers?.forEach { initializer ->
                 // Expect a `DocumentedRuleDefault` or `RuleDefault`
                 val ruleConstruct = initializer as? ConstructExpression ?: return@forEach

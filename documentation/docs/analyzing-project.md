@@ -85,24 +85,4 @@ A set of initial resources could be:
   Kotlin programming language. It lists all features of the language with various examples. The section "Concepts"
   should be the most relevant one.
 
-### Hints on writing queries
-
-**Handling of `null` values:**
-
-Kotlin differentiates between `null` and non-null values. To work with nullable values, use the `?` syntax/operator and
-implement checks using the `?.let` or `?:` operator rather than enforcing non-null values with `!!`. This ensures that
-all your queries will be evaluated even in the presence of null-values whereas using `!!` would immediately crash the
-execution. Keep in mind that the missing information in the check should likely result in a warning, which means you
-probably want to generate a failing result in this case (e.g. by creating a `QueryTree(false, ...)`).
-
-**Using variables:**
-
-Some data are likely to change frequently. Rather than hardcoding this information in the queries, you can use a
-variable. This makes it easier to update the information in subsequent usages of the same security statement or
-objectives.
-
-**Using extensions:**
-
-To keep the actual query small, we recommend getting familiar
-with [Kotlin Extensions](https://kotlinlang.org/docs/extensions.html) which can be used to extend existing classes with
-new functionality without having to inherit from the class. They can be used to add functions or properties.
+The files [./list-concepts-and-operations.md], [./writing-queries.md], and [./more-resources.md] provide further documentation on existing concepts and operations, writing queries with the Query API, and point to additional resources.
