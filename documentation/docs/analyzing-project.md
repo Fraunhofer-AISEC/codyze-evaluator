@@ -20,7 +20,121 @@ Currently, the OpenStack Checker requires a fixed project structure. It expects 
     ├── security-goals                    # In this directory, you can specify the security goals of your project in one or multiple yaml-file
         └── Your-Security-Goals.yaml      # This files contains a human-readable list of security objectives and statements
 
-## The security goals yaml
+## Defining an analysis project
+
+We provide a Domain-Specific Language (DSL) to define an analysis project.
+This DSL is used to specify the components of the TOE (Target of Evaluation) and the requirements it has to satisfy.
+It further allows to integrate the logic for tagging the code with concepts and operations, and to accept or reject assumptions.
+In the following, we describe how to configure the analysis project using the DSL.
+
+The outer element is the `project` element which has a `name` can contain the declarative blocks `tool`, `toe`, `requirements`, and `assumptions`.
+```kotlin
+project {
+    name = "This is the evaluation of OpenStack"
+
+    tool { ... }
+  
+    toe { ... }
+  
+    requirements { ... }
+  
+    assumptions { ... }
+}
+```
+
+The `tool` block can be used to fine-tune the configuration of the OpenStack Checker by registering additional passes or external libraries, among others.
+The full list of options can be found in the documentation of the `TranslationConfiguration.Builder` which can be accessed here.
+An example of a `tool` block is:
+```kotlin
+tool {
+    // Register additional passes
+    registerPass<MyPass>()
+
+    // Where can includes be found
+    includePath("src/integrationTest/resources/example/src/third-party/mylib")
+
+    // Should include be loaded?
+    loadIncludes(true)
+}
+```
+
+The `toe` block is used to specify the TOE and where its components can be found.
+The information provided here are used to translate the TOE to the CPG.
+The following example shows how to use this block:
+```kotlin
+toe {
+    // The name of the TOE
+    name = "My Mock TOE"
+    // The architecture of the TOE in terms of different components
+    architecture {
+        // The list of each component/module
+        modules {
+            // The first module. The parameter specifies the name of the module.
+            // The information provided here is used to configure the CPG translation.
+            module("module1") {
+                // The directory defines where the module's code can be found. 
+                directory = "src/module1"
+                // All files in this directory should be included in the analysis.
+                includeAll()
+                // We want to exclude the tests from the analysis. 
+                exclude("tests")
+            }
+        }
+    }
+}
+```
+
+The `requirements` block is used to specify the requirements the TOE has to satisfy.
+Each `requirement` listed here has a name and can be checked by automatically running a query, a manual assessment, or a combination of both.
+The manual assessment is specified by using the `byManualAssessment` function which requires a unique identifier as a parameter.
+The documentation of the check itself is not specified here but in another file.
+The automatic assessment is specified by using the `byQuery` function runs a check on the `TranslationResult` and must return a `QueryTree<Boolean>` object.
+```kotlin
+requirements {
+    // Each of the requirements has a name which is passed by the mandatory parameter.
+        requirement("Is Security Target Correctly specified") {
+            // The requirement is composed by exactly one statement.
+            // In this case, we have to assess manually, if the requirement is satisfied, what is done by the `byManualAssessment` function.
+            // This function must be configured with a unique identifier of the check to be performed.
+            byManualAssessment("SEC-TARGET")
+        }
+
+        requirement("Good Encryption") {
+            // This requirement is checked fully automatically by the query specified in the `byQuery` function.
+            // The lambda receives the translation result as a parameter and must return a `QueryTree<Boolean>` object.
+            // It uses the two helper functions `goodCryptoFunc` and `goodArgumentSize` which are part of the catalogue.
+            byQuery { result -> goodCryptoFunc(result) and goodArgumentSize(result) }
+        }
+  
+         requirement("Hybrid check") {
+            // This requirement is checked by a hybrid approach. The first part is checked by the query specified in the `byQuery` function.
+            // The second part is checked manually by the `byManualAssessment` function.
+            // Both parts are combined by the `and` operator which returns a QueryTree<Boolean>.
+            byQuery { result -> query(result) } and  byManualAssessment("HYBRID")
+         }
+    }
+```
+The block `assumptions` is used to specify the assumptions which have to hold so that the analysis is meaningful.
+It also allows to specify the state of the assumption (i.e., accepted, rejected, ignored or undecided).
+To do so, the functions `accept`, `reject`, `ignore` and `undecided` can be called with the UUID of the respective assumption.
+To list more assumptions for documentation purposes, the function `assumption` can be used.
+Note that this assumption does not have to be accepted manually and won't be included in the analysis or translation result.
+```kotlin
+assumptions {
+    // Documentation of an additional assumption which has to hold and is accepted.
+    assume { "We assume that everything is fine." }
+    // Accept the assumption with the UUID "00000000-0000-0000-0000-000000000000" which is part of the CPG or the queries.
+    accept("00000000-0000-0000-0000-000000000000")
+    // Reject the assumption with the UUID "00000000-0000-0000-0000-000000000001" which is part of the CPG or the queries. 
+    reject("00000000-0000-0000-0000-000000000001")
+    // Nobody has decided on the assumption with the UUID "00000000-0000-0000-0000-000000000002" which is part of the CPG or the queries.
+    undecided("00000000-0000-0000-0000-000000000002")
+    // Ignore the assumption with the UUID "00000000-0000-0000-0000-000000000003" which is part of the CPG or the queries.
+    ignore("00000000-0000-0000-0000-000000000003")
+}
+```
+
+## Legacy: The security goals yaml
 
 This file contains a human-readable list of security objectives and statements. The file is structured in a way that
 each security goal is a top-level entry, and each security goal can have multiple components, assumptions, and
@@ -54,7 +168,7 @@ objectives: # This is the list of security objectives which are relevant for you
       - cinder
 ```
 
-## Writing the security statements in the `query.kts` file
+## Legacy: Writing the security statements in the `query.kts` file
 
 The `query.kts` file represents a single security objective.
 It contains one function for each statement belonging to this objective. This function expects a `TranslationResult` as
