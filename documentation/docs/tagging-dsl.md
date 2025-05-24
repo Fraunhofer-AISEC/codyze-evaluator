@@ -8,10 +8,11 @@ The tagging DSL is defined in the module `codyze-core` in the file `codyze-core/
 
 ## Where to add Concepts and Tags
 
-The user can define own `Concept`s and `Operation`s in files with the ending `.concept.kts`.
-These are kotlin script files which are executed during the translation of the source code.
-
-TODO @oxisto: is there a difference to `query.kts`? I assume, they won't be assessed in-time to feed them into the Concept Tagging Pass?
+The user can define own `Concept`s and `Operation`s in any kotlin file within the analysis project.
+We recommend to first check the catalog of existing concepts and operations in the file and, if possible, to extend the catalog with the new concepts and operations instead of creating many project-specific ones.
+The project-specific tagging logic can be added in the file `tagging.codyze.kts` in the project root directory.
+It is also possible to create custom passes if the tagging logic is too complex for the DSL.
+This is a kotlin script files which are executed during the translation of the source code.
 
 ## Tagging the code
 
@@ -23,6 +24,14 @@ tag {
     each<NodeType>("name").with { Concept() }
     // Tagging each node of the type NodeType and specialProperty set to true with the concept Concept
     each<NodeType>(predicate = { it.specialProperty == true } ).with { Concept() }
+    // Tagging each node of the type NodeType and name "name" with the concept Concept
+    each<NodeType>("name").with {
+        // Starting from each of the selected nodes of NodeType (they are kept in `node`), you can access specific properties and propagate tags to them.
+        // This is useful, e.g., if you want to tag specific arguments of a function call.
+        propagate { node.attribute }.with { OtherConcept() }
+        
+        Concept()
+    }
 }
 ```
 
