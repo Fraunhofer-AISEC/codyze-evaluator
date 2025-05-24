@@ -122,12 +122,4 @@ open class Wireguard_CryptoKeyRoutingTable(un: Node?) : Concept(un)
 
 open class Wireguard_KeyStore
 
-/*
-    Generic Tags & Queries
-*/
 
-// All Blockcipherkeys are secret
-// A blockcipherkey must be the result of a KeyGenerator
-// If there is a write-operation into a randomness-object, it must happen inside an
-// "entropy-preserving-function" (i.e. during key derivation: KEMs expect a 256 Bit string,
-// Randomness-Sources do not output these)
