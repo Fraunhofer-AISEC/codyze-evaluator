@@ -1,3 +1,6 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
 package de.fraunhofer.aisec.openstack.queries.encryption
 
 import de.fraunhofer.aisec.cpg.TranslationResult
@@ -23,10 +26,9 @@ import de.fraunhofer.aisec.cpg.query.*
  */
 fun HttpEndpoint.isSecureKeyProvider(): Boolean {
     return httpMethod == HttpMethod.GET &&
-            path == "/v1/secrets/{secret_id}/payload" &&
-            this.underlyingNode?.firstParentOrNull<Component> {
-                it.name.localName == "barbican"
-            } != null
+        path == "/v1/secrets/{secret_id}/payload" &&
+        this.underlyingNode?.firstParentOrNull<Component> { it.name.localName == "barbican" } !=
+            null
 }
 
 /**
@@ -37,20 +39,22 @@ fun HttpEndpoint.isSecureKeyProvider(): Boolean {
  * - Writing to a log
  * - Printing to the console (via a call expression `println`)
  * - Executing a command (via a call expression `execute`)
- * - Being exposed via an Http endpoint which is not explicitly whitelisted by being a "secure key provider"
+ * - Being exposed via an Http endpoint which is not explicitly whitelisted by being a "secure key
+ *   provider"
  *
  * @return `true` if this [Node] can be used to leak data.
  */
 fun Node.dataLeavesComponent(): Boolean {
     return this is WriteFile ||
-            this is LogWrite ||
-            (this is HttpEndpoint && !this.isSecureKeyProvider()) ||
-            (this is CallExpression && (this.name.localName == "println" || this.name.localName == "execute"))
+        this is LogWrite ||
+        (this is HttpEndpoint && !this.isSecureKeyProvider()) ||
+        (this is CallExpression &&
+            (this.name.localName == "println" || this.name.localName == "execute"))
 }
 
 /**
- * Given a customer-managed key K stored in Barbican, it must not be
- * leaked via printing, logging, file writing or command execution input.
+ * Given a customer-managed key K stored in Barbican, it must not be leaked via printing, logging,
+ * file writing or command execution input.
  */
 fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
     // The result of a `GetSecret` operation must not have a data flow
@@ -70,7 +74,8 @@ fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
                     scope = Interprocedural(),
                     // Use the function `dataLeavesComponent` defined above to represent a sink.
                     predicate = { it.dataLeavesComponent() },
-                ) // If this returns a QueryTree<Boolean> with value `true`, a dataflow may be present.
+                ) // If this returns a QueryTree<Boolean> with value `true`, a dataflow may be
+                // present.
             ) // We want to negate this result because such a flow must not happen.
         }
 
@@ -78,40 +83,45 @@ fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
 }
 
 /**
- * Given a customer-managed key K used for disk encryption, K must only be accessible via the API endpoint responsible
- * to provide keys.
+ * Given a customer-managed key K used for disk encryption, K must only be accessible via the API
+ * endpoint responsible to provide keys.
  */
 fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTree<Boolean> {
     val tree =
         result.allExtended<DiskEncryption> { encryption ->
             // We start with a disk encryption operation and check if the key is present.
             encryption.key?.let { key ->
-                // This key must originate from a secure key provider. In our case, this is the Barbican API endpoint.
+                // This key must originate from a secure key provider. In our case, this is the
+                // Barbican API endpoint.
                 // We perform this check with a backward data flow analysis.
                 dataFlow(
                     // We start our data flow analysis at the encryption operation.
                     startNode = encryption,
-                    // We want to make sure that each DFG-path leads us to the Barbican API endpoint, so we use a Must analysis.
+                    // We want to make sure that each DFG-path leads us to the Barbican API
+                    // endpoint, so we use a Must analysis.
                     type = Must,
                     // We want to follow the data flow in the backward direction.
                     direction = Backward(GraphToFollow.DFG),
-                    // These arguments tell that we want to perform a context- and field sensitive analysis.
+                    // These arguments tell that we want to perform a context- and field sensitive
+                    // analysis.
                     // This is actually the default setting, so it's optional to specify this.
                     sensitivities = FieldSensitive + ContextSensitive,
-                    // We want to consider all paths across functions, i.e., perform an interprocedural analysis.
+                    // We want to consider all paths across functions, i.e., perform an
+                    // interprocedural analysis.
                     scope = Interprocedural(),
                     // The requirement is satisified if the key comes from a secure key provider.
-                    // We use the extension function `isSecureKeyProvider` defined above to perform this check.
+                    // We use the extension function `isSecureKeyProvider` defined above to perform
+                    // this check.
                     predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
                 )
             }
-            // If there's no key present for the encryption, there's something wrong.
-            // In this case, we create a QueryTree with value `false` manually.
+                // If there's no key present for the encryption, there's something wrong.
+                // In this case, we create a QueryTree with value `false` manually.
                 ?: QueryTree(
                     value = false,
                     children = mutableListOf(QueryTree(encryption)),
                     stringRepresentation = "encryptionOp.concept.key is null",
-                    node = encryption
+                    node = encryption,
                 )
         }
 
@@ -119,36 +129,44 @@ fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTr
 }
 
 /**
- * Given a device encryption operation O, the key K used in O must be deleted from memory after the operation is completed.
+ * Given a device encryption operation O, the key K used in O must be deleted from memory after the
+ * operation is completed.
  */
 fun keyIsDeletedFromMemoryAfterUse(result: TranslationResult): QueryTree<Boolean> {
-    val tree = result.allExtended<DiskEncryption> { diskEncryption ->
-        // We start with the disk encryption operation and check if the key is present.
-        // For this key, we get all `GetSecret` operations, i.e., all operations which
-        // may be used to generate the secret key.
-        val subQueries = diskEncryption.key?.ops?.filterIsInstance<GetSecret>()?.map { secret ->
-            // For each secret, we check if it is de-allocated.
-            // The function `alwaysFlowsTo` checks if there's a data flow to a node fulfilling
-            // the predicate on every possible execution path starting at the node `secret`.
-            secret.alwaysFlowsTo(
-                // We perform an interprocedural analysis.
-                scope = Interprocedural(),
-                // We do not want to track unreachable EOG paths and we perform a context- and field-sensitive analysis.
-                sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                // We require a de-allocate operation to be present which affects the secret.
-                predicate = { it is DeAllocate },
+    val tree =
+        result.allExtended<DiskEncryption> { diskEncryption ->
+            // We start with the disk encryption operation and check if the key is present.
+            // For this key, we get all `GetSecret` operations, i.e., all operations which
+            // may be used to generate the secret key.
+            val subQueries =
+                diskEncryption.key?.ops?.filterIsInstance<GetSecret>()?.map { secret ->
+                    // For each secret, we check if it is de-allocated.
+                    // The function `alwaysFlowsTo` checks if there's a data flow to a node
+                    // fulfilling
+                    // the predicate on every possible execution path starting at the node `secret`.
+                    secret.alwaysFlowsTo(
+                        // We perform an interprocedural analysis.
+                        scope = Interprocedural(),
+                        // We do not want to track unreachable EOG paths and we perform a context-
+                        // and field-sensitive analysis.
+                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
+                        // We require a de-allocate operation to be present which affects the
+                        // secret.
+                        predicate = { it is DeAllocate },
+                    )
+                }
+            // Since there might be multiple `GetSecret` operations, we need to check if all of them
+            // are de-allocated.
+            // We do so by creating a single QueryTree object with value `true` if the query above
+            // is fulfilled for all
+            // `GetSecret` operations. If the key was `null`, the result will be `false`.
+            QueryTree(
+                value = subQueries?.all { it.value } ?: false,
+                // Store the sub-queries into the list of children.
+                children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
+                stringRepresentation = "All keys must be deleted",
+                node = diskEncryption,
             )
         }
-        // Since there might be multiple `GetSecret` operations, we need to check if all of them are de-allocated.
-        // We do so by creating a single QueryTree object with value `true` if the query above is fulfilled for all
-        // `GetSecret` operations. If the key was `null`, the result will be `false`.
-        QueryTree(
-            value = subQueries?.all { it.value } ?: false,
-            // Store the sub-queries into the list of children.
-            children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
-            stringRepresentation = "All keys must be deleted",
-            node = diskEncryption
-        )
-    }
     return tree
 }

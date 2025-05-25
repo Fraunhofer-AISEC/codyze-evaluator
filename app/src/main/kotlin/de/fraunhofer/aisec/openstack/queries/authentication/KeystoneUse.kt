@@ -1,3 +1,6 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
 package de.fraunhofer.aisec.openstack.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
