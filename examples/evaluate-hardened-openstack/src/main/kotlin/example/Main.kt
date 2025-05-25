@@ -3,8 +3,9 @@
  */
 package example
 
-import de.fraunhofer.aisec.codyze.evaluateWithCodyze
+import de.fraunhofer.aisec.openstack.evaluateWithCodyze
 
 fun main() {
-    evaluateWithCodyze("project.codyze.kts")
+    val result = evaluateWithCodyze("project.codyze.kts")
+    println(result)
 }

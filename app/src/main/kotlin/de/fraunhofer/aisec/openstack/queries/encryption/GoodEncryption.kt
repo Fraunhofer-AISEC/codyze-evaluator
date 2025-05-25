@@ -7,7 +7,6 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.*
 
-
 /**
  * This query enforces the following statement: "Given a block device encryption E, if an encryption
  * algorithm A is employed, then A must be a state-of-the-art cryptographic algorithm (e.g., BSI
