@@ -1,9 +1,13 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
+package de.fraunhofer.aisec.openstack.queries.authentication
+
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
-
 
 fun useKeystoneForAuthentication(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<ConfigurationOptionSource>(

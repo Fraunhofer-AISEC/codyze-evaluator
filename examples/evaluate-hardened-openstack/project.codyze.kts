@@ -5,6 +5,8 @@ import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncryption
 import example.queries.verySpecificQuery
 
 project {
+    name = "Evaluation Project for Hardened OpenStack"
+
     /**
      * This block describes the target of evaluation. It is used to define the properties of the ToE
      * (e.g., its name), its architecture, and the requirements that need to be checked.
@@ -36,7 +38,9 @@ project {
          * automatically checked by a query or by manual inspection.
          */
         requirements {
-            requirement("Check Security Target Description for Consistency") { byManualCheck() }
+            requirement("Check Security Target Description for Consistency") {
+                byManualAssessment("SEC-TARGET")
+            }
             requirement("State-of-the-Art Encryption Algorithm") {
                 byQuery { result -> stateOfTheArtEncryption(result) }
             }
