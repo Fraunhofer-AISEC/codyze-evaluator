@@ -1,48 +1,47 @@
 # OpenStack Ecosystem Security Analysis
 
-The purpose of this analysis is to provide a guideline to assessing the security of OpenStack's ecosystem. It underscores that choosing a cloud platform is a fundamental decision that influences many subsequent choices and which is dependent on many variables. Therefore, we also analyze the OpenStack ecosystem regarding the context it provides for good overall security, e.g., to address potential vulnerabilities.
+The purpose of this analysis is to provide a guideline to assessing the security of OpenStack's ecosystem. It underscores that choosing a cloud platform is a fundamental decision that influences many subsequent choices and which is dependent on many variables, especially its overall security posture. In this document, we therefore analyze the OpenStack ecosystem regarding the context it provides for good overall security, e.g., to address new vulnerabilities and maintain a healthy reviewer community.
 
-The analysis methodology for the OpenStack security ecosystem focuses on examining the broader context surrounding the OpenStack system. It seeks to clarify essential questions such as which members have the authority to make decisions, the long-term goals of the project, and the rules or voting processes regarding changes, including merge requests or more significant conceptual modifications. Additionally, the quality of the publicly accessible toolchain is scrutinized, addressing how dependencies are managed to prevent supply chain attacks, how high code quality is ensured through build pipelines, and how authorship of contributions to the codebase is verified. The analysis also aims to identify further potential questions within this domain and provide answers to them.
+The analysis methodology for the OpenStack security ecosystem focuses on examining the broader context surrounding the OpenStack system. It seeks to clarify essential questions such as which members have the authority to make decisions, the long-term goals of the project, and the rules or voting processes regarding changes, including merge requests or more significant conceptual modifications. Additionally, the quality of the publicly accessible toolchain is scrutinized, addressing how dependencies are managed to prevent supply chain attacks, how high code quality is ensured through build pipelines, and how authorship of contributions to the codebase is verified. This document first and foremost provides guidelines that enable users to conduct the security analysis themselves, but it also provides sample analyses.
 
 This document is divided into two major parts: First, a general description of multiple OpenStack ecosystem elements, like the vulnerability management process and the contribution processes. Second, a hands-on guideline for evaluating several concrete security criteria, including appropriate tooling that can be used to (semi-)automatically conduct the checks.
 
 ## Security-Relevant Elements in the OpenStack Ecosystem 
 
 ### Contribution Process
-The OpenStack contribution process is a transparent framework that aims as balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. 
+The OpenStack contribution process is a transparent framework that aims at balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. In the following, the contribution process is briefly explained to provide an initial understanding of what needs to be done to get a contribution accepted, for example in case a new feature is desired to be introduced.
 
 The starting point for OpenStack contributors is its [Contributor Guide](https://docs.openstack.org/contributors/code-and-documentation/index.html).
 
-The most important aspects of being able to contribute to an openstack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on openstack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between openstack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
+The most important aspects of being able to contribute to an OpenStack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on OpenStack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between OpenStack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
 
 Major steps for getting a contribution accepted:
 
 1. Commit changes according to [guideline](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#committing-changes)
 2. Submit change for review with `git review`
 3. Pass initial [automated testing](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#automated-testing): get a `Verified +1` by passing the check-pipeline
-4. Update change according to test-results and [peer-review process](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
+4. Update change according to test results and [peer-review process](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
 5. If there are positive `+1` reviews, try to get attention of core-developers via [IRC](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
 6. Get `+2` reviews from two different core-developers and a `Workflow +1` from one core developer in order to trigger the `gate-pipeline`
 7. If the change passes the [gate](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review), it is merged automatically
 
 ### CI/CD Architecture
-The CI/CD architecture employs automated testing pipelines that run unit tests, integration tests, and security checks on every code change before it is merged. This systematic approach helps identify vulnerabilities early in the development cycle, reducing the risk of security issues in production. Tools like Zuul facilitate this automation, ensuring that only code that passes all tests is deployed.
+The CI/CD architecture employs automated testing pipelines that run unit tests, integration tests, and security checks on every code change before it is merged. This systematic approach helps to identify vulnerabilities early in the development cycle, reducing the risk of security issues in production. Tools like Zuul facilitate this automation, ensuring that only code that passes all tests is deployed.
 
-- Openstack development infrastructure: 
+Below is an overview of Openstack's development infrastructure: 
 
 ![](./images/Overview_Openstack_Devops.svg)
 
-- High level processes for code changes:
-    * Gerrit based workflow:
-        1. Submit change for review
-        2. review process:
-            * code-review: +1 one vote from normal reviewers
-            * code-review: +2 vote from core reviewers (at least one, normally two needed for approval)
-            * verified: +1 automated testing (ZUUL)
-            * workflow: +1 (only core-reviewers) -> indicates approval for gate pipeline
-        3. ZUUL merges changes automatically if prerequisites are met
+- The general processes for code changes is structured as follows. It uses the Gerrit system:
+  1. Submit change for review
+  2. review process:
+      * code-review: +1 one vote from normal reviewers
+      * code-review: +2 vote from core reviewers (at least one, normally two needed for approval)
+      * verified: +1 automated testing (ZUUL)
+      * workflow: +1 (only core-reviewers) -> indicates approval for gate pipeline
+  3. ZUUL merges changes automatically if prerequisites are met
 
-- OpenStack Zuul config hierarchy (arrows symbolize dependencies):
+The OpenStack Zuul config hierarchy divides component-specific configurations and global configurations, and looks as follows (arrows symbolize dependencies):
   - [zuul/zuul-jobs](https://opendev.org/zuul/zuul-jobs): opendev-global definitions / templates for zuul jobs and roles
   - [openstack-zuul-jobs](https://opendev.org/openstack/openstack-zuul-jobs): OpenStack-global definitions / templates for zuul-jobs
   - [project-config](https://opendev.org/openstack/project-config): central repository for all infrastructure related OpenStack configs (two folders: `zuul.d`, `zuul`)
@@ -66,14 +65,11 @@ For private reports, patches are developed privately and pre-approved by core re
  
 ![The OpenStack Vulnerability Management Process](./images/vmt-process.png)
 
-How to report a security issue:  
-See the [official recommendations](https://security.openstack.org/reporting.html).
+See the [official recommendations](https://security.openstack.org/reporting.html) on how to report a security issue. The major aspects about this reporting process to keep in mind are the following:
+- Ensure private reporting by either sending an encrypted email or checking the respective `private` and `security related` checkboxes for a [bug report](https://security.openstack.org/reporting.html)
+- Reports are embargoed for a maximum of 90 days before being made public, regardless the resolution state
 
-Major aspects:
-- assure private reporting by either sending an encrypted email or checking the respective `private` and `security related` checkboxes for a [bug report](https://security.openstack.org/reporting.html)
-- reports are embargoed for a maximum of 90 days before being made public, regardless the resolution state
-
-Example security bug report for `nova`: <https://bugs.launchpad.net/nova/+bug/2071734>
+See the following example security bug report for `nova`: <https://bugs.launchpad.net/nova/+bug/2071734>
 
 ## Guideline for Security Assessment
 In the following, multiple ecosystem-related security criteria are described and analyzed for various OpenStack components. Some of the checks are based on the [Open Source Security Foundation checks](https://scorecard.dev/#the-checks) for open-source repositories. This OSSF scorecard, however, cannot be applied to OpenStack components without limitations. Below, a table shows which of the automated OSSF checks can be used for the OpenStack GitHub mirrors.
