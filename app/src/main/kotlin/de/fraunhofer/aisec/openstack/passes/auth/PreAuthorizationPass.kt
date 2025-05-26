@@ -13,6 +13,10 @@ import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteBefore
 import de.fraunhofer.aisec.cpg.passes.markDirty
 
+/**
+ * A preprocessing pass that assigns the type to subscript expressions accessing the request
+ * context, specifically `req.environ['cinder.context']`, before the AuthorizationPass is executed.
+ */
 @ExecuteBefore(AuthorizationPass::class)
 class PreAuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun accept(t: Component) {
