@@ -41,10 +41,13 @@ fun MetadataProvider.newAuthorize(
     concept: Authorization,
     action: Node,
     targets: Set<Node>,
+    exception: Node,
     connect: Boolean,
 ) =
     newOperation(
-        { concept -> Authorize(concept = concept, action = action, targets = targets) },
+        { concept ->
+            Authorize(concept = concept, action = action, targets = targets, exception = exception)
+        },
         underlyingNode = underlyingNode,
         concept = concept,
         connect = connect,
