@@ -45,11 +45,20 @@ fun HttpEndpoint.isSecureKeyProvider(): Boolean {
  * @return `true` if this [Node] can be used to leak data.
  */
 fun Node.dataLeavesComponent(): Boolean {
+    val whitelist =
+        listOf(
+            "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
+            "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
+        )
+
     return this is WriteFile ||
         this is LogWrite ||
-        (this is HttpEndpoint && !this.isSecureKeyProvider()) ||
-        (this is CallExpression &&
-            (this.name.localName == "println" || this.name.localName == "execute"))
+        ((this is CallExpression) &&
+            (this.name.localName == "write" ||
+                this.name.localName == "println" ||
+                this.name.localName == "execute" ||
+                this.name.localName == "log")) ||
+        (this is HttpEndpoint && this.name.toString() !in whitelist)
 }
 
 /**
