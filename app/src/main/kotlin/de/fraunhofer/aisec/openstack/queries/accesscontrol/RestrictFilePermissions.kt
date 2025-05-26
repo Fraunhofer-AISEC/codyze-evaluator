@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.accesscontrol
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow

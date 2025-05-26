@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.encryption
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -20,7 +18,7 @@ fun stateOfTheArtEncAlgorithms(tr: TranslationResult): QueryTree<Boolean> {
     val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
 
     // The predicate must hold for all DiskEncryption concepts.
-    return tr.allExtended<DiskEncryption> {
+    return tr.allExtended<DiskEncryption>() {
         // The cipher's name must be in the list of allowed ciphers.
         // We use the Query-API's infix function `IN` for the check.
         // Since this function requires a QueryTree object as input,

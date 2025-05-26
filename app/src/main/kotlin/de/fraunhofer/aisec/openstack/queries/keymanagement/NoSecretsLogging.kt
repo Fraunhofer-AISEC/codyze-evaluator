@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.keymanagement
-
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*

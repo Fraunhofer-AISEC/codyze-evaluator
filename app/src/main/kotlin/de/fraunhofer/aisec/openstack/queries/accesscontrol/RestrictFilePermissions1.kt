@@ -1,28 +1,12 @@
+package de.fraunhofer.aisec.openstack.queries.accesscontrol
+
+import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.Backward
+import de.fraunhofer.aisec.cpg.graph.GraphToFollow
+import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.file.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
-
-/**
- * Restrictive file permissions should be set.
- *
- * This query has the following interpretation of this statement:
- * If data is written to a file by a `WriteFile` operation, the
- * file mask must be set to `0o600` before the write-operation.
- */
-/*fun statement1(tr: TranslationResult): QueryTree<Boolean> {
-    return tr.allExtended<WriteFile>(
-        mustSatisfy = { writeOp ->
-            executionPath(
-                startNode = writeOp,
-                type = Must,
-                direction = Backward(GraphToFollow.EOG),
-                scope = Interprocedural(),
-                predicate = {
-                    it is SetFileMask && it.mask == 0x180L /* 0x180 == 0o600 */
-                },
-            )
-        }
-    )
-}*/
+import de.fraunhofer.aisec.cpg.query.*
 
 /**
  * Restrictive file permissions should be set.
@@ -32,7 +16,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
  * file by a `WriteFile` operation, the file mask must be set to
  * `0o600` before the write-operation.
  */
-fun statement1(tr: TranslationResult): QueryTree<Boolean> {
+fun restrictFilePermissions(tr: TranslationResult): QueryTree<Boolean> {
     // The requirement has to hold for all `WriteFile` operations where the
     // input has an incoming dataflow from a `GetSecret` operation.
     return tr.allExtended<WriteFile>(

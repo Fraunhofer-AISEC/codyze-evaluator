@@ -1,10 +1,9 @@
-package de.fraunhofer.aisec.openstack.queries.authentication
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
+
 
 /**
  * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)

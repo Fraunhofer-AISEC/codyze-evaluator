@@ -1,6 +1,5 @@
-package de.fraunhofer.aisec.openstack.queries.authentication
-
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.assumptions.Assumption
 import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
@@ -86,7 +85,6 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
 }
 
 /**
- * // Todo: Add documentation on which security statement is enforced
  * Checks if all [HttpEndpoint]s in the [TranslationResult] are either in the list of endpoints that do not require authentication or have a valid (in terms of secure) token-based authentication in-place.
  */
 fun doNotRequireOrHaveTokenBasedAuthentication(tr: TranslationResult): QueryTree<Boolean> {

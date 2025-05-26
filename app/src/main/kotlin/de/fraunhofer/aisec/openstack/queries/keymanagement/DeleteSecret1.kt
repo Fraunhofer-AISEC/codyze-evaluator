@@ -1,5 +1,15 @@
+package de.fraunhofer.aisec.openstack.queries.keymanagement
+
+import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.ContextSensitive
+import de.fraunhofer.aisec.cpg.graph.FieldSensitive
+import de.fraunhofer.aisec.cpg.graph.FilterUnreachableEOG
+import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
+import de.fraunhofer.aisec.cpg.query.QueryTree
+import de.fraunhofer.aisec.cpg.query.allExtended
+import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
 
 /**
  * Delete secret data.
@@ -8,7 +18,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
  * If data is retrieved from a `GetSecret` operation, it must be
  * deleted on each outgoing EOG-path.
  */
-fun statement1(tr: TranslationResult): QueryTree<Boolean> {
+fun deleteSecretOnEOGPaths(tr: TranslationResult): QueryTree<Boolean> {
     // The requirement must hold for all data introduced by a `GetSecret` operation.
     return tr.allExtended<GetSecret>(
         // There are no further filters for the starting point of the query.

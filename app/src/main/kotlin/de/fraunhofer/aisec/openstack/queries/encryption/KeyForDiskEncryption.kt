@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.encryption
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption

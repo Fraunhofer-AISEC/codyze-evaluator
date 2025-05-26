@@ -1,3 +1,7 @@
+package de.fraunhofer.aisec.openstack.queries.encryption
+
+import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
@@ -6,6 +10,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.query.*
 
 /**
  * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
@@ -47,7 +52,7 @@ fun Node.dataLeavesComponent(): Boolean {
  * Given a customer-managed key K stored in Barbican, it must not be
  * leaked via printing, logging, file writing or command execution input.
  */
-fun statement1(tr: TranslationResult): QueryTree<Boolean> {
+fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
     // The result of a `GetSecret` operation must not have a data flow
     // to a node which can be used to leak sensitive data according to
     // the function `dataLeavesComponent`.
@@ -73,9 +78,10 @@ fun statement1(tr: TranslationResult): QueryTree<Boolean> {
 }
 
 /**
- * Given a customer-managed key K used for disk encryption, K must only be accessible via the Barbican API endpoint.
+ * Given a customer-managed key K used for disk encryption, K must only be accessible via the API endpoint responsible
+ * to provide keys.
  */
-fun statement2(result: TranslationResult): QueryTree<Boolean> {
+fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTree<Boolean> {
     val tree =
         result.allExtended<DiskEncryption> { encryption ->
             // We start with a disk encryption operation and check if the key is present.
@@ -115,7 +121,7 @@ fun statement2(result: TranslationResult): QueryTree<Boolean> {
 /**
  * Given a device encryption operation O, the key K used in O must be deleted from memory after the operation is completed.
  */
-fun statement3(result: TranslationResult): QueryTree<Boolean> {
+fun keyIsDeletedFromMemoryAfterUse(result: TranslationResult): QueryTree<Boolean> {
     val tree = result.allExtended<DiskEncryption> { diskEncryption ->
         // We start with the disk encryption operation and check if the key is present.
         // For this key, we get all `GetSecret` operations, i.e., all operations which

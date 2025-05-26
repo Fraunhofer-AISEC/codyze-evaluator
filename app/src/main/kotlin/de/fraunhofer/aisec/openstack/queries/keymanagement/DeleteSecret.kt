@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.keymanagement
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.ContextSensitive
 import de.fraunhofer.aisec.cpg.graph.FieldSensitive
@@ -33,7 +31,7 @@ fun deleteSecretOnEOGPaths(tr: TranslationResult): QueryTree<Boolean> {
             secret.alwaysFlowsTo(
                 // We perform an interprocedural analysis.
                 scope = Interprocedural(),
-                // We do not want to track unreachable EOG paths and we perform a
+                // We do not want to track unreachable EOG paths, and we perform a
                 // context- and field-sensitive analysis.
                 // It would be possible to add `Implicit` to consider implicit dataflows.
                 sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,

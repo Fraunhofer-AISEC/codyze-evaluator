@@ -1,5 +1,3 @@
-package de.fraunhofer.aisec.openstack.queries.encryption
-
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -19,7 +17,7 @@ fun transportEncryptionForKeys(result: TranslationResult): QueryTree<Boolean> {
         // Since this function requires a QueryTree object as input,
         // we use manually create one using the QueryTree of the isTLS
         // property.
-        QueryTree(request.concept.isTLS) eq  true
+        QueryTree(request.concept.isTLS) eq true
     }
 
     return tree

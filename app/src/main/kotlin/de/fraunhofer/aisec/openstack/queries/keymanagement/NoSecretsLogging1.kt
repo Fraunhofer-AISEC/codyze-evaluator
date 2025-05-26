@@ -1,7 +1,10 @@
+package de.fraunhofer.aisec.openstack.queries.keymanagement
+
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
+import de.fraunhofer.aisec.cpg.query.*
 
 /**
  * Secrets must not be logged.
@@ -13,7 +16,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
  * If this is not desired, an option might be to replace `Secret` with the `GetSecret` operation.
  * Another option could be to use the `startNode = secret.underlyingNode`.
  */
-fun statement1(tr: TranslationResult): QueryTree<Boolean> {
+fun noLoggingOfSecrets(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<Secret> { secret ->
         not(
             dataFlow(
