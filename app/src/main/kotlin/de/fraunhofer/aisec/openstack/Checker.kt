@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.options.default
 import com.github.ajalt.clikt.parameters.options.option
 import com.github.ajalt.clikt.parameters.types.boolean
 import de.fraunhofer.aisec.codyze.AnalysisProject
+import de.fraunhofer.aisec.codyze.AnalysisResult
 import de.fraunhofer.aisec.codyze.compliance.*
 import de.fraunhofer.aisec.codyze.console.ConsoleService
 import de.fraunhofer.aisec.codyze.console.startConsole
@@ -21,6 +22,8 @@ import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import java.io.File
+import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import org.neo4j.driver.GraphDatabase
 import org.neo4j.driver.Session
 
@@ -74,6 +77,26 @@ class OpenstackCheckerCommand : ProjectCommand() {
             }
         }
     }
+}
+
+fun evaluateWithCodyze(scriptFile: String): AnalysisResult? {
+    val absoluteFile = Path(scriptFile).absolutePathString()
+    val project =
+        AnalysisProject.fromScript(absoluteFile) {
+            it.registerPass<SecretPass>()
+            it.registerPass<DiskEncryptionPass>()
+            it.registerPass<PythonMemoryPass>()
+            it.registerPass<HttpPecanLibPass>()
+            it.registerPass<HttpWsgiPass>()
+            it.registerPass<AuthenticationPass>()
+            it.registerPass<SecureKeyRetrievalPass>()
+            it.registerPass<MakeThingsWorkPrototypicallyPass>()
+            it.registerPass<OsloConfigPass>()
+            it.registerPass<IniFileConfigurationSourcePass>()
+            it.registerPass<PythonEntryPointPass>()
+            it.registerPass<StevedoreDynamicLoadingPass>()
+        }
+    return project?.analyze()
 }
 
 fun main(args: Array<String>) {
