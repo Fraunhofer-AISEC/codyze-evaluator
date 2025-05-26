@@ -28,6 +28,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.getOverlaysByPrevDFG
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import de.fraunhofer.aisec.cpg.passes.concepts.with
 import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
+import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
@@ -445,7 +446,7 @@ class AuthenticationPassTest {
         return this.allExtended<Authenticate>(
             mustSatisfy = { token ->
                 val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
-                val hasTokenDataFlow = tokens.any { it.token == token.credential }
+                val hasTokenDataFlow = tokens.all { it.token == token.credential }
                 QueryTree(value = hasTokenDataFlow, node = token)
             }
         )
@@ -458,6 +459,7 @@ class AuthenticationPassTest {
     fun Authenticate.hasDataFlowIntoContext(): QueryTree<Boolean> {
         return dataFlow(
             startNode = this.credential,
+            type = Must,
             predicate = { target ->
                 target.overlays.filterIsInstance<ExtendedRequestContext>().any {
                     it.userInfo?.userId != null &&
