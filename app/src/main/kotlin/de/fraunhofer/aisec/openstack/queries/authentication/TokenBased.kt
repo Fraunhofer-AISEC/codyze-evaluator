@@ -96,14 +96,9 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
 }
 
 /**
- * <<<<<<< HEAD Checks if all [HttpEndpoint]s in the [TranslationResult] are either in the list of
- * endpoints that do not require authentication or have a valid (in terms of secure) token-based
- * authentication in-place.
- * =======
  * // Todo: Add documentation on which security statement is enforced Checks if all [HttpEndpoint]s
  * in the [TranslationResult] are either in the list of endpoints that do not require authentication
- * or have a valid (in terms of secure) token-based authentication in-place. >>>>>>>
- * 241044b45df6da98f9d0016cc0956941c27bad82
+ * or have a valid (in terms of secure) token-based authentication in-place.
  */
 fun doNotRequireOrHaveTokenBasedAuthentication(tr: TranslationResult): QueryTree<Boolean> {
     // Is a valid token provider configured?
