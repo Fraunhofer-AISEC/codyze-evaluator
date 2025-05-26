@@ -19,11 +19,11 @@ objectives:
     description: All endpoints have token-based authentication.
     statements:
       - Token-based authentication is set for all endpoints.
-#
-#  - name: Tie access token context to the user's domain/project
-#    description: Access tokens must be tied to the user’s domain and project identifiers.
-#    statements:
-#      - When an access token is generated, its context is tied to the user’s domain/project.
+
+  - name: Tie access token context to the users domain
+    description: Access tokens must be tied to the user’s domain and project identifiers.
+    statements:
+      - When an access token is validated, its context is tied to the user’s domain/project.
 #
 #  - name: Sensitive information restricted to user´s domain
 #    description: Access to sensitive information must be restricted to the user's domain

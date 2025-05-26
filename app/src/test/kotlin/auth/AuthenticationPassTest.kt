@@ -362,7 +362,6 @@ class AuthenticationPassTest {
 
     @Test
     fun testAccessToken() {
-        // When an access token is validated, its context is tied to the user’s domain/project
         val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
@@ -433,12 +432,16 @@ class AuthenticationPassTest {
         assertNotNull(result)
         val q =
             result.allExtended<Authenticate>(
-                mustSatisfy = { it.hasDataFlowIntoAuthenticate() and it.hasDataFlowIntoContext() }
+                mustSatisfy = { it.usesSameTokenAsCredential() and it.hasDataFlowIntoContext() }
             )
         assertTrue(q.value)
     }
 
-    fun Authenticate.hasDataFlowIntoAuthenticate(): QueryTree<Boolean> {
+    /**
+     * Checks if any [Authenticate] uses a [TokenBasedAuth] where the token is equal to the
+     * credential of that [Authenticate].
+     */
+    fun Authenticate.usesSameTokenAsCredential(): QueryTree<Boolean> {
         return this.allExtended<Authenticate>(
             mustSatisfy = { token ->
                 val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
@@ -448,6 +451,10 @@ class AuthenticationPassTest {
         )
     }
 
+    /**
+     * Checks if there is a data flow from the credential of this [Authenticate] into an
+     * [ExtendedRequestContext], where user-related info is set.
+     */
     fun Authenticate.hasDataFlowIntoContext(): QueryTree<Boolean> {
         return dataFlow(
             startNode = this.credential,
