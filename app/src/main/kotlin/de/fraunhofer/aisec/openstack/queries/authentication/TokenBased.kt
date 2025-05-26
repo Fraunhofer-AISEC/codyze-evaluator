@@ -13,18 +13,30 @@ import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
+ * The list of valid token providers that are valid for the project.
+ *
+ * Note: This set may change depending on the project or state-of-the-art.
+ */
+val tokenProvider = setOf("fernet", "jws")
+
+/**
+ * Currently, we assume that only the endpoints under "/v3" (for cinder) and "/v1" (for barbican)
+ * need authentication.
+ */
+val requireAuthentication = setOf(Pair("cinder", "/v3/"), Pair("barbican", "/v1/"))
+
+/**
  * Determines if the [HttpEndpoint] [this] does not require authentication.
  *
  * Note: This whitelist has to be customized for each project.
  */
 fun HttpEndpoint.doesNotNeedAuthentication(): QueryTree<Boolean> {
-    // Currently, we assume that only the endpoints under "/v3" (for cinder) and "/v1" (for
-    // barbican) need authentication.
+    // Checks if the endpoint is in the list of endpoints that do not require authentication.
     val doesNotNeedAuth =
-        !((this.underlyingNode?.component?.name?.localName == "cinder" &&
-            this.path.startsWith("/v3/")) ||
-            (this.underlyingNode?.component?.name?.localName == "barbican" &&
-                this.path.startsWith("/v1/")))
+        requireAuthentication.none {
+            it.first == this.underlyingNode?.component?.name?.localName &&
+                this.path.startsWith(it.second)
+        }
 
     // Creates the QueryTree with the result of the assessment.
     return QueryTree(
@@ -68,13 +80,6 @@ fun TranslationResult.isTokenProviderConfigured(): QueryTree<Boolean> {
         },
     )
 }
-
-/**
- * The list of valid token providers that are valid for the project.
- *
- * Note: This set may change depending on the project or state-of-the-art.
- */
-val tokenProvider = setOf("fernet", "jws")
 
 /**
  * Checks if the [HttpEndpoint] [this] requires token-based authentication. The attribute

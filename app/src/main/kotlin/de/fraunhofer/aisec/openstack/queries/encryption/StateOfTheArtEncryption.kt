@@ -10,9 +10,18 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.const
 import de.fraunhofer.aisec.cpg.query.ge
 
+/**
+ * The minimum key length for symmetric encryption algorithms. According to BSI TR-02102-1, this
+ * should be at least 256 bits.
+ */
 val SYM_KEYLENGTH = 256
 
+/** The list of allowed ciphers for block device encryption. */
+val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
+
 /**
+ * The block device encryption algorithm must be state of the art, e.g., refer to a TR.
+ *
  * This query enforces the following statement: "Given a block device encryption E, if an encryption
  * algorithm A is employed, then A must be a state-of-the-art cryptographic algorithm (e.g., BSI
  * TR-02102-1)"
@@ -35,7 +44,12 @@ fun stateOfTheArtEncAlgorithms(tr: TranslationResult): QueryTree<Boolean> {
     }
 }
 
-/** A must support a minimum key length L with L >= 256. */
+/**
+ * The block device encryption algorithm must be state of the art, e.g., refer to a TR.
+ *
+ * This query enforces the following statement: "Given a block device encryption E, if an encryption
+ * algorithm A is employed, A must support a minimum key length L with L >= 256."
+ */
 fun minimalKeyLengthEnforced(tr: TranslationResult): QueryTree<Boolean> {
     // The inner predicate has to hold for each DiskEncryption concept
     val tree =

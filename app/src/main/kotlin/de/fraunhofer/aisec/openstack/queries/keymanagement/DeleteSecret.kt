@@ -17,8 +17,8 @@ import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
 /**
  * Delete secret data.
  *
- * This query has the following interpretation of this statement: If data is retrieved from a
- * `GetSecret` operation, it must be deleted on each outgoing EOG-path.
+ * This query has the following interpretation of this statement: "If data is retrieved from a
+ * `GetSecret` operation, it must be deleted on each outgoing EOG-path."
  */
 fun deleteSecretOnEOGPaths(tr: TranslationResult): QueryTree<Boolean> {
     // The requirement must hold for all data introduced by a `GetSecret` operation.

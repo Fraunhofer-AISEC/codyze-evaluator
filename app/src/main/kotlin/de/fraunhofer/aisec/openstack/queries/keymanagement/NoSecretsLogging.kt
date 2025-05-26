@@ -10,7 +10,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
- * Secrets must not be logged.
+ * This query enforces the following statement: "Secrets must not be logged."
  *
  * This query checks if there is a data flow from any `Secret` Concept to a `LogWrite` Operation
  * possible.

@@ -14,6 +14,24 @@ import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.query.*
+import de.fraunhofer.aisec.openstack.queries.OpenStackComponents
+
+/**
+ * A list of whitelisted [HttpEndpoint]s that are considered secure key providers.
+ *
+ * These endpoints are allowed receive secret material without it being a leak.
+ */
+val secretsWhitelist =
+    listOf(
+        "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
+        "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
+    )
+
+/**
+ * These functions are considered leaks of sensitive data outside the component, if secrets are
+ * written with them.
+ */
+val leakingFunctions = listOf("write", "println", "execute", "log")
 
 /**
  * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
@@ -27,8 +45,9 @@ import de.fraunhofer.aisec.cpg.query.*
 fun HttpEndpoint.isSecureKeyProvider(): Boolean {
     return httpMethod == HttpMethod.GET &&
         path == "/v1/secrets/{secret_id}/payload" &&
-        this.underlyingNode?.firstParentOrNull<Component> { it.name.localName == "barbican" } !=
-            null
+        this.underlyingNode?.firstParentOrNull<Component> {
+            it.name.localName == OpenStackComponents.BARBICAN
+        } != null
 }
 
 /**
@@ -45,25 +64,16 @@ fun HttpEndpoint.isSecureKeyProvider(): Boolean {
  * @return `true` if this [Node] can be used to leak data.
  */
 fun Node.dataLeavesComponent(): Boolean {
-    val whitelist =
-        listOf(
-            "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
-            "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
-        )
 
     return this is WriteFile ||
         this is LogWrite ||
-        ((this is CallExpression) &&
-            (this.name.localName == "write" ||
-                this.name.localName == "println" ||
-                this.name.localName == "execute" ||
-                this.name.localName == "log")) ||
-        (this is HttpEndpoint && this.name.toString() !in whitelist)
+        ((this is CallExpression) && (this.name.localName in leakingFunctions)) ||
+        (this is HttpEndpoint && this.name.toString() !in secretsWhitelist)
 }
 
 /**
- * Given a customer-managed key K stored in Barbican, it must not be leaked via printing, logging,
- * file writing or command execution input.
+ * This query enforces the following statement: "Given a customer-managed key K stored in Barbican,
+ * it must not be leaked via printing, logging, file writing or command execution input."
  */
 fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
     // The result of a `GetSecret` operation must not have a data flow
@@ -92,8 +102,8 @@ fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
 }
 
 /**
- * Given a customer-managed key K used for disk encryption, K must only be accessible via the API
- * endpoint responsible to provide keys.
+ * This query enforces the following statement: "Given a customer-managed key K used for disk
+ * encryption, K must only be accessible via the Barbican API endpoint."
  */
 fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTree<Boolean> {
     val tree =
@@ -138,8 +148,8 @@ fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTr
 }
 
 /**
- * Given a device encryption operation O, the key K used in O must be deleted from memory after the
- * operation is completed.
+ * This query enforces the following statement: "Given a device encryption operation O, the key K
+ * used in O must be deleted from memory after the operation is completed."
  */
 fun keyIsDeletedFromMemoryAfterUse(result: TranslationResult): QueryTree<Boolean> {
     val tree =

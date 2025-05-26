@@ -10,8 +10,11 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.eq
 
 /**
- * Given a client call C that retrieves a key K from the Barbican API, the transmission of K must
- * utilize a secure, state-of-the-art, transport protocol (e.g., specified in BSI TR-02102-1).
+ * The key must be protected when in transit.
+ *
+ * This query enforces the following statement: "Given a client call C that retrieves a key K from
+ * the Barbican API, the transmission of K must utilize a secure, state-of-the-art, transport
+ * protocol (e.g., specified in BSI TR-02102-1)."
  */
 fun transportEncryptionForKeys(result: TranslationResult): QueryTree<Boolean> {
     val tree =

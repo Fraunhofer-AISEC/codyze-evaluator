@@ -15,8 +15,11 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.dataFlow
 
 /**
- * Access to Barbican keys must be restricted to authenticated users, i.e., each Barbican REST API
- * that provides access to K must be connected to an Authentication concept.
+ * The key must only be accessible by a valid user and through the REST API of barbican.
+ *
+ * This query enforces the following statement: "Access to Barbican keys must be restricted to
+ * authenticated users, i.e., each Barbican REST API that provides access to K must be connected to
+ * an Authentication concept."
  */
 fun keyAccessWithAuthenticationToken(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<HttpEndpoint>(
