@@ -7,10 +7,7 @@ import analyze
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.Name
-import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.cpg.graph.concepts.Concept
-import de.fraunhofer.aisec.cpg.graph.concepts.Operation
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
@@ -23,6 +20,8 @@ import de.fraunhofer.aisec.cpg.passes.concepts.with
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
+import de.fraunhofer.aisec.openstack.concepts.database.DatabaseAccess
+import de.fraunhofer.aisec.openstack.concepts.database.Filter
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
@@ -142,8 +141,3 @@ class AuthorizationPassTest {
             )
     }
 }
-
-class DatabaseAccess(underlyingNode: Node? = null) : Concept(underlyingNode)
-
-class Filter(underlyingNode: Node?, concept: DatabaseAccess, val by: Node) :
-    Operation(underlyingNode, concept)
