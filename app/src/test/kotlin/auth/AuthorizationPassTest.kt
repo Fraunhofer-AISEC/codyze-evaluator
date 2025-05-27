@@ -19,7 +19,7 @@ import de.fraunhofer.aisec.cpg.graph.statements.ThrowExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
-import de.fraunhofer.aisec.cpg.passes.ControlDependenceGraphPass
+import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -27,6 +27,7 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.mergeWithAll
+import de.fraunhofer.aisec.cpg.query.not
 import de.fraunhofer.aisec.openstack.concepts.auth.AuthorizationWithPolicy
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
 import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
@@ -240,7 +241,7 @@ class AuthorizationPassTest {
                 it.registerPass<AuthorizationPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.registerPass<OsloPolicyPass>()
-                it.registerPass<ControlDependenceGraphPass>()
+                it.registerPass<ProgramDependenceGraphPass>()
                 it.exclusionPatterns("tests", "drivers", "sqlalchemy")
                 it.includePath("../external/oslo.policy")
                 it.includePath("../external/oslo.context")
@@ -312,15 +313,19 @@ class AuthorizationPassTest {
                 .allExtended<MemberCallExpression>(
                     sel = { it.name.localName == "_enforce_scope" },
                     mustSatisfy = {
-                        QueryTree(
-                            it.followNextCDGUntilHit(
-                                    predicate = {
-                                        it is ThrowExpression &&
-                                            it.exception?.name?.localName == "PolicyNotAuthorized"
+                        not(
+                            dataFlow(
+                                it,
+                                scope = Intraprocedural(),
+                                sensitivities = FieldSensitive + ContextSensitive + Implicit,
+                                predicate = {
+                                    if (it !is ThrowExpression) false
+                                    else {
+                                        !(it.exception?.name?.localName == "PolicyNotAuthorized" ||
+                                            it.exception?.name?.localName == "exc")
                                     }
-                                )
-                                .failed
-                                .isEmpty()
+                                },
+                            )
                         )
                     },
                 )
