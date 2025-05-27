@@ -95,7 +95,7 @@ class OpenStackTest {
 
         // It seems its sometimes 26 and sometimes 27
         val longestValid =
-            validDataflows.map { it.children.first().value as List<Node> }.maxByOrNull { it.size }
+            validDataflows.map { it.children.first().value as List<*> }.maxByOrNull { it.size }
         assertNotNull(longestValid)
         assertTrue(longestValid.size >= 26)
 
