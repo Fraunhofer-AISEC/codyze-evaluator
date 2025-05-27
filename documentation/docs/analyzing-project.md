@@ -51,7 +51,7 @@ and how to write those queries.
     The project is defined in a file called `project.codyze.kts` which is then passed to the OpenStack Checker.
     
     The outer element is the `project` element which has a `name` can contain the declarative blocks `tool`, `toe`, `requirements`, and `assumptions`.
-    ```kotlin
+    ```kotlin title="project.codyze.kts"
     project {
         name = "This is the evaluation of OpenStack"
     
@@ -68,7 +68,7 @@ and how to write those queries.
     The `tool` block can be used to fine-tune the configuration of the OpenStack Checker by registering additional passes or external libraries, among others.
     The full list of options can be found in the documentation of the `TranslationConfiguration.Builder` which can be accessed here.
     An example of a `tool` block is:
-    ```kotlin
+    ```kotlin title="The tool description in project.codyze.kts"
     tool {
         // Register additional passes
         registerPass<MyPass>()
@@ -84,7 +84,7 @@ and how to write those queries.
     The `toe` block is used to specify the TOE and where its components can be found.
     The information provided here are used to translate the TOE to the CPG.
     The following example shows how to use this block:
-    ```kotlin
+    ```kotlin title="The TOE description in project.codyze.kts"
     toe {
         // The name of the TOE
         name = "My Mock TOE"
@@ -109,31 +109,32 @@ and how to write those queries.
     
     The `requirements` block is used to specify the requirements the TOE has to satisfy.
     Each `requirement` listed here has a name and can be checked by automatically running a query, a manual assessment, or a combination of both.
-    The manual assessment is specified by using the `byManualAssessment` function which requires a unique identifier as a parameter.
+    The manual assessment is specified by using the `manualAssessmentOf` function which requires a unique identifier as a parameter.
     The documentation of the check itself is not specified here but in another file.
     The automatic assessment is specified by using the `byQuery` function runs a check on the `TranslationResult` and must return a `QueryTree<Boolean>` object.
-    ```kotlin
+    ```kotlin title="The requirements description in project.codyze.kts"
     requirements {
         // Each of the requirements has a name which is passed by the mandatory parameter.
             requirement("Is Security Target Correctly specified") {
                 // The requirement is composed by exactly one statement.
-                // In this case, we have to assess manually, if the requirement is satisfied, what is done by the `byManualAssessment` function.
+                // In this case, we have to assess manually, if the requirement is satisfied, what is done by the `manualAssessmentOf` function.
                 // This function must be configured with a unique identifier of the check to be performed.
-                byManualAssessment("SEC-TARGET")
+                manualAssessmentOf("SEC-TARGET")
             }
     
-            requirement("Good Encryption") {
-                // This requirement is checked fully automatically by the query specified in the `byQuery` function.
-                // The lambda receives the translation result as a parameter and must return a `QueryTree<Boolean>` object.
-                // It uses the two helper functions `goodCryptoFunc` and `goodArgumentSize` which are part of the catalogue.
-                byQuery { result -> goodCryptoFunc(result) and goodArgumentSize(result) }
+            requirement("Good Encryption") { result ->
+                // This requirement is checked fully automatically by the query.
+                // The lambda receives the translation result as a parameter and must return a `Decision` object.
+                // It uses the two helper functions `goodCryptoFunc` and `goodArgumentSize` which are part of the catalogue and return a `QueryTree<Boolean>` object.
+                // The `decide` function is called on the `QueryTree<Boolean>` object to get the final `Decision` object by assessing the acceptance of assumptions.
+                goodCryptoFunc(result).decide() and goodArgumentSize(result).decide()
             }
       
-             requirement("Hybrid check") {
+             requirement("Hybrid check") { result ->
                 // This requirement is checked by a hybrid approach. The first part is checked by the query specified in the `byQuery` function.
-                // The second part is checked manually by the `byManualAssessment` function.
-                // Both parts are combined by the `and` operator which returns a QueryTree<Boolean>.
-                byQuery { result -> query(result) } and  byManualAssessment("HYBRID")
+                // The second part is checked manually by the `manualAssessmentOf` function.
+                // Both parts are combined by the `and` operator which returns a Decision object.
+                query(result).decide() and manualAssessmentOf("HYBRID")
              }
         }
     ```
@@ -142,18 +143,59 @@ and how to write those queries.
     To do so, the functions `accept`, `reject`, `ignore` and `undecided` can be called with the UUID of the respective assumption.
     To list more assumptions for documentation purposes, the function `assumption` can be used.
     Note that this assumption does not have to be accepted manually and won't be included in the analysis or translation result.
-    ```kotlin
+    ```kotlin title="The assumptions descriptions of project.codyze.kts"
     assumptions {
         // Documentation of an additional assumption which has to hold and is accepted.
         assume { "We assume that everything is fine." }
-        // Accept the assumption with the UUID "00000000-0000-0000-0000-000000000000" which is part of the CPG or the queries.
-        accept("00000000-0000-0000-0000-000000000000")
-        // Reject the assumption with the UUID "00000000-0000-0000-0000-000000000001" which is part of the CPG or the queries. 
-        reject("00000000-0000-0000-0000-000000000001")
-        // Nobody has decided on the assumption with the UUID "00000000-0000-0000-0000-000000000002" which is part of the CPG or the queries.
-        undecided("00000000-0000-0000-0000-000000000002")
-        // Ignore the assumption with the UUID "00000000-0000-0000-0000-000000000003" which is part of the CPG or the queries.
-        ignore("00000000-0000-0000-0000-000000000003")
+        decisions {
+            // Accept the assumption with the UUID "00000000-0000-0000-0000-000000000000" which is part of the CPG or the queries.
+            accept("00000000-0000-0000-0000-000000000000")
+            // Reject the assumption with the UUID "00000000-0000-0000-0000-000000000001" which is part of the CPG or the queries. 
+            reject("00000000-0000-0000-0000-000000000001")
+            // Nobody has decided on the assumption with the UUID "00000000-0000-0000-0000-000000000002" which is part of the CPG or the queries.
+            undecided("00000000-0000-0000-0000-000000000002")
+            // Ignore the assumption with the UUID "00000000-0000-0000-0000-000000000003" which is part of the CPG or the queries.
+            ignore("00000000-0000-0000-0000-000000000003")
+        }
+    }
+    ```
+    The decisions on the acceptance of the assumptions can also be moved into an own file, e.g., `assumptions.codyze.kts`, which can then be included in the project file using the `include` function as follows:
+    ```kotlin title="project.codyze.kts"
+    include {
+        AssumptionDecisions from "assumptions.codyze.kts"
+    }
+    ```
+    ```kotlin title="assumptions.codyze.kts"
+    project {
+        assumptions {
+            decisions {
+                accept("00000000-0000-0000-0000-000000000000")
+                reject("00000000-0000-0000-0000-000000000001")
+                undecided("00000000-0000-0000-0000-000000000002")
+                ignore("00000000-0000-0000-0000-000000000003")
+            }
+        }
+    }
+    ```
+
+    Incorporating results of manual assessments is possible by documenting the results in a separate file, e.g., `manual.codyze.kts`, and including it in the project file:
+    ```kotlin title="project.codyze.kts"
+    include {
+        ManualAssessment from "manual.codyze.kts"
+    }
+    ```
+    The `manualAssessment` block contains the assessments of the checks which are performed manually.
+    Each check is identified by a unique identifier, which is used to link the manual assessment to the requirement and is passed as a string parameter to the function `of`.
+    ```kotlin title="manual.codyze.kts"
+    project {
+        manualAssessment {
+            // Document the manual assessment of check with identifier "SEC-TARGET".
+            of("SEC-TARGET") {
+                // The result of the manual assessment can be returned as a `Decision` object, `Boolean` or `QueryTree<Boolean>`.
+                // When returning a `Decision` object, the acceptance of assumptions is considered, when returning a `QueryTree<Boolean>`, it is possible to add assumptions by calling the function `assume`.
+                true
+            }
+        }
     }
     ```
 
@@ -198,10 +240,10 @@ and how to write those queries.
 === "Current"
 
     The requiements are written in the `project.codyze.kts` file as described above.
-    All requirements which are (partially) checked by queries (i.e., `byQuery`) can call functions which are defined elsewhere in the project.
+    All requirements which are (partially) checked by queries can call functions which are defined elsewhere in the project.
     A common place to define those functions is the `src/main/kotlin/.../queries` directory.
     The queries are written in Kotlin and can use the Query API to access the CPG and perform checks on it.
-    There are no specific restrictions on how to write them, but the result for the argument of `byQuery` must be a `QueryTree<Boolean>` object.
+    There are no specific restrictions on how to write them, but the result must be a `QueryTree<Boolean>`, `Boolean` or `Decision` object.
 
     To increase the reusability of existing queries, it is advisable to split them up into small pieces of reusable code and externalize project-specific logic into own functions or variables.
     This simplifies adapting the queries across different evaluation projects, or react to changes in the state of the art.

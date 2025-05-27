@@ -10,28 +10,40 @@ The tagging DSL is defined in the module `codyze-core` in the file `codyze-core/
 
 The user can define own `Concept`s and `Operation`s in any kotlin file within the analysis project.
 We recommend to first check the catalog of existing concepts and operations in the file and, if possible, to extend the catalog with the new concepts and operations instead of creating many project-specific ones.
-The project-specific tagging logic can be added in the file `tagging.codyze.kts` in the project root directory.
+The project-specific tagging logic can be added in a kotlin script file which can be included in the evaluation project script using the `Tagging` import.
 It is also possible to create custom passes if the tagging logic is too complex for the DSL.
 This is a kotlin script files which are executed during the translation of the source code.
 
 ## Tagging the code
 
-To tag the source code, the user can use the following syntax:
+The following example shows a separate file `tagging.codyze.kts` which contains the tagging logic for the project which describes the syntax for tagging the source code:
 
-```kotlin
-tag {
-    // Tagging each node of the type NodeType and name "name" with the concept Concept
-    each<NodeType>("name").with { Concept() }
-    // Tagging each node of the type NodeType and specialProperty set to true with the concept Concept
-    each<NodeType>(predicate = { it.specialProperty == true } ).with { Concept() }
-    // Tagging each node of the type NodeType and name "name" with the concept Concept
-    each<NodeType>("name").with {
-        // Starting from each of the selected nodes of NodeType (they are kept in `node`), you can access specific properties and propagate tags to them.
-        // This is useful, e.g., if you want to tag specific arguments of a function call.
-        propagate { node.attribute }.with { OtherConcept() }
-        
-        Concept()
+```kotlin title="tagging.codyze.kts"
+project {
+    tagging {
+        tag {
+            // Tagging each node of the type NodeType and name "name" with the concept Concept
+            each<NodeType>("name").with { Concept() }
+            // Tagging each node of the type NodeType and specialProperty set to true with the concept Concept
+            each<NodeType>(predicate = { it.specialProperty == true } ).with { Concept() }
+            // Tagging each node of the type NodeType and name "name" with the concept Concept
+            each<NodeType>("name").with {
+                // Starting from each of the selected nodes of NodeType (they are kept in `node`), you can access specific properties and propagate tags to them.
+                // This is useful, e.g., if you want to tag specific arguments of a function call.
+                propagate { node.attribute }.with { OtherConcept() }
+
+                Concept()
+            }
+        }
     }
+}
+```
+
+To include this file in the evaluation project, the user can add the following line to the evaluation project script:
+
+```kotlin title="project.codyze.kts"
+include {
+    Tagging from "tagging.codyze.kts"
 }
 ```
 
@@ -67,5 +79,3 @@ While the user can access the lattice and state used during the fixed-point iter
 
     The ordering of the tagging is important.
     If you want to build upon existing tags of a node, you should make sure that this also happens in the correct order within the file.
-
-    TODO @oxisto: Is this correct? Are multiple files supported and how is the order determined there?
