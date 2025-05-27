@@ -5,9 +5,9 @@ package de.fraunhofer.aisec.openstack.queries.encryption
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
+import de.fraunhofer.aisec.cpg.query.IN
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
-import de.fraunhofer.aisec.cpg.query.const
 import de.fraunhofer.aisec.cpg.query.ge
 
 /**
@@ -60,7 +60,7 @@ fun minimalKeyLengthEnforced(tr: TranslationResult): QueryTree<Boolean> {
             // It has to be greater or equal (infix function `ge` of the Query-API).
             // Since this function requires a QueryTree object as input,
             // we use create with the Query-API's `const` function.
-            const(it.key?.keySize ?: 0) ge const(SYM_KEYLENGTH)
+            (it.key?.keySize ?: 0) ge SYM_KEYLENGTH
         }
 
     return tree

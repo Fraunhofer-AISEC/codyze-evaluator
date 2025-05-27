@@ -4,7 +4,7 @@
 package de.fraunhofer.aisec.openstack.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
+import de.fraunhofer.aisec.cpg.assumptions.*
 import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
