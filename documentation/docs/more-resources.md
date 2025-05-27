@@ -10,8 +10,23 @@ The Query API is mostly defined in three files in the module `cpg-analysis`:
 * `FlowQueries.kt`
 * `QueryTree.kt`
 
-Note: A `QueryTree` serves as a wrapper around the results and the sub-statements which were used to retrieve the result.
-It also contains the assumptions which were collected on evaluation and a human-readable string representation.
+!!! note "The QueryTree object"
+
+    A `QueryTree` serves as a wrapper around the results and the sub-statements which were used to retrieve the result.
+    It also contains the assumptions which were collected on evaluation and a human-readable string representation.
+
+## detailed information on the CPG?
+
+Extensive documentation on the Code Property Graph (CPG) can be found online:
+
+* [The specification of the graph schema (all nodes, their properties and edges)](https://fraunhofer-aisec.github.io/cpg/CPG/specs/graph/)
+* [The specification of the dataflow graph (DFG)](https://fraunhofer-aisec.github.io/cpg/CPG/specs/dfg/)
+* [The specification of the evaluation order graph (EOG)](https://fraunhofer-aisec.github.io/cpg/CPG/specs/eog/)
+
+!!! note "Edges of Sub-Graphs"
+
+    The sub-graphs are not transitive, i.e., if a node A is connected to a node B, and B is connected to C, then A is not necessarily connected to C via a direct edge.
+    It is therefore recommended to use the functions traversing the graph (e.g. `dataFlow`, and `executionPath`) to traverse the graph instead of using the edges directly.
 
 ## `Concept`s and `Operation`s?
 
