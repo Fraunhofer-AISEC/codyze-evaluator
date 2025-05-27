@@ -176,29 +176,6 @@ Similarly, framework-specific "tagging" logic and queries (e.g., to check the co
 Obviously, highly customized queries and tagging logic are not portable to other projects.
 This might be the case when using specific names of functions, classes, or variables of the respective project, or when relying on any other specific implementation details of the project.
 
-## Integration into the Evaluation Process
-
-The OpenStack Checker may be integrated into existing evaluation processes which currently rely on manual documentation and code reviews.
-An example for such a process is the Common Criteria (CC) Evaluation, which is a widely used standard for evaluating the security of IT products.
-
-As mentioned above, in the scenario of a CC evaluation, two main sources can be used to extract the security goals:
-
-* The Protection Profile to which the TOE claims compliance.
-* The Security Target of the TOE, in particular the Security Functional Requirements (SFRs) and the details on their implementation.
-  Obviously, if compliance to certain standards is claimed, the respective standards should also be used to derive the OpenStack Checker Configuration.
-
-Once a catalogue of security goals has been derived, the Evaluator may simply select the applicable goals for the product.
-
-In addition to the selection of the correct security goals, the tagging of the code with concepts and operations is a main task during the evaluation process.
-Currently, the vendor/developer of the product needs to describe the security feature and how they are implemented in the code.
-This makes the Product Expert, who may be part of the development team, the ideal candidate for this task.
-Rather than writing a document, the product expert can provide the tagging logic of the code with concepts and operations.
-The evaluator would then review the tagging logic.
-
-The OpenStack Checker can then be used to check the compliance of the OpenStack instance with respect to the security goals and thus assess if they hold.
-This may reduce the need for extensive description and documentation of development processes and implementation details and how they are beneficial to fulfill the security goals in the product.
-Instead, the OpenStack Checker could be used to check the implementation of the security goals and provide a detailed report on the findings.
-
 
 [^1]: https://fraunhofer-aisec.github.io/cpg/CPG/specs/
 [^2]: Yamaguchi, Fabian, et al. "Modeling and discovering vulnerabilities with code property graphs." 2014 IEEE Symposium on Security and Privacy (S&P). IEEE, 2014.

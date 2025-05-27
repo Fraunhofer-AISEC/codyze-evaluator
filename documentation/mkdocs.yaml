@@ -156,7 +156,9 @@ markdown_extensions:
 nav:
   - "Home": index.md
   - "Goal": goal.md
-  - "Methodology": methodology.md
+  - "Methodology":
+      - methodology.md
+      - "Integration into Evaluation Processes": integration-cc.md
   - "User Guide":
       - "Analyzing a project": analyzing-project.md
       - "Queries":
