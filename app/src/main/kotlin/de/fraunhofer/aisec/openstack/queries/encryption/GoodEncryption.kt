@@ -7,8 +7,6 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.*
 
-val SYM_KEYLENGTH = 256
-
 /**
  * This query enforces the following statement: "Given a block device encryption E, if an encryption
  * algorithm A is employed, then A must be a state-of-the-art cryptographic algorithm (e.g., BSI
@@ -18,9 +16,6 @@ val SYM_KEYLENGTH = 256
  * efficiency"
  */
 fun stateOfTheArtEncryption(tr: TranslationResult): QueryTree<Boolean> {
-    // We currently allow the two ciphers aes-xts-plain64 and aes-cbc-essiv.
-    // This could be extracted to a variable outside this statement.
-    val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
 
     // The predicate must hold for all DiskEncryption concepts.
     return tr.allExtended<DiskEncryption> {

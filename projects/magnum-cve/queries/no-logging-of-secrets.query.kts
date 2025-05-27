@@ -1,1 +1,0 @@
-../../common/queries/no-logging-of-secrets.query.kts
