@@ -13,6 +13,18 @@ open class ImmutableObject(un: Node?) : Concept(un)
 open class InjectiveFunction(un: Node?) : Concept(un)
 
 /**
+ * A function mapping from U to V, such that for a set of sets \{A, B, C, D, ...\}
+ * and a set of set \{a, b, c, d, ...\} it is true that
+ * \forall e \in A: f(e) \in a
+ * \forall e \in B: f(e) \in b
+ * ...
+ * A partition can be combined with a different partition to form a third partition, since they are
+ * simply renaming the elements in the respective sets without shuffling the elements between the sets.
+ * See domain separation in "properties" for example usage.
+ */
+open class Partition(un: Node?) : Concept(un)
+
+/**
  * Is a function that removes the information contained in all concepts in "annihilatedNodes" from
  * cleanedNodes, i.e. even if there is technically an information flow from one node in aN to a node
  * in cN, a node tagged with this concept removes it. Examples: c = a * 0 with c in cleanedNodes, a

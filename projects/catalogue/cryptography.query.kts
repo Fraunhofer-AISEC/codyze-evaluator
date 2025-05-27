@@ -6,7 +6,9 @@ import de.bund.bsi.catalgoue.*
 import de.bund.bsi.catalgoue.architecture.PlaintextBackupEndpoint
 import de.bund.bsi.catalgoue.cryptography.Blockcipherkey
 import de.bund.bsi.catalgoue.cryptography.EntropyPreservingFunction
+import de.bund.bsi.catalgoue.cryptography.HMAC
 import de.bund.bsi.catalgoue.cryptography.KeyGenerator
+import de.bund.bsi.catalgoue.cryptography.MessageAuthenticationCode
 import de.bund.bsi.catalgoue.cryptography.SymmetricEncrypt
 import de.bund.bsi.catalgoue.network.HttpResponse
 import de.bund.bsi.catalgoue.properties.Asset_Confidentiality
@@ -84,5 +86,7 @@ tag {
     each<Node>( predicate = { nodeHasConcept<Blockcipherkey>(it) })
         .with { Asset_Confidentiality(null) }
 
-
+    // HMAC is also a MAC.
+    each<Node>( predicate = {nodeHasConcept<HMAC>(it)})
+        .with { MessageAuthenticationCode(null) }
 }
