@@ -4,6 +4,7 @@
 package auth
 
 import analyze
+import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
@@ -15,12 +16,17 @@ import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
+import de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement
 import de.fraunhofer.aisec.cpg.graph.statements.ThrowExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
+import de.fraunhofer.aisec.cpg.passes.concepts.with
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
@@ -30,12 +36,16 @@ import de.fraunhofer.aisec.cpg.query.mergeWithAll
 import de.fraunhofer.aisec.cpg.query.not
 import de.fraunhofer.aisec.openstack.concepts.auth.AuthorizationWithPolicy
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
+import de.fraunhofer.aisec.openstack.concepts.auth.CheckDomainScope
 import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
+import de.fraunhofer.aisec.openstack.passes.auth.SetOsloPolicyEnforcerTypePass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
+import kotlin.and
+import kotlin.collections.get
 import kotlin.io.path.Path
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -238,6 +248,7 @@ class AuthorizationPassTest {
                 it.registerPass<IniFileConfigurationSourcePass>()
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<PreAuthorizationPass>()
+                it.registerPass<SetOsloPolicyEnforcerTypePass>()
                 it.registerPass<AuthorizationPass>()
                 it.registerPass<HttpWsgiPass>()
                 it.registerPass<OsloPolicyPass>()
@@ -270,66 +281,142 @@ class AuthorizationPassTest {
                         "keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile(),
                     )
                 )
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag =
+                            tag {
+                                each<MemberCallExpression>(
+                                        predicate = { it.name.localName == "_enforce_scope" }
+                                    )
+                                    .with {
+                                        // Authorization concept is already set in the
+                                        // `AuthorizationPass`
+                                        CheckDomainScope(
+                                            underlyingNode = node,
+                                            concept = Authorization(),
+                                            rule = node.arguments[1],
+                                        )
+                                    }
+                            }
+                    )
+                )
             }
         assertNotNull(result)
 
-        val blacklist = setOf("exist", "not found")
+        val notAllowedThrowMessages = setOf("exist", "not found")
+        val allowedExceptions = setOf("PolicyNotAuthorized", "exc")
+        val allowedExceptionParent = "NotAuthorized"
+        val throwMessageField = "message"
+
         val q =
-            result.allExtended<HttpEndpoint>(
+            unauthorizedResponseFromAnotherDomainQuery(
+                result = result,
+                notAllowedThrowMessages = notAllowedThrowMessages,
+                allowedExceptions = allowedExceptions,
+                allowedExceptionParent = allowedExceptionParent,
+                throwMessageField = throwMessageField,
+            )
+        assertTrue(q.value)
+    }
+
+    private fun unauthorizedResponseFromAnotherDomainQuery(
+        result: TranslationResult,
+        notAllowedThrowMessages: Set<String>,
+        allowedExceptions: Set<String>,
+        allowedExceptionParent: String,
+        throwMessageField: String,
+    ): QueryTree<Boolean> {
+        return result.allExtended<HttpEndpoint>(
+            sel = { it.authorization != null },
+            mustSatisfy = { endpoint ->
+                endpoint
+                    .onlyThrowsNotAuthorized(
+                        allowedExceptionClass = allowedExceptionParent,
+                        throwMessageField = throwMessageField,
+                        notAllowedThrowMessages = notAllowedThrowMessages,
+                    )
+                    .and(
+                        endpoint.throwsNotAuthorizedWhenDomainCheckFails(
+                            allowedExceptions = allowedExceptions
+                        )
+                    )
+            },
+        )
+    }
+
+    fun HttpEndpoint.onlyThrowsNotAuthorized(
+        allowedExceptionClass: String,
+        throwMessageField: String,
+        notAllowedThrowMessages: Set<String>,
+    ): QueryTree<Boolean> {
+        return this.allExtended<HttpEndpoint>(
+            sel = { it.authorization != null },
+            mustSatisfy = { endpoint ->
+                endpoint.authorization
+                    ?.ops
+                    ?.filterIsInstance<Authorize>()
+                    ?.map { auth ->
+                        val ref = auth.exception as? Reference
+                        ref?.refersTo?.let { refs ->
+                            val record = refs as? RecordDeclaration
+                            val superClass = record?.superTypeDeclarations?.singleOrNull()
+                            val message = record.fields[throwMessageField]?.evaluate().toString()
+                            QueryTree(
+                                superClass?.name?.localName == allowedExceptionClass &&
+                                    notAllowedThrowMessages.none {
+                                        message.contains(it, ignoreCase = true)
+                                    }
+                            )
+                        } ?: QueryTree(false)
+                    }
+                    ?.mergeWithAll() ?: QueryTree(false)
+            },
+        )
+    }
+
+    fun HttpEndpoint.throwsNotAuthorizedWhenDomainCheckFails(
+        allowedExceptions: Set<String>
+    ): QueryTree<Boolean> {
+        val q =
+            this.allExtended<HttpEndpoint>(
                 sel = { it.authorization != null },
                 mustSatisfy = { endpoint ->
                     endpoint.authorization
                         ?.ops
                         ?.filterIsInstance<Authorize>()
                         ?.map { auth ->
-                            val ref = auth.exception as? Reference
-                            ref?.refersTo?.let { refs ->
-                                val record = refs as? RecordDeclaration
-                                val superClass = record?.superTypeDeclarations?.singleOrNull()
-                                val message = record.fields["message"]?.evaluate().toString()
-                                QueryTree(
-                                    superClass?.name?.localName == "NotAuthorized" &&
-                                        blacklist.none { message.contains(it, ignoreCase = true) }
-                                )
-                            } ?: QueryTree(false)
+                            auth.action
+                                .followNextFullDFGEdgesUntilHit {
+                                    it.astParent
+                                        ?.overlays
+                                        ?.filterIsInstance<CheckDomainScope>()
+                                        ?.isNotEmpty() == true
+                                }
+                                .fulfilled
+                                .mapNotNull { it.nodes.last().astParent }
+                                .map { node ->
+                                    not(
+                                        dataFlow(
+                                            node,
+                                            scope = Intraprocedural(),
+                                            sensitivities =
+                                                FieldSensitive + ContextSensitive + Implicit,
+                                            predicate = {
+                                                if (node !is ThrowExpression) false
+                                                else {
+                                                    node.name.localName in allowedExceptions
+                                                }
+                                            },
+                                            earlyTermination = { it is ReturnStatement },
+                                        )
+                                    )
+                                }
+                                .mergeWithAll()
                         }
-                        ?.mergeWithAll()
-                        ?: QueryTree(false)
-                            .and(
-                                endpoint.authorization
-                                    ?.ops
-                                    ?.filterIsInstance<Authorize>()
-                                    ?.map { auth ->
-                                        val authorize = auth.underlyingNode
-                                        QueryTree(false)
-                                    }
-                                    ?.mergeWithAll() ?: QueryTree(false)
-                            )
+                        ?.mergeWithAll() ?: QueryTree(false)
                 },
             )
-        val q1 =
-            result
-                .functions("enforce")[1]
-                .allExtended<MemberCallExpression>(
-                    sel = { it.name.localName == "_enforce_scope" },
-                    mustSatisfy = {
-                        not(
-                            dataFlow(
-                                it,
-                                scope = Intraprocedural(),
-                                sensitivities = FieldSensitive + ContextSensitive + Implicit,
-                                predicate = {
-                                    if (it !is ThrowExpression) false
-                                    else {
-                                        !(it.exception?.name?.localName == "PolicyNotAuthorized" ||
-                                            it.exception?.name?.localName == "exc")
-                                    }
-                                },
-                            )
-                        )
-                    },
-                )
-        assertTrue(q1.value)
-        assertTrue(q.value)
+        return q
     }
 }

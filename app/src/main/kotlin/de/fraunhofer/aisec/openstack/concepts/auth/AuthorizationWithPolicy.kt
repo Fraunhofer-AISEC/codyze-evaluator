@@ -31,3 +31,12 @@ open class Authorize(
     val targets: Set<Node>,
     val exception: Node,
 ) : AuthorizationOperation(underlyingNode = underlyingNode, concept = concept)
+
+/**
+ * Represents a domain scope check operation.
+ *
+ * @param underlyingNode The underlying CPG node.
+ * @param rule The rule used for the domain scope check.
+ */
+open class CheckDomainScope(underlyingNode: Node? = null, concept: Authorization, val rule: Node) :
+    AuthorizationOperation(underlyingNode = underlyingNode, concept)
