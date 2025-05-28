@@ -5,13 +5,12 @@ package de.fraunhofer.aisec.openstack.passes
 
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newGetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newGetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newSecret
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
-import kotlin.collections.plusAssign
+import kotlin.collections.forEach
 
 /**
  * Adds [de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret] concept nodes to the

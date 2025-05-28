@@ -4,22 +4,16 @@
 package de.fraunhofer.aisec.openstack.passes
 
 import de.fraunhofer.aisec.cpg.TranslationContext
-import de.fraunhofer.aisec.cpg.graph.Backward
-import de.fraunhofer.aisec.cpg.graph.Component
-import de.fraunhofer.aisec.cpg.graph.GraphToFollow
-import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.calls
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCipher
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newCipher
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newDiskEncryption
-import de.fraunhofer.aisec.cpg.graph.edges.*
-import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
+import de.fraunhofer.aisec.cpg.graph.edges.get
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Literal
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
-import de.fraunhofer.aisec.cpg.query.value
 
 /**
  * Adds [de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption] concept nodes to the

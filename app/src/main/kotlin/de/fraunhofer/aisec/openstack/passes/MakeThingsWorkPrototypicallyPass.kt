@@ -6,13 +6,13 @@ package de.fraunhofer.aisec.openstack.passes
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newCipher
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newGetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.CreateEncryptedDisk
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.Secret
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCipher
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newCreateEncryptedDisk
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newDiskEncryption
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newGetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpClient

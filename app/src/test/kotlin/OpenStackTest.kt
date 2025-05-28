@@ -9,6 +9,7 @@ import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest

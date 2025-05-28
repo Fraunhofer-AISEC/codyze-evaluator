@@ -9,10 +9,12 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictPermissionsForAllWrites
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictPermissionsOfSecretWriting
+import de.fraunhofer.aisec.openstack.queries.accesscontrol.AllWritesToFile
+import de.fraunhofer.aisec.openstack.queries.accesscontrol.OnlyWritesFromASecret
+import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictiveFilePermissionsAreAppliedWhenWriting
 import kotlin.io.path.Path
 import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
@@ -67,8 +69,11 @@ class FileTest {
 
         // Checks that before each file write operation, there is an operation setting the correct
         // access rights to write only.
-        val setMaskBeforeWrite = restrictPermissionsForAllWrites(result)
-        println(setMaskBeforeWrite.printNicely())
+        with(result) {
+            val setMaskBeforeWrite =
+                restrictiveFilePermissionsAreAppliedWhenWriting(select = AllWritesToFile)
+            assertFalse(setMaskBeforeWrite.value)
+        }
     }
 
     @Test
@@ -93,7 +98,11 @@ class FileTest {
 
         // Checks that before each file write operation, there is an operation setting the correct
         // access rights to write only.
-        val setMaskBeforeWrite = restrictPermissionsOfSecretWriting(result)
-        println(setMaskBeforeWrite.printNicely())
+        val setMaskBeforeWrite =
+            with(result) {
+                restrictiveFilePermissionsAreAppliedWhenWriting(select = OnlyWritesFromASecret)
+            }
+
+        assertTrue(setMaskBeforeWrite.value)
     }
 }

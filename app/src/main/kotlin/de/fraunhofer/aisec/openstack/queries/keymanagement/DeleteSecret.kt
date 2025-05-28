@@ -8,6 +8,7 @@ import de.fraunhofer.aisec.cpg.graph.ContextSensitive
 import de.fraunhofer.aisec.cpg.graph.FieldSensitive
 import de.fraunhofer.aisec.cpg.graph.FilterUnreachableEOG
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
 import de.fraunhofer.aisec.cpg.query.QueryTree

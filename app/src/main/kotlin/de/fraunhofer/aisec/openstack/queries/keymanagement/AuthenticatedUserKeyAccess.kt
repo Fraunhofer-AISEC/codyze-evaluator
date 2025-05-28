@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.query.May
 import de.fraunhofer.aisec.cpg.query.QueryTree

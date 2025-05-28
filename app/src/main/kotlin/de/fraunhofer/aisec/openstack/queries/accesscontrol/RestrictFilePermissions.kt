@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
 import de.fraunhofer.aisec.cpg.graph.concepts.file.*
 import de.fraunhofer.aisec.cpg.query.*
 
@@ -31,34 +31,51 @@ val permissionsOnWritePredicate = { writeOp: WriteFile ->
     )
 }
 
+/** This selector can be used to select [WriteFile] operations. */
+typealias WriteFileSelector = ((WriteFile) -> Boolean)?
+
 /**
- * Restrictive file permissions should be set.
+ * This selector can be used to select all [WriteFile] operations.
  *
- * This query has the following interpretation of this statement: If data retrieved from a
- * `GetSecret` operation is written to a file by a `WriteFile` operation, the file mask must be set
- * to `0o600` before the write-operation.
+ * If this selector is used, the query will check all [WriteFile] operations in the translation
+ * result.
  */
-fun restrictPermissionsOfSecretWriting(tr: TranslationResult): QueryTree<Boolean> {
-    // The requirement has to hold for all `WriteFile` operations where the
-    // input has an incoming dataflow from a `GetSecret` operation.
-    return tr.allExtended<WriteFile>(
-        sel = { writeOp ->
-            dataFlow(
-                    startNode = writeOp,
-                    type = May,
-                    direction = Backward(GraphToFollow.DFG),
-                    scope = Interprocedural(),
-                    predicate = { it is GetSecret },
-                )
-                .value
-        },
-        mustSatisfy = permissionsOnWritePredicate,
-    )
+val AllWritesToFile: WriteFileSelector = null
+
+/**
+ * This selector can be used to select only those [WriteFile] operations which are preceded by a
+ * `Secret` operation.
+ *
+ * If this selector is used, the query will check only those [WriteFile] operations which are
+ * preceded by a [Secret] operation in the data flow.
+ */
+val OnlyWritesFromASecret: WriteFileSelector = { writeOp ->
+    dataFlow(
+            startNode = writeOp,
+            type = May,
+            direction = Backward(GraphToFollow.DFG),
+            scope = Interprocedural(),
+            predicate = { it is Secret },
+        )
+        .value
 }
 
-/** This query restricts writes to any file with the appropriate mask. */
-fun restrictPermissionsForAllWrites(tr: TranslationResult): QueryTree<Boolean> {
+/**
+ * Restrictive file permissions should be set when writing files.
+ *
+ * This query has the following interpretation of this statement: If data is written to a file by a
+ * `WriteFile` operation, the file mask must be set to `0o600` before the write-operation.
+ *
+ * The parameter [select] can be used to restrict the query to only those `WriteFile` operations,
+ * e.g. to ones are preceded by a `Secret` operation (see [OnlyWritesFromASecret]).
+ */
+context(TranslationResult)
+fun restrictiveFilePermissionsAreAppliedWhenWriting(
+    select: WriteFileSelector = AllWritesToFile
+): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     // The requirement has to hold for all `WriteFile` operations where the
     // input has an incoming dataflow from a `GetSecret` operation.
-    return tr.allExtended<WriteFile>(mustSatisfy = permissionsOnWritePredicate)
+    return tr.allExtended<WriteFile>(sel = select, mustSatisfy = permissionsOnWritePredicate)
 }

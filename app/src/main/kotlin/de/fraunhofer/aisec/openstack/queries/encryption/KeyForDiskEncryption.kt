@@ -5,8 +5,8 @@ package de.fraunhofer.aisec.openstack.queries.encryption
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod

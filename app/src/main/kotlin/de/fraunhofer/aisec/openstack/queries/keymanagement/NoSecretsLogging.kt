@@ -3,10 +3,10 @@
  */
 package de.fraunhofer.aisec.openstack.queries.keymanagement
 
-import de.fraunhofer.aisec.cpg.*
-import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
-import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
+import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.graph.Interprocedural
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
+import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
