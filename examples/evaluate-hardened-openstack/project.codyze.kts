@@ -39,12 +39,12 @@ project {
          */
         requirements {
             requirement("Check Security Target Description for Consistency") {
-                byManualAssessment("SEC-TARGET")
+                manualAssessmentOf("SEC-TARGET")
             }
-            requirement("State-of-the-Art Encryption Algorithm") {
-                byQuery { result -> stateOfTheArtEncryption(result) }
+            requirement("State-of-the-Art Encryption Algorithm") { result ->
+                stateOfTheArtEncryption(result)
             }
-            requirement("Very Specific Requirement") { byQuery(::verySpecificQuery) }
+            requirement("Very Specific Requirement") { verySpecificQuery(it) }
         }
     }
 }

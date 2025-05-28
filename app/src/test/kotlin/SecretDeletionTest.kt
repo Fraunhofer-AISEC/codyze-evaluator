@@ -4,22 +4,15 @@
 import de.fraunhofer.aisec.codyze.toSarif
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.graph.ContextSensitive
-import de.fraunhofer.aisec.cpg.graph.FieldSensitive
-import de.fraunhofer.aisec.cpg.graph.FilterUnreachableEOG
-import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.cpg.query.allExtended
-import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
 import de.fraunhofer.aisec.openstack.passes.PythonMemoryPass
 import de.fraunhofer.aisec.openstack.passes.SecureKeyRetrievalPass
+import de.fraunhofer.aisec.openstack.queries.keymanagement.deleteSecretOnEOGPaths
 import io.github.detekt.sarif4k.Run
 import io.github.detekt.sarif4k.SarifSchema210
 import io.github.detekt.sarif4k.SarifSerializer
@@ -58,17 +51,7 @@ class SecretDeletionTest {
 
         // Checks that before each file write operation, there is an operation setting the correct
         // access rights to write only.
-        val deleteSecrets =
-            result.allExtended<GetSecret>(
-                sel = null,
-                mustSatisfy = { secret ->
-                    secret.alwaysFlowsTo(
-                        scope = Interprocedural(maxSteps = 100),
-                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                        predicate = { it is DeAllocate }, // Anforderung: de-allocate the data
-                    )
-                },
-            )
+        val deleteSecrets = deleteSecretOnEOGPaths(result)
         println(deleteSecrets.printNicely())
     }
 
@@ -106,19 +89,9 @@ class SecretDeletionTest {
         // For all data which originate from a GetSecret operation, all execution paths must flow
         // through a DeAllocate operation of the respective value
 
-        val queryTreeResult =
-            result.allExtended<GetSecret>(
-                sel = null,
-                mustSatisfy = { secret ->
-                    secret.alwaysFlowsTo(
-                        scope = Interprocedural(maxSteps = 100),
-                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                        predicate = { it is DeAllocate }, // Anforderung: de-allocate the data
-                    )
-                },
-            )
+        val allSecretsDeletedOnEOGPaths = deleteSecretOnEOGPaths(result)
 
-        println(queryTreeResult.printNicely())
+        println(allSecretsDeletedOnEOGPaths.printNicely())
 
         val jsonSarif =
             SarifSerializer.toJson(
@@ -137,7 +110,7 @@ class SecretDeletionTest {
                                             )
                                     ),
                                 results =
-                                    queryTreeResult.children
+                                    allSecretsDeletedOnEOGPaths.children
                                         .map {
                                             (it as QueryTree<Boolean>).toSarif(
                                                 "secret-data-must-be-deleted-statement1"
@@ -150,9 +123,11 @@ class SecretDeletionTest {
             )
         // println(jsonSarif)
 
-        assertEquals(2, queryTreeResult.children.size)
+        assertEquals(2, allSecretsDeletedOnEOGPaths.children.size)
         val key =
-            queryTreeResult.children.singleOrNull { it.node?.location?.region?.startLine == 509 }
+            allSecretsDeletedOnEOGPaths.children.singleOrNull {
+                it.node?.location?.region?.startLine == 509
+            }
         assertNotNull(key)
         assertTrue(key.value == true)
         assertEquals(2, key.children.size, "There should be two EOG paths")
@@ -164,7 +139,9 @@ class SecretDeletionTest {
         )
 
         val new_key =
-            queryTreeResult.children.singleOrNull { it.node?.location?.region?.startLine == 515 }
+            allSecretsDeletedOnEOGPaths.children.singleOrNull {
+                it.node?.location?.region?.startLine == 515
+            }
         assertNotNull(new_key)
         assertTrue(new_key.value == false)
         assertTrue(new_key.children.size > 2, "There should be multiple EOG paths")
@@ -175,6 +152,6 @@ class SecretDeletionTest {
             "There should be some nodes in the path",
         )
 
-        assertFalse(queryTreeResult.value)
+        assertFalse(allSecretsDeletedOnEOGPaths.value)
     }
 }

@@ -1,19 +1,26 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
+package de.fraunhofer.aisec.openstack.queries.keymanagement
+
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.logging.*
+import de.fraunhofer.aisec.cpg.query.*
 
 /**
- * Secrets must not be logged.
+ * This query enforces the following statement: "Secrets must not be logged."
  *
- * This query checks if there is a data flow from any `Secret` Concept to a `LogWrite` Operation possible.
+ * This query checks if there is a data flow from any `Secret` Concept to a `LogWrite` Operation
+ * possible.
  *
- * **Important note for this query to work as intended:**
- * The nodes implementing the `Secret` concept must have an outgoing DFG edge (typically to the underlyingNode).
- * If this is not desired, an option might be to replace `Secret` with the `GetSecret` operation.
- * Another option could be to use the `startNode = secret.underlyingNode`.
+ * **Important note for this query to work as intended:** The nodes implementing the `Secret`
+ * concept must have an outgoing DFG edge (typically to the underlyingNode). If this is not desired,
+ * an option might be to replace `Secret` with the `GetSecret` operation. Another option could be to
+ * use the `startNode = secret.underlyingNode`.
  */
-fun statement1(tr: TranslationResult): QueryTree<Boolean> {
+fun noLoggingOfSecrets(tr: TranslationResult): QueryTree<Boolean> {
     return tr.allExtended<Secret> { secret ->
         not(
             dataFlow(
