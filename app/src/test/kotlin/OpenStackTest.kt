@@ -11,7 +11,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
 import de.fraunhofer.aisec.cpg.graph.concepts.config.LoadConfiguration
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.Memory
@@ -26,6 +25,9 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.query.*
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
+import de.fraunhofer.aisec.openstack.queries.encryption.isSecureKeyProvider
+import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutput
+import de.fraunhofer.aisec.openstack.queries.keymanagement.deleteSecretOnEOGPaths
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -64,18 +66,6 @@ class OpenStackTest {
         val barbican = result.components["barbican"]
         assertNotNull(barbican)
 
-        /**
-         * The following http endpoints are considered as a secure key provider:
-         * * GET /v1/secrets/{encryption_key_id}/payload in the `Component` "Barbican"
-         */
-        fun HttpEndpoint.isSecureKeyProvider(): Boolean {
-            return httpMethod == HttpMethod.GET &&
-                path == "/v1/secrets/{secret_id}/payload" &&
-                this.underlyingNode?.firstParentOrNull<Component> {
-                    it.name.localName == "barbican"
-                } != null
-        }
-
         val evaluationResult =
             result.allExtended<DiskEncryption> { encryption ->
                 encryption.key?.let { key ->
@@ -105,7 +95,7 @@ class OpenStackTest {
 
         // It seems its sometimes 26 and sometimes 27
         val longestValid =
-            validDataflows.map { it.children.first().value as List<Node> }.maxByOrNull { it.size }
+            validDataflows.map { it.children.first().value as List<*> }.maxByOrNull { it.size }
         assertNotNull(longestValid)
         assertTrue(longestValid.size >= 26)
 
@@ -150,7 +140,7 @@ class OpenStackTest {
             }
         assertNotNull(result)
 
-        fun Node.dataLeavesComponent(): Boolean {
+        /*fun Node.dataLeavesComponent(): Boolean {
             val whitelist =
                 listOf<String>(
                     "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
@@ -165,19 +155,9 @@ class OpenStackTest {
                     this.name.localName == "execute" ||
                     this.name.localName == "log")) ||
                 (this is HttpEndpoint && this.name.toString() !in whitelist)
-        }
+        }*/
 
-        val noKeyLeakResult =
-            result.allExtended<GetSecret> { secret ->
-                not(
-                    dataFlow(
-                        startNode = secret,
-                        type = May,
-                        scope = Interprocedural(),
-                        predicate = { it.dataLeavesComponent() },
-                    )
-                )
-            }
+        val noKeyLeakResult = keyNotLeakedThroughOutput(result)
         println(noKeyLeakResult.printNicely())
         assertTrue(noKeyLeakResult.value)
     }
@@ -349,20 +329,10 @@ class OpenStackTest {
         // For all data which originate from a GetSecret operation, all execution paths must flow
         // through a DeAllocate operation of the respective value
 
-        val queryTreeResult =
-            result.allExtended<GetSecret>(
-                null,
-                { secret ->
-                    secret.alwaysFlowsTo(
-                        scope = Interprocedural(),
-                        sensitivities = FilterUnreachableEOG + FieldSensitive + ContextSensitive,
-                        predicate = { it is DeAllocate },
-                    )
-                },
-            )
+        val allSecretsDeletedOnEOGPaths = deleteSecretOnEOGPaths(result)
 
-        println(queryTreeResult.printNicely())
-        assertFalse(queryTreeResult.value)
+        println(allSecretsDeletedOnEOGPaths.printNicely())
+        assertFalse(allSecretsDeletedOnEOGPaths.value)
         // There are 2 correct and 1 failing paths
     }
 
