@@ -1,10 +1,11 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.OnlyWritesFromASecret
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictiveFilePermissionsAreAppliedWhenWriting
 import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncAlgorithms
-import de.fraunhofer.aisec.openstack.queries.keymanagement.deleteSecretOnEOGPaths
+import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
+import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
+import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
+import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
 import example.queries.verySpecificQuery
 
 project {
@@ -57,37 +58,33 @@ project {
                     description =
                         "See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html."
 
-                    fulfilledBy { restrictiveFilePermissionsAreAppliedWhenWriting(select = OnlyWritesFromASecret) }
+                    // This query checks if restrictive file permissions are applied when writing
+                    // files. But only
+                    // if the file is written from a secret.
+                    fulfilledBy {
+                        restrictiveFilePermissionsAreAppliedWhenWriting(
+                            select = OnlyWritesFromASecret
+                        )
+                    }
                 }
 
                 requirement {
                     name = "Delete Secrets after Usage"
-                    description = "Secret data should be deleted from memory, ideally right after usage."
+                    description =
+                        "Secret data should be deleted from memory, ideally right after usage."
 
-                    fulfilledBy { deleteSecretOnEOGPaths() }
+                    // We can use method references when we do not need to pass any parameters.
+                    fulfilledBy(::secretsAreDeletedAfterUsage)
+                }
+
+                requirement {
+                    name = "Secrets Must not be Logged"
+                    description =
+                        "Secret data must not be logged, i.e., they must not flow into a logging-statement."
+
+                    fulfilledBy(::noLoggingOfSecrets)
                 }
             }
-
-            /*
-                        name: Generic Security Requirements
-            description: This describes generic security requirements for all OpenStack components.
-            legacyAssumptions:
-              - Third-party library code is correctly implemented
-            objectives:
-              - name: Apply Restrictive File Permissions
-                description: See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html.
-                statements:
-                  - Restrictive file permissions should be set.
-              - name: Delete Secrets
-                description: Secret data should be deleted from memory, ideally right after usage.
-                statements:
-                  - Delete secret data.
-              - name: No Logging of Secrets
-                description: Secret data must not be logged, i.e., they must not flow into a logging-statement.
-                statements:
-                  - Secrets must not be logged
-
-                         */
 
             category("byok") {
                 name = "Bring Your Own Key (BYOK)"

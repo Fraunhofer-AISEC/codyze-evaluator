@@ -4,24 +4,32 @@
 package de.fraunhofer.aisec.openstack.queries.keymanagement
 
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.frontends.Language
 import de.fraunhofer.aisec.cpg.graph.ContextSensitive
 import de.fraunhofer.aisec.cpg.graph.FieldSensitive
 import de.fraunhofer.aisec.cpg.graph.FilterUnreachableEOG
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
 
 /**
- * Delete secret data.
+ * Secret data should be deleted after usage.
  *
- * This query has the following interpretation of this statement: "If data is retrieved from a
- * `GetSecret` operation, it must be deleted on each outgoing EOG-path."
+ * This query has the following interpretation of this statement: If data is retrieved from a
+ * [GetSecret] operation, it must be deleted (using a [DeAllocate] operation) on each outgoing EOG
+ * path.
+ *
+ * ## Prerequisites
+ * - The [GetSecret] operation must be tagged
+ * - A programming [Language] that supports the [DeAllocate] operation must be used
  */
-fun deleteSecretOnEOGPaths(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun secretsAreDeletedAfterUsage(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     // The requirement must hold for all data introduced by a `GetSecret` operation.
     return tr.allExtended<GetSecret>(
         // There are no further filters for the starting point of the query.

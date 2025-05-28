@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.openstack.queries.accesscontrol
+package de.fraunhofer.aisec.openstack.queries.file
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.Backward

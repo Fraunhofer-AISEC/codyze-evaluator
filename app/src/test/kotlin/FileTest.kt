@@ -9,9 +9,9 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.AllWritesToFile
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.OnlyWritesFromASecret
-import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictiveFilePermissionsAreAppliedWhenWriting
+import de.fraunhofer.aisec.openstack.queries.file.AllWritesToFile
+import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
+import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertFalse

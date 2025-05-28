@@ -28,7 +28,6 @@ import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.queries.encryption.isSecureKeyProvider
 import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutput
-import de.fraunhofer.aisec.openstack.queries.keymanagement.deleteSecretOnEOGPaths
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -293,48 +292,6 @@ class OpenStackTest {
             keyManagerAPI.returnTypes.singleOrNull()?.name.toString(),
             "The return type of $keyManagerAPI should be 'castellan.key_manager.barbican_key_manager.BarbicanKeyManager'",
         )
-    }
-
-    @Test
-    // TODO: test "passes" but takes 1 hour
-    @Ignore
-    fun testEverythingDerivedFromSecretMustBeDeletedOnAllPaths() {
-        val topLevel = Path("../projects/BYOK/components")
-        val result =
-            analyze(files = listOf(), topLevel = topLevel, usePasses = true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<SecureKeyRetrievalPass>()
-                it.registerPass<PythonMemoryPass>()
-                it.exclusionPatterns("tests", "drivers")
-                it.softwareComponents(
-                    mutableMapOf(
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                            ),
-                        "conf" to listOf(topLevel.resolve("conf").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "conf" to topLevel.resolve("conf").toFile(),
-                    )
-                )
-            }
-
-        assertNotNull(result)
-
-        // For all data which originate from a GetSecret operation, all execution paths must flow
-        // through a DeAllocate operation of the respective value
-
-        val allSecretsDeletedOnEOGPaths = deleteSecretOnEOGPaths(result)
-
-        println(allSecretsDeletedOnEOGPaths.printNicely())
-        assertFalse(allSecretsDeletedOnEOGPaths.value)
-        // There are 2 correct and 1 failing paths
     }
 
     /**

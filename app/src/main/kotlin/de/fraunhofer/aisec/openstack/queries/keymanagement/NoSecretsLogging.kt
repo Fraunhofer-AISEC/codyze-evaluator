@@ -10,9 +10,9 @@ import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
- * This query enforces the following statement: "Secrets must not be logged."
+ * This query enforces the following statement: Secrets must not be logged.
  *
- * This query checks if there is a data flow from any `Secret` Concept to a `LogWrite` Operation
+ * This query checks if there is a data flow from any [Secret] concept to a [ogWrite` Operation
  * possible.
  *
  * **Important note for this query to work as intended:** The nodes implementing the `Secret`
@@ -20,7 +20,9 @@ import de.fraunhofer.aisec.cpg.query.*
  * an option might be to replace `Secret` with the `GetSecret` operation. Another option could be to
  * use the `startNode = secret.underlyingNode`.
  */
-fun noLoggingOfSecrets(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun noLoggingOfSecrets(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
     return tr.allExtended<Secret> { secret ->
         not(
             dataFlow(
