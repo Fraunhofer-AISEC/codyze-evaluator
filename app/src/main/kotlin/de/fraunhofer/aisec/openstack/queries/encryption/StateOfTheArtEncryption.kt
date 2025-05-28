@@ -14,7 +14,7 @@ import de.fraunhofer.aisec.cpg.query.ge
  * The minimum key length for symmetric encryption algorithms. According to BSI TR-02102-1, this
  * should be at least 256 bits.
  */
-val SYM_KEYLENGTH = 256
+const val SYM_KEYLENGTH = 256
 
 /** The list of allowed ciphers for block device encryption. */
 val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
@@ -29,7 +29,10 @@ val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
  * Note that BSI TR-02102-1 only mentions aes-xts as having "relatively good security properties and
  * efficiency"
  */
-fun stateOfTheArtEncAlgorithms(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun stateOfTheArtEncAlgorithms(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     // We currently allow the two ciphers aes-xts-plain64 and aes-cbc-essiv.
     // This could be extracted to a variable outside this statement.
     val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
@@ -50,7 +53,10 @@ fun stateOfTheArtEncAlgorithms(tr: TranslationResult): QueryTree<Boolean> {
  * This query enforces the following statement: "Given a block device encryption E, if an encryption
  * algorithm A is employed, A must support a minimum key length L with L >= 256."
  */
-fun minimalKeyLengthEnforced(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun minimalKeyLengthEnforced(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     // The inner predicate has to hold for each DiskEncryption concept
     val tree =
         tr.allExtended<DiskEncryption> {

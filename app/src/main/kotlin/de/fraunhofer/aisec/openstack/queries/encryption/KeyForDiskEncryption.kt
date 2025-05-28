@@ -64,7 +64,6 @@ fun HttpEndpoint.isSecureKeyProvider(): Boolean {
  * @return `true` if this [Node] can be used to leak data.
  */
 fun Node.dataLeavesComponent(): Boolean {
-
     return this is WriteFile ||
         this is LogWrite ||
         ((this is CallExpression) && (this.name.localName in leakingFunctions)) ||
@@ -151,9 +150,12 @@ fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTr
  * This query enforces the following statement: "Given a device encryption operation O, the key K
  * used in O must be deleted from memory after the operation is completed."
  */
-fun keyIsDeletedFromMemoryAfterUse(result: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun keyIsDeletedFromMemoryAfterUse(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     val tree =
-        result.allExtended<DiskEncryption> { diskEncryption ->
+        tr.allExtended<DiskEncryption> { diskEncryption ->
             // We start with the disk encryption operation and check if the key is present.
             // For this key, we get all `GetSecret` operations, i.e., all operations which
             // may be used to generate the secret key.
