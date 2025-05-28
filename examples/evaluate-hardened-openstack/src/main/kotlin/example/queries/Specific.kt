@@ -5,7 +5,10 @@ package example.queries
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.query.QueryTree
+import de.fraunhofer.aisec.cpg.query.toQueryTree
 
-fun verySpecificQuery(tr: TranslationResult): QueryTree<Boolean> {
-    return QueryTree(true)
+context(TranslationResult)
+fun verySpecificQuery(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+    return true.toQueryTree()
 }
