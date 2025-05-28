@@ -25,3 +25,40 @@ It is the evaluators responsibility to correctly tag the code, and provide the c
 
 ### "Architecture"
 This class is concerned with the overall design of the TOE, especially how the TOE enforces non-bypassability, domain-separation and self-protection of the TSF.
+
+
+### Common Vulnerabilities
+* Session Fixation
+- GenAuthData_Server muss ein gutes Geheimnis erstellen
+- Multi-Faktor auth ist auth mit zwei verschiedenen User-Auth-Blöcken. Falls es verschiedene Endpunkte sind, darf es keine spezifische
+Fehlermeldung geben für ein falsches Passwort. die DataStore müssen verschiedenen "Domänen" angehören (Knowledge, Posession, Biometry).
+- Manuelle überprüfung:
+  - verify(authData): Gültigkeit, nur unter Wissen des Geheimnisses s kann Input authData generiert werden, so dass verfiy(authData) == true
+    - keine typischen Sicherheitslücken in Datenbank
+  - verify(uname, pw): Stelle sicher, dass (uname, h(pw)) in DataStore und der Eintrag nicht revokiert wurde
+    - typische Sicherheitslücken: keine
+  - GenAuthDataServer(): Nutze frischen Zufall
+
+* UserEnumeration
+- Rückgabetyp von Auth ist entweder UserID oder ein einzelner Fehler (das generierte Objekt ist stets das Gleiche)
+
+* Schlechter PW-Rücksetzungsmechanismus
+  - Link nur einmal anklickbar
+  - Link braucht genügend Entropie
+  - Rückmeldung muss unabhängig davon sein, ob Nutzer existiert oder nicht
+
+* Injection
+- Wenn es eine Änderung des Kontrollflusses basierend auf Nutzereingaben gibt, dann kann dies kein Datenfluss zwischen Domänen verursachen. Wenn dieser doch stattfindet, dann
+- in einer DomainSeparationComponent.
+- Beispiel: Die Verify(uname, pw) greift auf eine Tabelle zu, in der Daten aus verschiedenen Domänen gespeichert sind. Verify braucht manuelle überprüfung, dass keine Infos
+- (über Gebühr, wie #Nutzer) geleakt werden. Eine Suche darf die Liste aller VMs anzeigen, die einem Nutzer gehören (änderung Kontrollfluss), aber nicht auf Daten zugreifen,
+- die ihm nicht gehören.
+
+Frontend Injection:
+- Nutzerinput muss so bereinigt werden, dass die im Browser verwendeten Interpreter niemals Nutzerinput als Befehle verwenden. D.h. die Funktion muss angepasst werden /
+- ist abhängig von der Technologie, die im Browser verwendet wird. Ist ggf. eher manuelle Prüfung. Das Frontend kann ggf. nicht zwischen validen Befehlen des Backends und
+- dem Nutzerinput unterscheiden.
+- Ggf. sanitisiert das Frontend ebenfalls.
+- Um bei SQL eine Steuerfreiheit zu haben, braucht man sicherlich eine Input-Sanitizer(oder preparedStatements) Funktion.
+
+* Request Forgery

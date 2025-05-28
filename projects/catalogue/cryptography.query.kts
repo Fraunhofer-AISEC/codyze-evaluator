@@ -18,6 +18,7 @@ import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.passes.concepts.each
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import de.fraunhofer.aisec.cpg.passes.concepts.with
+import kotlin.reflect.typeOf
 
 
 /** Secrets used as keys and all things derived from it must not be persisted (except from ciphertexts). */
@@ -74,7 +75,7 @@ fun blockcipherkeysAreGeneratedByAKeyGeneratorAndPreserveEntropy(tr: Translation
                 direction = Backward(GraphToFollow.DFG),
                 scope = Interprocedural(),
                 earlyTermination = {bck -> !nodeHasConcept<EntropyPreservingFunction>(bck)},
-                predicate = {bck -> nodeHasConcept<KeyGenerator>(bck)})
+                predicate = {bck -> nodeHasConcept<KeyGenerator>(bck) })
                     }
             )
 }
