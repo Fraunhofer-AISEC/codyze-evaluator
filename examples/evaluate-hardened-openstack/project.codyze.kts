@@ -62,10 +62,21 @@ project {
                     exclude("tests", "drivers")
                 }
 
+                /**
+                 * Castellan is a library for managing secrets in OpenStack, providing abstraction
+                 * over various key management services, such as Barbican.
+                 */
+                module("castellan") {
+                    directory = "toe/libraries/castellan"
+                    include("castellan")
+                    exclude("tests")
+                }
+
                 /** Oslo.config is a library for managing configuration files in OpenStack. */
                 module("oslo.config") {
                     directory = "toe/libraries/oslo.config"
                     include("oslo_config")
+                    exclude("tests")
                 }
             }
         }
