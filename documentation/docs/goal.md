@@ -12,9 +12,9 @@ Core of this project is a tool which supports an analyst with a semi-automated c
 
 It receives as an input:
 
-* a set of rules which define the security goals/claims to be evaluated,
-* a set of relevant behavioral properties (in the form of concepts and operations) and how to "tag" the code base with them, and
-* the OpenStack code base, python interface (.pyi) files of libraries, and a specific configuration of the OpenStack instance.
+* A set of rules which define the security goals/claims to be evaluated,
+* A set of relevant behavioral properties (in the form of so-called concepts and operations) and logic on how to "tag" the code base with them, and
+* The OpenStack code base, python interface (.pyi) files of libraries, and a specific configuration of the OpenStack instance.
 
 The tool then performs a static analysis of the code base and configuration and generates a report which indicates whether the security goals are met or not.
 

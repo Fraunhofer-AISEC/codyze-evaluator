@@ -9,7 +9,7 @@ As mentioned above, in the scenario of a CC evaluation, two main sources can be 
 * The Security Target of the TOE, in particular the Security Functional Requirements (SFRs) and the details on their implementation.
   Obviously, if compliance to certain standards is claimed, the respective standards should also be used to derive the OpenStack Checker Configuration.
 
-Once a catalogue of security goals has been derived, the Evaluator may simply select the applicable goals for the product.
+Once a catalogue of security goals has been derived, the evaluator may simply select the applicable goals for the product.
 
 In addition to the selection of the correct security goals, the tagging of the code with concepts and operations is a main task during the evaluation process.
 Currently, the vendor/developer of the product needs to describe the security feature and how they are implemented in the code.
@@ -25,3 +25,6 @@ Certain mandatory aspects of the CC can be covered by the `project.codyze.kts` f
 In particular, it enforces specifying high-level information, the (security-)requirements which have to be fulfilled, and the architecture (in terms of modules) of the product.
 It would, however, also be possible to extend the OpenStack Checker to support additional mandatory aspects of the CC and thus provide an automated check if all required information is provided.
 By providing Concepts and Operations representing certain aspects which have to be described during a CC evaluation, the OpenStack Checker may even reduce the need for manual documentation of the product and could automatically check if the documentation (in terms of the tagging logic) is in-line with the product..
+Examples for this include but are not limited to internal and external interfaces of the modules and product, or the security features of the product with their technical description.
+
+Since the whole source code is required, this also fulfills the requirement of ADV_IMP.

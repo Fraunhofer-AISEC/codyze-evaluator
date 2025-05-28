@@ -1,4 +1,4 @@
-# Analysis of Security Promises
+# Analysis of Security Claims
 
 As described in the Chapter [Methodology](./methodology.md), the OpenStack Checker receives two inputs which are compared against each other:
 
