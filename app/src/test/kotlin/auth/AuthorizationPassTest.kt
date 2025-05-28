@@ -6,12 +6,14 @@ package auth
 import analyze
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.graph.Name
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
+import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.each
@@ -96,29 +98,48 @@ class AuthorizationPassTest {
 
     @Test
     fun testDatabaseQueryFilter() {
-        val topLevel = Path("../projects/BYOK/components")
+        val topLevel = Path("../projects/multi-tenancy/components")
         val result =
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
                 it.exclusionPatterns("tests", "drivers", "migrations")
+                it.registerPass<ControlFlowSensitiveDFGPass>()
                 it.registerPass<TagOverlaysPass>()
                 it.configurePass<TagOverlaysPass>(
                     TagOverlaysPass.Configuration(
                         tag =
                             tag {
-                                each<CallExpression>("model_query").with {
-                                    DatabaseAccess(underlyingNode = node)
-                                }
-                                each<MemberCallExpression>(
-                                        Name("filter_by", parent = Name("UNKNOWN"))
+                                each<CallExpression>(
+                                        predicate = { it.name.localName == "model_query" }
                                     )
                                     .with {
-                                        val concept =
-                                            node.conceptNodes
-                                                .filterIsInstance<DatabaseAccess>()
-                                                .single()
+                                        DatabaseAccess(
+                                            underlyingNode = node,
+                                            context = node.arguments[0],
+                                        )
+                                    }
+                                each<MemberCallExpression>(
+                                        predicate = { it.name.localName.startsWith("filter") }
+                                    )
+                                    .with {
+                                        val dbAccessConcepts =
+                                            node.conceptNodes.filterIsInstance<DatabaseAccess>()
+                                        dbAccessConcepts.forEach { dbAccessConcept ->
+                                            val paths =
+                                                dbAccessConcept.underlyingNode
+                                                    ?.followDFGEdgesUntilHit {
+                                                        (it is MemberCallExpression ||
+                                                            it is MemberExpression) &&
+                                                            it.name.localName.startsWith("filter")
+                                                    }
+                                            paths?.fulfilled?.last()
+                                        }
                                         val by = node.arguments.first()
-                                        Filter(underlyingNode = node, concept = concept, by = by)
+                                        Filter(
+                                            underlyingNode = node,
+                                            concept = DatabaseAccess(context = null),
+                                            by = by,
+                                        )
                                     }
                             }
                     )
@@ -137,7 +158,16 @@ class AuthorizationPassTest {
         // filter in the database query
         val q =
             result.allExtended<DatabaseAccess>(
-                mustSatisfy = { QueryTree<Boolean>(it.ops.any { it is Filter }) }
+                mustSatisfy = {
+                    if (it.context == null) {
+                        QueryTree(
+                            value = false,
+                            node = it,
+                            stringRepresentation = "No context provided",
+                        )
+                    }
+                    QueryTree<Boolean>(it.ops.any { it is Filter })
+                }
             )
     }
 }
