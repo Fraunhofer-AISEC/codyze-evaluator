@@ -28,6 +28,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.getOverlaysByPrevDFG
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import de.fraunhofer.aisec.cpg.passes.concepts.with
 import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
+import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
@@ -42,6 +43,7 @@ import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
@@ -430,41 +432,53 @@ class AuthenticationPassTest {
             }
 
         assertNotNull(result)
-        val q =
-            result.allExtended<Authenticate>(
-                mustSatisfy = { it.usesSameTokenAsCredential() and it.hasDataFlowIntoContext() }
-            )
-        assertTrue(q.value)
+        val q = accessTokenIsTiedToRequestContextQuery(tr = result)
+        assertFalse(q.value)
+    }
+
+    fun accessTokenIsTiedToRequestContextQuery(tr: TranslationResult): QueryTree<Boolean> {
+        return tr.usesSameTokenAsCredential() and tr.hasDataFlowToToken()
     }
 
     /**
      * Checks if any [Authenticate] uses a [TokenBasedAuth] where the token is equal to the
      * credential of that [Authenticate].
      */
-    fun Authenticate.usesSameTokenAsCredential(): QueryTree<Boolean> {
+    fun TranslationResult.usesSameTokenAsCredential(): QueryTree<Boolean> {
         return this.allExtended<Authenticate>(
             mustSatisfy = { token ->
                 val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
-                val hasTokenDataFlow = tokens.all { it.token == token.credential }
-                QueryTree(value = hasTokenDataFlow, node = token)
+                val isSameToken = tokens.all { it.token == token.credential }
+                QueryTree(value = isSameToken, node = token)
             }
         )
     }
 
     /**
-     * Checks if there is a data flow from the credential of this [Authenticate] into an
-     * [ExtendedRequestContext], where user-related info is set.
+     * Checks if there is a data flow from the [ExtendedRequestContext.token] into the
+     * [TokenBasedAuth].
      */
-    fun Authenticate.hasDataFlowIntoContext(): QueryTree<Boolean> {
-        return dataFlow(
-            startNode = this.credential,
-            predicate = { target ->
-                target.overlays.filterIsInstance<ExtendedRequestContext>().any {
-                    it.userInfo?.userId != null &&
-                        it.userInfo?.projectId != null &&
-                        it.userInfo?.domainId != null
+    fun TranslationResult.hasDataFlowToToken(): QueryTree<Boolean> {
+        return this.allExtended<ExtendedRequestContext>(
+            mustSatisfy = { ctx ->
+                if (
+                    ctx.token == null ||
+                        ctx.userInfo?.userId == null ||
+                        ctx.userInfo?.domainId == null ||
+                        ctx.userInfo?.projectId == null
+                ) {
+                    QueryTree(false, node = ctx, stringRepresentation = "Invalid Request context")
+                } else {
+                    dataFlow(
+                        startNode = ctx.token,
+                        direction = Backward(GraphToFollow.DFG),
+                        type = Must,
+                        predicate = { token ->
+                            token.overlays.filterIsInstance<TokenBasedAuth>().isNotEmpty()
+                        },
+                    )
                 }
-            },
+            }
         )
     }
 }
