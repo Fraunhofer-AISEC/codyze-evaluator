@@ -34,6 +34,17 @@ project {
                     include("cinder")
                     exclude("tests", "drivers")
                 }
+
+                module("magnum") {
+                    directory = "toe/modules/magnum"
+                    include("magnum")
+                    exclude("tests", "drivers")
+                }
+
+                module("oslo.config") {
+                    directory = "toe/libraries/oslo.config"
+                    include("oslo_config")
+                }
             }
         }
 
