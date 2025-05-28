@@ -8,6 +8,8 @@ import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
 import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
 import example.queries.verySpecificQuery
 
+include { Tagging from "tagging.codyze.kts" }
+
 project {
     name = "Evaluation Project for Hardened OpenStack"
 
@@ -29,18 +31,38 @@ project {
          */
         architecture {
             modules {
+                /**
+                 * Barbican is the OpenStack key manager service that provides secure storage and
+                 * management of secrets, such as encryption keys, passwords, and certificates.
+                 */
+                module("barbican") {
+                    directory = "toe/modules/barbican"
+                    include("barbican")
+                    exclude("tests")
+                }
+
+                /**
+                 * Cinder is the OpenStack block storage service that provides persistent block
+                 * storage to instances. It supports various backends and allows users to manage
+                 * volumes.
+                 */
                 module("cinder") {
                     directory = "toe/modules/cinder"
                     include("cinder")
                     exclude("tests", "drivers")
                 }
 
+                /**
+                 * Magnum is the OpenStack container orchestration service that provides container
+                 * management capabilities.
+                 */
                 module("magnum") {
                     directory = "toe/modules/magnum"
                     include("magnum")
                     exclude("tests", "drivers")
                 }
 
+                /** Oslo.config is a library for managing configuration files in OpenStack. */
                 module("oslo.config") {
                     directory = "toe/libraries/oslo.config"
                     include("oslo_config")
@@ -70,8 +92,7 @@ project {
                         "See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html."
 
                     // This query checks if restrictive file permissions are applied when writing
-                    // files. But only
-                    // if the file is written from a secret.
+                    // files. But only if the file is written from a secret.
                     fulfilledBy {
                         restrictiveFilePermissionsAreAppliedWhenWriting(
                             select = OnlyWritesFromASecret
@@ -97,17 +118,15 @@ project {
                 }
             }
 
-            category("byok") {
+            category("BYOK") {
                 name = "Bring Your Own Key (BYOK)"
                 description =
                     "Ensure that the OpenStack deployment supports Bring Your Own Key (BYOK) " +
                         "for disk encryption, allowing users to manage their own encryption keys."
 
-                requirement("State-of-the-Art Encryption Algorithm") {
-                    fulfilledBy { stateOfTheArtEncAlgorithms() }
-                }
+                requirement { fulfilledBy { stateOfTheArtEncAlgorithms() } }
 
-                requirement("Very Specific Requirement") { fulfilledBy { verySpecificQuery() } }
+                requirement { fulfilledBy { verySpecificQuery() } }
             }
         }
     }
