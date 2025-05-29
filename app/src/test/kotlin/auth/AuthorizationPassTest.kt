@@ -4,8 +4,11 @@
 package auth
 
 import analyze
+import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
+import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
+import de.fraunhofer.aisec.cpg.graph.OverlayNode
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
@@ -18,7 +21,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.each
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
-import de.fraunhofer.aisec.cpg.passes.concepts.with
+import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
@@ -29,6 +32,7 @@ import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import kotlin.io.path.Path
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
 import org.junit.jupiter.api.Test
@@ -112,34 +116,37 @@ class AuthorizationPassTest {
                                 each<CallExpression>(
                                         predicate = { it.name.localName == "model_query" }
                                     )
-                                    .with {
-                                        DatabaseAccess(
-                                            underlyingNode = node,
-                                            context = node.arguments[0],
-                                        )
-                                    }
-                                each<MemberCallExpression>(
-                                        predicate = { it.name.localName.startsWith("filter") }
-                                    )
-                                    .with {
-                                        val dbAccessConcepts =
-                                            node.conceptNodes.filterIsInstance<DatabaseAccess>()
-                                        dbAccessConcepts.forEach { dbAccessConcept ->
-                                            val paths =
-                                                dbAccessConcept.underlyingNode
-                                                    ?.followDFGEdgesUntilHit {
-                                                        (it is MemberCallExpression ||
-                                                            it is MemberExpression) &&
-                                                            it.name.localName.startsWith("filter")
-                                                    }
-                                            paths?.fulfilled?.last()
+                                    .withMultiple {
+                                        val overlays = mutableListOf<OverlayNode>()
+                                        val contextArg = node.arguments.getOrNull(0)
+                                        val dbAccess =
+                                            DatabaseAccess(
+                                                underlyingNode = node,
+                                                context = contextArg,
+                                            )
+                                        overlays += dbAccess
+
+                                        val paths =
+                                            node.followDFGEdgesUntilHit {
+                                                (it is MemberCallExpression ||
+                                                    it is MemberExpression) &&
+                                                    // It can be `filter` or `filter_by`
+                                                    it.name.localName.startsWith("filter") ||
+                                                    it.name.localName.startsWith("with_entities")
+                                            }
+                                        val filterCall =
+                                            paths.fulfilled.lastOrNull()?.nodes?.lastOrNull()
+                                        val by = node.arguments.getOrNull(1)
+
+                                        if (filterCall != null && by != null) {
+                                            overlays +=
+                                                Filter(
+                                                    underlyingNode = filterCall,
+                                                    concept = dbAccess,
+                                                    by = by,
+                                                )
                                         }
-                                        val by = node.arguments.first()
-                                        Filter(
-                                            underlyingNode = node,
-                                            concept = DatabaseAccess(context = null),
-                                            by = by,
-                                        )
+                                        overlays
                                     }
                             }
                     )
@@ -157,17 +164,25 @@ class AuthorizationPassTest {
         // When a user reads data from or writes data to a database, the user’s domain is used as a
         // filter in the database query
         val q =
-            result.allExtended<DatabaseAccess>(
-                mustSatisfy = {
-                    if (it.context == null) {
-                        QueryTree(
-                            value = false,
-                            node = it,
-                            stringRepresentation = "No context provided",
-                        )
+            result
+                .allExtended<DatabaseAccess>(
+                    mustSatisfy = {
+                        if (it.context == null) {
+                            QueryTree(
+                                value = false,
+                                node = it,
+                                stringRepresentation = "No context provided",
+                            )
+                        }
+                        QueryTree<Boolean>(it.ops.any { it is Filter })
                     }
-                    QueryTree<Boolean>(it.ops.any { it is Filter })
-                }
-            )
+                )
+                .assume(
+                    assumptionType = AssumptionType.DataFlowAssumption,
+                    message =
+                        "We assume that there exists a data flow from a method that performs a database access (e.g., within an HTTP endpoint) to the 'model_query' call expression represented by this node." +
+                            "To verify this assumption, it is necessary to check the data flow",
+                )
+        assertFalse(q.value)
     }
 }
