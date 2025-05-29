@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.bund.bsi.catalgoue.architecture
+package de.bund.bsi.catalogue.architecture
 
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
@@ -26,7 +26,7 @@ open class TestedModule()
  */
 open class ToeInternalPort(un: Node?) : Concept(un)
 
-class PlaintextBackupEndpoint(
+open class PlaintextBackupEndpoint(
     underlyingNode: FunctionDeclaration? = null,
     httpMethod: HttpMethod,
     path: String,
@@ -44,3 +44,13 @@ class PlaintextBackupEndpoint(
         authorization,
         requestContext,
     )
+
+
+// Avoid injection attacks
+
+/**
+ * User input probably needs to be transformed (e.g. using prepared statements for a sql-statements,
+ * or HTML-encoding if something based on the input is part of a website).
+ */
+open class UserInputTransformator(un: Node?) : Concept(un)
+

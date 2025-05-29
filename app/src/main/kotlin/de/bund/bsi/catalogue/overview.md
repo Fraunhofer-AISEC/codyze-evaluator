@@ -34,7 +34,7 @@ This class is concerned with the overall design of the TOE, especially how the T
 Fehlermeldung geben für ein falsches Passwort. die DataStore müssen verschiedenen "Domänen" angehören (Knowledge, Posession, Biometry).
 - Manuelle überprüfung:
   - verify(authData): Gültigkeit, nur unter Wissen des Geheimnisses s kann Input authData generiert werden, so dass verfiy(authData) == true
-    - keine typischen Sicherheitslücken in Datenbank
+    - keine typischen Sicherheitslücken in Datenbank von I15
   - verify(uname, pw): Stelle sicher, dass (uname, h(pw)) in DataStore und der Eintrag nicht revokiert wurde
     - typische Sicherheitslücken: keine
   - GenAuthDataServer(): Nutze frischen Zufall

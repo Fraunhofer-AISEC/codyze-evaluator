@@ -1,12 +1,11 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.bund.bsi.catalgoue.cryptography
+package de.bund.bsi.catalogue.cryptography
 
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
 import de.fraunhofer.aisec.cpg.graph.concepts.Operation
-import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 
 /*
     Concepts

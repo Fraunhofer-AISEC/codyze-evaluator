@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.bund.bsi.catalgoue.properties
+package de.bund.bsi.catalogue.properties
 
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.Concept
@@ -12,17 +12,6 @@ open class ImmutableObject(un: Node?) : Concept(un)
 
 open class InjectiveFunction(un: Node?) : Concept(un)
 
-/**
- * A function mapping from U to V, such that for a set of sets \{A, B, C, D, ...\}
- * and a set of set \{a, b, c, d, ...\} it is true that
- * \forall e \in A: f(e) \in a
- * \forall e \in B: f(e) \in b
- * ...
- * A partition can be combined with a different partition to form a third partition, since they are
- * simply renaming the elements in the respective sets without shuffling the elements between the sets.
- * See domain separation in "properties" for example usage.
- */
-open class Partition(un: Node?) : Concept(un)
 
 /**
  * Is a function that removes the information contained in all concepts in "annihilatedNodes" from
@@ -46,3 +35,9 @@ open class nonConfidentialVariable(un: Node?) : Concept(un)
 open class Asset_Integrity(un: Node?) : Concept(un)
 
 open class Asset_Availability(un: Node?) : Concept(un)
+
+/**
+ * Input to the TOE the user has (some) control over, like the content of text fields,
+ * names of resources, etc. See [architecture.query.kts] for usage examples.
+ */
+open class UserInput(un: Node?) : Concept(un)

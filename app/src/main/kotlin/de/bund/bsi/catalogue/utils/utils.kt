@@ -1,9 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.bund.bsi.catalgoue.utils
+package de.bund.bsi.catalogue.utils
 
-import de.bund.bsi.catalgoue.properties.InformationAnnihilator
+import de.bund.bsi.catalogue.properties.InformationAnnihilator
 import de.fraunhofer.aisec.cpg.graph.Node
 
 fun goesIntoInformationAnnihilator(searchNode: Node): Boolean {
