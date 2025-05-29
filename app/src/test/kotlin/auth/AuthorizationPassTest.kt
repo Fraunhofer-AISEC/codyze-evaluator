@@ -303,52 +303,45 @@ class AuthorizationPassTest {
                 )
             }
         assertNotNull(result)
-
-        val notAllowedThrowMessages = setOf("exist", "not found")
-        val allowedExceptions = setOf("PolicyNotAuthorized", "exc")
-        val allowedExceptionParent = "NotAuthorized"
-        val throwMessageField = "message"
-
         val q =
             unauthorizedResponseFromAnotherDomainQuery(
                 result = result,
-                notAllowedThrowMessages = notAllowedThrowMessages,
-                allowedExceptions = allowedExceptions,
-                allowedExceptionParent = allowedExceptionParent,
-                throwMessageField = throwMessageField,
+                policy = UnauthorizedResponsePolicy(),
             )
         assertTrue(q.value)
     }
 
+    data class UnauthorizedResponsePolicy(
+        val notAllowedThrowMessages: Set<String> = setOf("exist", "not found"),
+        val allowedExceptions: Set<String> = setOf("PolicyNotAuthorized", "exc"),
+        val allowedExceptionParentClass: String = "NotAuthorized",
+        val throwMessageField: String = "message",
+    )
+
+    /**
+     * Checks whether an HttpEndpoint with an authorization set only throws allowed "Not Authorized"
+     * exceptions and does not contain disallowed throw messages.
+     */
     private fun unauthorizedResponseFromAnotherDomainQuery(
         result: TranslationResult,
-        notAllowedThrowMessages: Set<String>,
-        allowedExceptions: Set<String>,
-        allowedExceptionParent: String,
-        throwMessageField: String,
+        policy: UnauthorizedResponsePolicy,
     ): QueryTree<Boolean> {
         return result.allExtended<HttpEndpoint>(
             sel = { it.authorization != null },
             mustSatisfy = { endpoint ->
                 endpoint
-                    .onlyThrowsNotAuthorized(
-                        allowedExceptionClass = allowedExceptionParent,
-                        throwMessageField = throwMessageField,
-                        notAllowedThrowMessages = notAllowedThrowMessages,
-                    )
-                    .and(
-                        endpoint.throwsNotAuthorizedWhenDomainCheckFails(
-                            allowedExceptions = allowedExceptions
-                        )
-                    )
+                    .onlyThrowsNotAuthorized(policy = policy)
+                    .and(endpoint.throwsNotAuthorizedWhenDomainCheckFails(policy = policy))
             },
         )
     }
 
+    /**
+     * Checks if an [HttpEndpoint] only throws "Not Authorized" exceptions of a permitted class and
+     * none of the disallowed message appear.
+     */
     fun HttpEndpoint.onlyThrowsNotAuthorized(
-        allowedExceptionClass: String,
-        throwMessageField: String,
-        notAllowedThrowMessages: Set<String>,
+        policy: UnauthorizedResponsePolicy
     ): QueryTree<Boolean> {
         return this.allExtended<HttpEndpoint>(
             sel = { it.authorization != null },
@@ -361,10 +354,11 @@ class AuthorizationPassTest {
                         ref?.refersTo?.let { refs ->
                             val record = refs as? RecordDeclaration
                             val superClass = record?.superTypeDeclarations?.singleOrNull()
-                            val message = record.fields[throwMessageField]?.evaluate().toString()
+                            val message =
+                                record.fields[policy.throwMessageField]?.evaluate().toString()
                             QueryTree(
-                                superClass?.name?.localName == allowedExceptionClass &&
-                                    notAllowedThrowMessages.none {
+                                superClass?.name?.localName == policy.allowedExceptionParentClass &&
+                                    policy.notAllowedThrowMessages.none {
                                         message.contains(it, ignoreCase = true)
                                     }
                             )
@@ -375,8 +369,9 @@ class AuthorizationPassTest {
         )
     }
 
+    /** Checks if an [HttpEndpoint] only throws allowed exceptions when domain checks fail. */
     fun HttpEndpoint.throwsNotAuthorizedWhenDomainCheckFails(
-        allowedExceptions: Set<String>
+        policy: UnauthorizedResponsePolicy
     ): QueryTree<Boolean> {
         val q =
             this.allExtended<HttpEndpoint>(
@@ -405,7 +400,7 @@ class AuthorizationPassTest {
                                             predicate = {
                                                 if (node !is ThrowExpression) false
                                                 else {
-                                                    node.name.localName in allowedExceptions
+                                                    node.name.localName in policy.allowedExceptions
                                                 }
                                             },
                                             earlyTermination = { it is ReturnStatement },
