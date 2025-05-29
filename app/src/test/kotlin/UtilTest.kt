@@ -91,7 +91,7 @@ fun wrapInAnalysisResult(tr: TranslationResult, trees: List<QueryTree<Boolean>>)
 
     return AnalysisResult(
         translationResult = tr,
-        project = AnalysisProject("ad-hoc", projectDir = null, config = tr.config),
+        project = AnalysisProject(null, "ad-hoc", projectDir = null, config = tr.config),
         sarif = SarifSchema210(version = Version.The210, runs = listOf(run)),
     )
 }

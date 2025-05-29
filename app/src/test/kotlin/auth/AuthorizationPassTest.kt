@@ -13,7 +13,6 @@ import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -165,11 +164,7 @@ class AuthorizationPassTest {
                         startNode = target,
                         type = Must,
                         direction = Backward(GraphToFollow.DFG),
-                        predicate = { dataFlowNode ->
-                            val ref = dataFlowNode as? Reference
-                            ref?.refersTo?.let { refersTo -> targetValues.contains(refersTo) }
-                                ?: false
-                        },
+                        predicate = { dataFlowNode -> dataFlowNode in targetValues },
                     )
                 }
             }
