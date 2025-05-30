@@ -29,12 +29,11 @@ import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import de.fraunhofer.aisec.openstack.queries.authorization.authorizeActionComesFromPolicyRef
-import org.junit.jupiter.api.Assertions.assertFalse
 import kotlin.io.path.Path
+import kotlin.test.Test
+import kotlin.test.assertFalse
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-import org.junit.jupiter.api.Test
 
 class AuthorizationPassTest {
     @Test
