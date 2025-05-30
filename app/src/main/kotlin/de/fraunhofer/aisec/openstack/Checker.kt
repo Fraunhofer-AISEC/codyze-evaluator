@@ -23,7 +23,7 @@ import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import java.io.File
 import kotlin.io.path.Path
-import kotlin.io.path.absolutePathString
+import kotlin.io.path.absolute
 import org.neo4j.driver.GraphDatabase
 import org.neo4j.driver.Session
 
@@ -33,11 +33,7 @@ class OpenstackCheckerCommand : ProjectCommand() {
 
     override fun run() {
         val result =
-            AnalysisProject.fromOptions(
-                    projectOptions,
-                    translationOptions,
-                    postProcess = AnalysisProject::executeSecurityGoalsQueries,
-                ) {
+            AnalysisProject.fromOptions(projectOptions, translationOptions) {
                     it.registerPass<SecretPass>()
                     it.registerPass<DiskEncryptionPass>()
                     it.registerPass<PythonMemoryPass>()
@@ -80,7 +76,7 @@ class OpenstackCheckerCommand : ProjectCommand() {
 }
 
 fun evaluateWithCodyze(scriptFile: String): AnalysisResult? {
-    val absoluteFile = Path(scriptFile).absolutePathString()
+    val absoluteFile = Path(scriptFile).absolute()
     val project =
         AnalysisProject.fromScript(absoluteFile) {
             it.registerPass<SecretPass>()
