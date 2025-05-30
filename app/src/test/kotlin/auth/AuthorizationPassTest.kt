@@ -44,8 +44,6 @@ import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.SetOsloPolicyEnforcerTypePass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
-import de.fraunhofer.aisec.openstack.queries.authorization.authorizeActionComesFromPolicyRef
-import kotlin.collections.get
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertFalse
@@ -202,35 +200,7 @@ class AuthorizationPassTest {
      */
     fun HttpEndpoint.targetValuesForUserOrProject(): Set<Node> {
         val userInfo = (this.requestContext as? ExtendedRequestContext)?.userInfo
-
         return setOfNotNull(userInfo?.projectId, userInfo?.userId)
-    }
-
-    /**
-     * Checks if there is a data flow from the policy reference into the `action` argument of the
-     * `policy.authorize` call.
-     *
-     * The `action` argument is expected to be the second argument of the `authorize` call.
-     */
-    fun HttpEndpoint.hasDataFlowFromPolicyToAuthorizeAction(): QueryTree<Boolean> {
-        val policyRef =
-            (this.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
-                ?: return QueryTree(
-                    value = false,
-                    stringRepresentation = "No policy found",
-                    node = this,
-                )
-
-        return dataFlow(
-            startNode = policyRef,
-            predicate = { dataflowNode ->
-                val authorizeCall = dataflowNode.astParent as? CallExpression
-                authorizeCall?.overlays?.filterIsInstance<Authorize>()?.isNotEmpty() == true &&
-                    // Check if the data flow matches the `action` argument, which is expected to be
-                    // the second argument of the authorize call
-                    authorizeCall.arguments.getOrNull(1) == dataflowNode
-            },
-        )
     }
 
     @Test
@@ -333,7 +303,7 @@ class AuthorizationPassTest {
 
     /**
      * Checks if an [HttpEndpoint] only throws "Not Authorized" exceptions of a permitted class and
-     * none of the disallowed message appear.
+     * none of the disallowed messages appear.
      */
     fun HttpEndpoint.onlyThrowsNotAuthorized(
         policy: UnauthorizedResponsePolicy
