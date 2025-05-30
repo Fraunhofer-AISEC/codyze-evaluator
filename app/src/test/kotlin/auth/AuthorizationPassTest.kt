@@ -188,8 +188,8 @@ class AuthorizationPassTest {
     }
 
     /**
-     * Checks if the `action` argument of the call to `policy.authorize` always comes from the policy
-     * ref belonging to [currentEndpoint].
+     * Checks if the `action` argument of the call to `policy.authorize` always comes from the
+     * policy ref belonging to [currentEndpoint].
      *
      * Note: This function is specific to the OpenStack authorization model and the call to
      * `policy.authorize`.
@@ -223,7 +223,8 @@ class AuthorizationPassTest {
                             node = authorize,
                         )
 
-                // The second argument of the authorize call is expected to be the `action` argument.
+                // The second argument of the authorize call is expected to be the `action`
+                // argument.
                 val actionArgument =
                     policyAuthorize.arguments.getOrNull(1)
                         ?: return@map QueryTree(
@@ -234,7 +235,8 @@ class AuthorizationPassTest {
                         )
                 // Retrieve the policy reference which should be used when authorizing the request
                 // handled by the currentEndpoint.
-                // If there is no policy, return a QueryTree with value false, indicating that no policy
+                // If there is no policy, return a QueryTree with value false, indicating that no
+                // policy
                 // was found.
                 val policyRef =
                     (currentEndpoint.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
@@ -247,7 +249,8 @@ class AuthorizationPassTest {
                 dataFlow(
                     // We start at the `action` argument of the authorize call.
                     startNode = actionArgument,
-                    // We traverse the data flow graph in the backward direction to find out if it comes
+                    // We traverse the data flow graph in the backward direction to find out if it
+                    // comes
                     // from the policy reference.
                     direction = Backward(GraphToFollow.DFG),
                     // The criterion must hold on every path, so we use `Must` analysis.
