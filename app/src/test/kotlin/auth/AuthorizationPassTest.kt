@@ -28,6 +28,7 @@ import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.openstack.queries.authorization.authorizeActionComesFromPolicyRef
 import kotlin.io.path.Path
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -141,7 +142,7 @@ class AuthorizationPassTest {
                     } else {
                         endpoint
                             .hasDataFlowToDomain(targetValues)
-                            .and(endpoint.hasDataFlowFromPolicyToAuthorizeAction())
+                            .and(endpoint.authorization.authorizeActionComesFromPolicyRef(endpoint))
                     }
                 },
             )
@@ -187,29 +188,75 @@ class AuthorizationPassTest {
     }
 
     /**
-     * Checks if there is a data flow from the policy reference into the `action` argument of the
-     * `policy.authorize` call.
+     * Checks if the `action` argument of the call to `policy.authorize` always comes from the policy
+     * ref belonging to [currentEndpoint].
      *
-     * The `action` argument is expected to be the second argument of the `authorize` call.
+     * Note: This function is specific to the OpenStack authorization model and the call to
+     * `policy.authorize`.
      */
-    fun HttpEndpoint.hasDataFlowFromPolicyToAuthorizeAction(): QueryTree<Boolean> {
-        val policyRef =
-            (this.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
+    fun Authorization?.authorizeActionComesFromPolicyRef(
+        currentEndpoint: HttpEndpoint
+    ): QueryTree<Boolean> {
+        val authorizeCalls =
+            this?.ops?.filterIsInstance<Authorize>()
                 ?: return QueryTree(
                     value = false,
-                    stringRepresentation = "No policy found",
-                    node = this,
+                    stringRepresentation = "No authorization was specified",
                 )
+        if (authorizeCalls.isEmpty()) {
+            return QueryTree(
+                value = false,
+                stringRepresentation = "No authorize calls found in the authorization operations.",
+            )
+        }
 
-        return dataFlow(
-            startNode = policyRef,
-            predicate = { dataflowNode ->
-                val authorizeCall = dataflowNode.astParent as? CallExpression
-                authorizeCall?.overlays?.filterIsInstance<Authorize>()?.isNotEmpty() == true &&
-                    // Check if the data flow matches the `action` argument, which is expected to be
-                    // the second argument of the authorize call
-                    authorizeCall.arguments.getOrNull(1) == dataflowNode
-            },
-        )
+        return authorizeCalls
+            .map { authorize ->
+                // Check that the requirement holds for all authorize calls.
+                // This is the call to `policy.authorize` which performs the authorization check.
+                val policyAuthorize =
+                    (authorize.underlyingNode as? CallExpression)
+                        ?: return@map QueryTree(
+                            value = false,
+                            stringRepresentation =
+                                "No underlyingNode of the authorize operation is found. This is unexpected.",
+                            node = authorize,
+                        )
+
+                // The second argument of the authorize call is expected to be the `action` argument.
+                val actionArgument =
+                    policyAuthorize.arguments.getOrNull(1)
+                        ?: return@map QueryTree(
+                            value = false,
+                            stringRepresentation =
+                                "No action argument found in the authorize call. This is invalid.",
+                            node = authorize,
+                        )
+                // Retrieve the policy reference which should be used when authorizing the request
+                // handled by the currentEndpoint.
+                // If there is no policy, return a QueryTree with value false, indicating that no policy
+                // was found.
+                val policyRef =
+                    (currentEndpoint.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
+                        ?: return@map QueryTree(
+                            value = false,
+                            stringRepresentation = "No policy found for the endpoint",
+                            node = currentEndpoint,
+                        )
+
+                dataFlow(
+                    // We start at the `action` argument of the authorize call.
+                    startNode = actionArgument,
+                    // We traverse the data flow graph in the backward direction to find out if it comes
+                    // from the policy reference.
+                    direction = Backward(GraphToFollow.DFG),
+                    // The criterion must hold on every path, so we use `Must` analysis.
+                    type = Must,
+                    // The predicate checks if the node is the policy reference of the authorization
+                    // belonging to the given HttpEndpoint.
+                    predicate = { it == policyRef },
+                )
+            }
+            .mergeWithAll()
     }
 }
