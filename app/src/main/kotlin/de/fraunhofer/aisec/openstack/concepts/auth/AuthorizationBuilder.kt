@@ -18,15 +18,19 @@ import de.fraunhofer.aisec.cpg.graph.concepts.newOperation
  *   setting its `underlyingNode`.
  * @return The created [Authorization] concept.
  */
-fun MetadataProvider.newAuthorization(underlyingNode: Node, connect: Boolean) =
-    newConcept(::Authorization, underlyingNode = underlyingNode, connect = connect)
+fun MetadataProvider.newAuthorization(underlyingNode: Node, policy: Policy, connect: Boolean) =
+    newConcept(
+        { AuthorizationWithPolicy(policy = policy) },
+        underlyingNode = underlyingNode,
+        connect = connect,
+    )
 
 /**
  * Creates a new [Authorize] operation.
  *
  * @param underlyingNode The underlying CPG node.
  * @param concept The [Authorization] concept to associate the operation with.
- * @param policy The [Policy] to use for authorization.
+ * @param action The action to use for authorization.
  * @param targets The set of target nodes for the operation.
  * @param connect If `true`, the created [Concept] will be connected to the underlying node by
  *   setting its `underlyingNode`.
@@ -35,12 +39,12 @@ fun MetadataProvider.newAuthorization(underlyingNode: Node, connect: Boolean) =
 fun MetadataProvider.newAuthorize(
     underlyingNode: Node,
     concept: Authorization,
-    policy: Policy,
+    action: Node,
     targets: Set<Node>,
     connect: Boolean,
 ) =
     newOperation(
-        { concept -> Authorize(concept = concept, policy = policy, targets = targets) },
+        { concept -> Authorize(concept = concept, action = action, targets = targets) },
         underlyingNode = underlyingNode,
         concept = concept,
         connect = connect,

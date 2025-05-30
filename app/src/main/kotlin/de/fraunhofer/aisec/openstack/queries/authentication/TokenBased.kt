@@ -5,12 +5,16 @@ package de.fraunhofer.aisec.openstack.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.*
+import de.fraunhofer.aisec.cpg.graph.Backward
+import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.component
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.query.*
+import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 
 /**
  * The list of valid token providers that are valid for the project.
@@ -101,9 +105,11 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
 }
 
 /**
- * // Todo: Add documentation on which security statement is enforced Checks if all [HttpEndpoint]s
- * in the [TranslationResult] are either in the list of endpoints that do not require authentication
- * or have a valid (in terms of secure) token-based authentication in-place.
+ * Todo: Add documentation on which security statement is enforced
+ *
+ * Checks if all [HttpEndpoint]s in the [TranslationResult] are either in the list of endpoints that
+ * do not require authentication or have a valid (in terms of secure) token-based authentication
+ * in-place.
  */
 fun doNotRequireOrHaveTokenBasedAuthentication(tr: TranslationResult): QueryTree<Boolean> {
     // Is a valid token provider configured?
@@ -116,6 +122,61 @@ fun doNotRequireOrHaveTokenBasedAuthentication(tr: TranslationResult): QueryTree
             // authentication.
             (tokenProviderConfigured and endpoint.hasTokenBasedAuth()) or
                 endpoint.doesNotNeedAuthentication()
+        }
+    )
+}
+
+/**
+ * Checks if all access tokens used for authentication are validated by the token-based
+ * authentication and if they come from the request context.
+ */
+fun accessTokenIsTiedToRequestContextQuery(tr: TranslationResult): QueryTree<Boolean> {
+    return tr.usesSameTokenAsCredential() and tr.hasDataFlowToToken()
+}
+
+/**
+ * Checks if any [Authenticate] uses a [TokenBasedAuth] where the token is equal to the credential
+ * of that [Authenticate].
+ */
+fun TranslationResult.usesSameTokenAsCredential(): QueryTree<Boolean> {
+    return this.allExtended<Authenticate>(
+        mustSatisfy = { token ->
+            val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
+            val isSameToken = tokens.all { it.token == token.credential }
+            QueryTree(value = isSameToken, node = token)
+        }
+    )
+}
+
+/**
+ * Checks if there is a data flow from the [ExtendedRequestContext.token] into the [TokenBasedAuth].
+ */
+fun TranslationResult.hasDataFlowToToken(): QueryTree<Boolean> {
+    return this.allExtended<ExtendedRequestContext>(
+        mustSatisfy = { ctx ->
+            if (
+                ctx.token == null ||
+                    ctx.userInfo?.userId == null ||
+                    ctx.userInfo?.domainId == null ||
+                    ctx.userInfo?.projectId == null
+            ) {
+                // If information is missing, we cannot determine the data flows and want to fail
+                QueryTree(false, node = ctx, stringRepresentation = "Invalid Request context")
+            } else {
+                dataFlow(
+                    // We start from the token in the request context
+                    startNode = ctx.token,
+                    // We want to find out which data can flow there, so we follow the data flow
+                    // backwards
+                    direction = Backward(GraphToFollow.DFG),
+                    // All paths must lead to a TokenBasedAuth because otherwise, we detected a path
+                    // which uses another token which was not used in the authentication.
+                    type = Must,
+                    predicate = { token ->
+                        token.overlays.filterIsInstance<TokenBasedAuth>().isNotEmpty()
+                    },
+                )
+            }
         }
     )
 }
