@@ -31,11 +31,11 @@ open class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node?
  */
 open class UserInfo(
     underlyingNode: Node? = null,
-    val userId: Node,
-    val projectId: Node,
-    val roles: Node,
-    val systemScope: Node,
-    val domainId: Node,
+    val userId: Node? = null,
+    val projectId: Node? = null,
+    val roles: Node? = null,
+    val systemScope: Node? = null,
+    val domainId: Node? = null,
 ) : Concept(underlyingNode = underlyingNode)
 
 /**
