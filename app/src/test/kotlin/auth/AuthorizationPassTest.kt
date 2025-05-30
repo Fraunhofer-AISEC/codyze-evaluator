@@ -183,10 +183,7 @@ class AuthorizationPassTest {
      */
     fun HttpEndpoint.targetValuesForUserOrProject(): Set<Node> {
         val userInfo = (this.requestContext as? ExtendedRequestContext)?.userInfo
-        userInfo?.let {
-            return setOf(userInfo.projectId, userInfo.userId)
-        }
-        return setOf()
+        return setOfNotNull(userInfo?.projectId, userInfo?.userId)
     }
 
     /**
