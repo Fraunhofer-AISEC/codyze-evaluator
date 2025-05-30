@@ -1,1 +1,0 @@
-../../common/queries/apply-restrictive-file-permissions.query.kts

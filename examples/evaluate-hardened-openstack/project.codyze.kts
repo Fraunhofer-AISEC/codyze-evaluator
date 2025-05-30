@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncryption
+import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncAlgorithms
 import example.queries.verySpecificQuery
 
 project {
@@ -38,13 +38,24 @@ project {
          * automatically checked by a query or by manual inspection.
          */
         requirements {
-            requirement("Check Security Target Description for Consistency") {
-                byManualAssessment("SEC-TARGET")
+            requirement("RQ-SEC-TARGET") {
+                name = "Check Security Target Description for Consistency"
+
+                fulfilledBy { manualAssessmentOf("SEC-TARGET") }
             }
-            requirement("State-of-the-Art Encryption Algorithm") {
-                byQuery { result -> stateOfTheArtEncryption(result) }
+
+            category("BYOK") {
+                name = "Bring Your Own Key (BYOK)"
+                description =
+                    "Ensure that the OpenStack deployment supports Bring Your Own Key (BYOK) " +
+                        "for disk encryption, allowing users to manage their own encryption keys."
+
+                requirement("State-of-the-Art Encryption Algorithm") {
+                    fulfilledBy { stateOfTheArtEncAlgorithms() }
+                }
+
+                requirement("Very Specific Requirement") { fulfilledBy { verySpecificQuery() } }
             }
-            requirement("Very Specific Requirement") { byQuery(::verySpecificQuery) }
         }
     }
 }

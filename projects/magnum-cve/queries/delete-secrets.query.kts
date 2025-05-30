@@ -1,1 +1,0 @@
-../../common/queries/delete-secrets.query.kts

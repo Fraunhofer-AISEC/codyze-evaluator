@@ -3,23 +3,14 @@
  */
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.graph.Backward
-import de.fraunhofer.aisec.cpg.graph.GraphToFollow
-import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.GetSecret
-import de.fraunhofer.aisec.cpg.graph.concepts.file.SetFileMask
-import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
 import de.fraunhofer.aisec.cpg.graph.operationNodes
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
-import de.fraunhofer.aisec.cpg.query.May
-import de.fraunhofer.aisec.cpg.query.Must
-import de.fraunhofer.aisec.cpg.query.allExtended
-import de.fraunhofer.aisec.cpg.query.dataFlow
-import de.fraunhofer.aisec.cpg.query.executionPath
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
+import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictPermissionsForAllWrites
+import de.fraunhofer.aisec.openstack.queries.accesscontrol.restrictPermissionsOfSecretWriting
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -76,22 +67,7 @@ class FileTest {
 
         // Checks that before each file write operation, there is an operation setting the correct
         // access rights to write only.
-        val setMaskBeforeWrite =
-            result.allExtended<WriteFile>(
-                mustSatisfy = { writeOp ->
-                    executionPath(
-                        startNode = writeOp,
-                        type = Must,
-                        direction = Backward(GraphToFollow.EOG),
-                        scope = Interprocedural(),
-                        predicate = {
-                            it is SetFileMask && it.mask == 0x180L /* 0x180 == 0o600 */
-                            /* || it is SetFileFlags && it.flags.singleOrNull() == FileAccessModeFlags.O_WRONLY*/
-                            /* TODO: How to use the SetFileFlags properly for the required test? */
-                        },
-                    )
-                }
-            )
+        val setMaskBeforeWrite = restrictPermissionsForAllWrites(result)
         println(setMaskBeforeWrite.printNicely())
     }
 
@@ -117,32 +93,7 @@ class FileTest {
 
         // Checks that before each file write operation, there is an operation setting the correct
         // access rights to write only.
-        val setMaskBeforeWrite =
-            result.allExtended<WriteFile>(
-                sel = { writeOp ->
-                    dataFlow(
-                            startNode = writeOp,
-                            type = May,
-                            direction = Backward(GraphToFollow.DFG),
-                            scope = Interprocedural(),
-                            predicate = { it is GetSecret },
-                        )
-                        .value
-                },
-                mustSatisfy = { writeOp ->
-                    executionPath(
-                        startNode = writeOp,
-                        type = Must,
-                        direction = Backward(GraphToFollow.EOG),
-                        scope = Interprocedural(),
-                        predicate = {
-                            it is SetFileMask && it.mask == 0x180L /* 0x180 == 0o600 */
-                            /* || it is SetFileFlags && it.flags.singleOrNull() == FileAccessModeFlags.O_WRONLY*/
-                            /* TODO: How to use the SetFileFlags properly for the required test? */
-                        },
-                    )
-                },
-            )
+        val setMaskBeforeWrite = restrictPermissionsOfSecretWriting(result)
         println(setMaskBeforeWrite.printNicely())
     }
 }

@@ -4,18 +4,13 @@
 package auth
 
 import analyze
-import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
-import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
-import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
@@ -34,6 +29,8 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.existsExtended
+import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.or
 import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.concepts.auth.UserInfo
@@ -41,6 +38,9 @@ import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.openstack.queries.authentication.doNotRequireOrHaveTokenBasedAuthentication
+import de.fraunhofer.aisec.openstack.queries.authentication.endpointsAreAuthenticated
+import de.fraunhofer.aisec.openstack.queries.authentication.useKeystoneForAuthentication
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -164,25 +164,9 @@ class AuthenticationPassTest {
 
         assertNotNull(result)
 
-        val r =
-            result.allExtended<HttpEndpoint>(
-                sel = { endpoint -> endpoint.shouldHaveAuthentication() },
-                mustSatisfy = { endpoint ->
-                    QueryTree(
-                        value = endpoint.authentication != null,
-                        children = mutableListOf(QueryTree(endpoint)),
-                    )
-                },
-            )
+        val r = endpointsAreAuthenticated(result)
         assertTrue(r.value)
         println(r.printNicely())
-    }
-
-    fun HttpEndpoint.shouldHaveAuthentication(): Boolean {
-        return (this.underlyingNode?.component?.name?.localName == "cinder" &&
-            this.path.startsWith("/v3/")) ||
-            (this.underlyingNode?.component?.name?.localName == "barbican" &&
-                this.path.startsWith("/v1/"))
     }
 
     @Test
@@ -212,16 +196,7 @@ class AuthenticationPassTest {
 
         assertNotNull(result)
 
-        val query =
-            result.allExtended<ConfigurationOptionSource>(
-                sel = { it.name.localName == "auth_strategy" },
-                mustSatisfy = {
-                    QueryTree<Boolean>(
-                        value = it.evaluate().toString() == "keystone",
-                        stringRepresentation = "Component config: ${it.location?.artifactLocation}",
-                    )
-                },
-            )
+        val query = useKeystoneForAuthentication(result)
         println(query.printNicely())
         assertEquals(true, query.value)
     }
@@ -262,17 +237,7 @@ class AuthenticationPassTest {
         assertNotNull(result)
 
         // Is a valid token provider configured?
-        val tokenProviderConfigured = result.isTokenProviderConfigured()
-        val r =
-            result.allExtended<HttpEndpoint>(
-                mustSatisfy = { endpoint ->
-                    // The requirement is satisfied if the endpoint has token-based authentication
-                    // enabled and a valid token provider is configured or if the endpoint does not
-                    // need authentication.
-                    (tokenProviderConfigured and endpoint.hasTokenBasedAuth()) or
-                        endpoint.doesNotNeedAuthentication()
-                }
-            )
+        val r = doNotRequireOrHaveTokenBasedAuthentication(result)
         assertTrue(r.value)
         println(r.printNicely())
     }
