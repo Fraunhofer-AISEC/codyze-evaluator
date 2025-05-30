@@ -17,7 +17,6 @@ import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.VariableDeclaration
 import de.fraunhofer.aisec.cpg.graph.firstParentOrNull
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
-import de.fraunhofer.aisec.cpg.graph.records
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.KeyValueExpression
@@ -66,40 +65,31 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
                             else null
                         }
                     authorizeCalls.forEach { authorizeCall ->
-                        applyAuthorization(
-                            policy = policy,
-                            call = authorizeCall,
-                            component = component,
-                        )
+                        applyAuthorization(policy = policy, call = authorizeCall)
                     }
                 }
             }
         }
     }
 
-    private fun applyAuthorization(
-        policy: Policy,
-        call: MemberCallExpression,
-        component: Component,
-    ) {
-        val authorization = newAuthorization(underlyingNode = call, connect = true)
-        // At the moment we don´t know the type of `context.authorize` so we search
-        // manually while assuming that
-        // the type of context is `RequestContext`
-        val requestContext =
-            component.records.singleOrNull { it.name.localName == "RequestContext" } ?: return
-        val authorize =
-            requestContext.methods.singleOrNull { it.name.localName == call.name.localName }
+    private fun applyAuthorization(policy: Policy, call: MemberCallExpression) {
+        val authorize = call.invokes.firstOrNull() as? MethodDeclaration ?: return
+        val policyRef = call.arguments.getOrNull(0) ?: return
         val policyAuthorize =
             authorize.calls.singleOrNull {
                 it.name.localName == "authorize" && it.name.parent?.localName == "policy"
             } ?: return
 
+        val action = policyAuthorize.arguments.getOrNull(1) ?: return
         val targets = extractTargets(policyAuthorize) ?: return
+        val authorization =
+            newAuthorization(underlyingNode = call, policy = policy, connect = true).also {
+                policy.policyRef = policyRef
+            }
         newAuthorize(
             underlyingNode = policyAuthorize,
             concept = authorization,
-            policy = policy,
+            action = action,
             targets = targets,
             connect = true,
         )

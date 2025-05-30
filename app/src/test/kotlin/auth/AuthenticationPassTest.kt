@@ -38,6 +38,7 @@ import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.concepts.auth.UserInfo
 import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
+import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import de.fraunhofer.aisec.openstack.queries.authentication.doNotRequireOrHaveTokenBasedAuthentication
@@ -60,6 +61,7 @@ class AuthenticationPassTest {
                 it.registerLanguage<PythonLanguage>()
                 it.registerLanguage<IniFileLanguage>()
                 it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<PreAuthorizationPass>()
                 it.registerPass<AuthenticationPass>()
                 it.registerPass<HttpPecanLibPass>()
                 it.registerPass<HttpWsgiPass>()
