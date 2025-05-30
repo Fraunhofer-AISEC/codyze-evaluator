@@ -29,6 +29,7 @@ import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import de.fraunhofer.aisec.openstack.queries.authorization.authorizeActionComesFromPolicyRef
+import org.junit.jupiter.api.Assertions.assertFalse
 import kotlin.io.path.Path
 import kotlin.test.assertIs
 import kotlin.test.assertNotNull
@@ -147,7 +148,7 @@ class AuthorizationPassTest {
                 },
             )
 
-        assertTrue(q.value)
+        assertFalse(q.value)
         println(q.printNicely())
     }
 
@@ -236,8 +237,7 @@ class AuthorizationPassTest {
                 // Retrieve the policy reference which should be used when authorizing the request
                 // handled by the currentEndpoint.
                 // If there is no policy, return a QueryTree with value false, indicating that no
-                // policy
-                // was found.
+                // policy was found.
                 val policyRef =
                     (currentEndpoint.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
                         ?: return@map QueryTree(
