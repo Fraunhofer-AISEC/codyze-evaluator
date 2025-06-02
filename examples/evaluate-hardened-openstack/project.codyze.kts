@@ -1,6 +1,8 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.openstack.queries.authentication.doNotRequireOrHaveTokenBasedAuthentication
+import de.fraunhofer.aisec.openstack.queries.authentication.endpointsAreAuthenticated
 import de.fraunhofer.aisec.openstack.queries.encryption.keyIsDeletedFromMemoryAfterUse
 import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutput
 import de.fraunhofer.aisec.openstack.queries.encryption.keyOnlyReachableThroughSecureKeyProvider
@@ -12,6 +14,7 @@ import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreA
 import de.fraunhofer.aisec.openstack.queries.keymanagement.keyOnyAccessibleByAuthenticatedEndpoint
 import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
 import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
+import example.queries.keystoneAuthStrategyConfigured
 
 include { Tagging from "tagging.codyze.kts" }
 
@@ -91,13 +94,13 @@ project {
          * automatically checked by a query or by manual inspection.
          */
         requirements {
-            requirement("RQ-SEC-TARGET") {
+            requirement {
                 name = "Check Security Target Description for Consistency"
 
                 fulfilledBy { manualAssessmentOf("SEC-TARGET") }
             }
 
-            category("GENERAL") {
+            category("General") {
                 name = "General Security Requirements"
                 description =
                     "This describes generic security requirements for all OpenStack components."
@@ -174,6 +177,41 @@ project {
                         "The key must only be accessible by a valid user and through the REST API of barbican."
 
                     fulfilledBy { keyOnyAccessibleByAuthenticatedEndpoint() }
+                }
+            }
+
+            category("Multi-Tenancy") {
+                name = "Multi-Tenancy"
+                description =
+                    "This describes security requirements for tenant isolation in OpenStack environments."
+
+                /*When authorizing a request, the caller’s domain/project is used in the authorization check
+                Access to sensitive information is restricted to the user’s domain
+                When a user reads data from or writes data to a database, the user’s domain is used as a filter in the database query
+                Data flows from user requests are not stored in global variables (since they are assumed to be domain-independent) – or they are deleted after the request is answered
+                An access request to a resource from another domain is answered with “unauthorized” (i.e. no indirect information leakages via answers like “not found” or “already exists” happen)*/
+
+                requirement {
+                    name = "All Endpoints Must Have Authentication Enabled"
+                    description =
+                        "All private endpoints must only be accessible after authentication."
+
+                    fulfilledBy { endpointsAreAuthenticated() }
+                }
+
+                requirement {
+                    name = "Token-based Authentication"
+                    description = "All endpoints have token-based authentication."
+
+                    fulfilledBy { doNotRequireOrHaveTokenBasedAuthentication() }
+                }
+
+                requirement {
+                    name = "Access Token Validated with Domain/Project Context"
+                    description =
+                        "When an access token is validated, its context is tied to the user’s domain/project."
+
+                    fulfilledBy { keystoneAuthStrategyConfigured() }
                 }
             }
         }

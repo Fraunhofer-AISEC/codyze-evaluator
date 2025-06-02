@@ -168,9 +168,11 @@ class AuthenticationPassTest {
 
         assertNotNull(result)
 
-        val r = endpointsAreAuthenticated(result)
-        assertTrue(r.value)
-        println(r.printNicely())
+        with(result) {
+            val r = endpointsAreAuthenticated()
+            assertTrue(r.value)
+            println(r.printNicely())
+        }
     }
 
     @Test
@@ -240,10 +242,12 @@ class AuthenticationPassTest {
 
         assertNotNull(result)
 
-        // Is a valid token provider configured?
-        val r = doNotRequireOrHaveTokenBasedAuthentication(result)
-        assertTrue(r.value)
-        println(r.printNicely())
+        with(result) {
+            // Is a valid token provider configured?
+            val r = doNotRequireOrHaveTokenBasedAuthentication()
+            assertTrue(r.value)
+            println(r.printNicely())
+        }
     }
 
     /**

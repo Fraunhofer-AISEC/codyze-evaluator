@@ -23,8 +23,10 @@ fun HttpEndpoint.shouldHaveAuthentication(): Boolean {
             this.path.startsWith("/v1/"))
 }
 
-/** All HTTPEndpoints that are private should have authentication methods */
-fun endpointsAreAuthenticated(tr: TranslationResult): QueryTree<Boolean> {
+/** All [HTTPEndpoint]s that are private should have authentication methods */
+context(TranslationResult)
+fun endpointsAreAuthenticated(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
     return tr.allExtended<HttpEndpoint>(
         sel = { endpoint ->
             // Only endpoints that are private and therefore should have authentication

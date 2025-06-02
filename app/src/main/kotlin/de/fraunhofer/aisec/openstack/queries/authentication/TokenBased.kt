@@ -111,7 +111,9 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
  * do not require authentication or have a valid (in terms of secure) token-based authentication
  * in-place.
  */
-fun doNotRequireOrHaveTokenBasedAuthentication(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun doNotRequireOrHaveTokenBasedAuthentication(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
     // Is a valid token provider configured?
     val tokenProviderConfigured = tr.isTokenProviderConfigured()
 
