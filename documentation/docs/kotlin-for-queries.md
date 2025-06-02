@@ -1,5 +1,5 @@
 
-# Hints on Kotlin for Writing sleek Queries
+# Hints on Kotlin for Writing Sleek Queries
 
 ## Context receivers
 

@@ -166,6 +166,7 @@ nav:
       - "Queries":
         - "Writing queries": writing-queries.md
         - "Basics of Program Analysis": program-analysis-basics.md
+        - "Hints on Kotlin for Writing Sleek Queries": kotlin-for-queries.md
       - "Concepts and Operations":
         - "Implementing Concepts and Operations": concepts-and-operations.md
         - "List": list-concepts-and-operations.md
