@@ -6,8 +6,10 @@ import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutpu
 import de.fraunhofer.aisec.openstack.queries.encryption.keyOnlyReachableThroughSecureKeyProvider
 import de.fraunhofer.aisec.openstack.queries.encryption.minimalKeyLengthIsEnforced
 import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncryptionIsUsed
+import de.fraunhofer.aisec.openstack.queries.encryption.transportEncryptionForKeys
 import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
 import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
+import de.fraunhofer.aisec.openstack.queries.keymanagement.keyOnyAccessibleByAuthenticatedEndpoint
 import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
 import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
 
@@ -147,16 +149,31 @@ project {
                 }
 
                 requirement {
-                    name = "Key Is Input to Disk Encryption"
+                    name = "Key for Disk Encryption is Kept Secure"
                     description =
                         "Given a disk encryption operation, the key used in the operation must be " +
-                            "provided by a secure key provider."
+                            "provided by a secure key provider, leaked through other output and deleted after use."
 
                     fulfilledBy {
                         keyNotLeakedThroughOutput() and
                             keyOnlyReachableThroughSecureKeyProvider() and
                             keyIsDeletedFromMemoryAfterUse()
                     }
+                }
+
+                requirement {
+                    name = "Transport Encryption of Key"
+                    description = "The key must be protected when in transit."
+
+                    fulfilledBy { transportEncryptionForKeys() }
+                }
+
+                requirement {
+                    name = "Key Accessible Only By Valid User"
+                    description =
+                        "The key must only be accessible by a valid user and through the REST API of barbican."
+
+                    fulfilledBy { keyOnyAccessibleByAuthenticatedEndpoint() }
                 }
             }
         }

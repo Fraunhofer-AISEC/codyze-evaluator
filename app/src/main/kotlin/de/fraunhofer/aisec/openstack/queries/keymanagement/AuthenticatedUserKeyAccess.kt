@@ -21,7 +21,9 @@ import de.fraunhofer.aisec.cpg.query.dataFlow
  * authenticated users, i.e., each Barbican REST API that provides access to K must be connected to
  * an Authentication concept."
  */
-fun keyAccessWithAuthenticationToken(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun keyOnyAccessibleByAuthenticatedEndpoint(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
     return tr.allExtended<HttpEndpoint>(
         // A secret reaches this endpoint.
         sel = { endpoint ->
