@@ -5,6 +5,8 @@ package auth
 
 import analyze
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
+import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
@@ -334,50 +336,78 @@ class AuthorizationPassTest {
         )
     }
 
-    /** Checks if an [HttpEndpoint] only throws allowed exceptions when domain checks fail. */
+    /**
+     * Checks if an [HttpEndpoint] only throws allowed exceptions when domain checks fail.
+     *
+     * This query follows a blacklisting approach: It checks if no exception is thrown or if the
+     * exception contains some keywords and in this case, lets the query fail.
+     */
     fun HttpEndpoint.throwsNotAuthorizedWhenDomainCheckFails(
         policy: UnauthorizedResponsePolicy
     ): QueryTree<Boolean> {
-        val q =
-            this.allExtended<HttpEndpoint>(
-                sel = { it.authorization != null },
-                mustSatisfy = { endpoint ->
-                    endpoint.authorization
-                        ?.ops
-                        ?.filterIsInstance<Authorize>()
-                        ?.map { auth ->
-                            auth.action
-                                .followNextFullDFGEdgesUntilHit {
-                                    it.astParent
-                                        ?.overlays
-                                        ?.filterIsInstance<CheckDomainScope>()
-                                        ?.isNotEmpty() == true
-                                }
-                                .fulfilled
-                                .mapNotNull { it.nodes.last().astParent }
-                                .map { node ->
-                                    not(
-                                        dataFlow(
+        return this.allExtended<HttpEndpoint>(
+            // We only consider endpoints with authorization
+            sel = { it.authorization != null },
+            mustSatisfy = { endpoint ->
+                endpoint.authorization
+                    ?.ops
+                    ?.filterIsInstance<Authorize>()
+                    ?.map { auth ->
+                        // We start from all the Authorize operations and check where the action is
+                        // used to check the scope of the domain. We collect the underlying node of
+                        // the CheckDomainScope operations.
+                        auth.action
+                            .followNextFullDFGEdgesUntilHit {
+                                it.astParent
+                                    ?.overlays
+                                    ?.filterIsInstance<CheckDomainScope>()
+                                    ?.isNotEmpty() == true
+                            }
+                            .fulfilled
+                            .mapNotNull { it.nodes.last().astParent }
+                            .map { node ->
+                                // node is the astParent of the CheckDomainScope operation's
+                                // underlyingNode.
+                                // We invert the result of the dataflow query because its result is
+                                // bad.
+                                not(
+                                    // We check if the node flows into an exception which is allowed
+                                    dataFlow(
                                             node,
+                                            // We only perform an intraprocedural data flow analysis
+                                            // because it's strange to populate the check outside
+                                            // the function and throw an exception there.
                                             scope = Intraprocedural(),
                                             sensitivities =
                                                 FieldSensitive + ContextSensitive + Implicit,
                                             predicate = {
+                                                // We have a fulfilled path if the node throws an
+                                                // exception which is in the allowedExceptions list.
                                                 if (node !is ThrowExpression) false
                                                 else {
                                                     node.name.localName in policy.allowedExceptions
                                                 }
                                             },
+                                            // If we reach a ReturnStatement, we stop following the
+                                            // data flow path.
+                                            // Here, we assume that the authorization check is not
+                                            // performed because we most likely ignore the result of
+                                            // the check.
                                             earlyTermination = { it is ReturnStatement },
                                         )
-                                    )
-                                }
-                                .mergeWithAll()
-                        }
-                        ?.mergeWithAll() ?: QueryTree(false)
-                },
-            )
-        return q
+                                        .assume(
+                                            AssumptionType.ExhaustiveEnumerationAssumption,
+                                            "We assume that the earlyTermination is correct and that no more exception will be thrown outside the function where the domain scope check is performed.",
+                                        ) // TODO: Would be nice to have this evaluated only if the
+                                    // earlyTermination was hit.
+                                )
+                            }
+                            .mergeWithAll() // It has to be fulfilled for all domain scope checks
+                    }
+                    ?.mergeWithAll() // It has to be fulfilled for all Authorize operations
+                ?: QueryTree(false)
+            },
+        )
     }
 
     /**
