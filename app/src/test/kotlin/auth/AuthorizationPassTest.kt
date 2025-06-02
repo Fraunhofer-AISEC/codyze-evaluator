@@ -16,27 +16,26 @@ import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
 import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
+import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
 import de.fraunhofer.aisec.cpg.query.Must
+import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.mergeWithAll
 import de.fraunhofer.aisec.openstack.concepts.auth.AuthorizationWithPolicy
-import de.fraunhofer.aisec.cpg.passes.concepts.each
-import de.fraunhofer.aisec.cpg.passes.concepts.tag
-import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
-import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
+import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.concepts.database.DatabaseAccess
 import de.fraunhofer.aisec.openstack.concepts.database.Filter
-import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
@@ -44,7 +43,6 @@ import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
 import de.fraunhofer.aisec.openstack.queries.authorization.authorizeActionComesFromPolicyRef
 import kotlin.io.path.Path
-import kotlin.test.assertFalse
 import kotlin.test.Test
 import kotlin.test.assertFalse
 import kotlin.test.assertIs
@@ -140,17 +138,20 @@ class AuthorizationPassTest {
                                                     it.name.localName.startsWith("filter") ||
                                                     it.name.localName.startsWith("with_entities")
                                             }
-                                        val filterCall =
-                                            paths.fulfilled.lastOrNull()?.nodes?.lastOrNull()
+
+                                        val filterCalls =
+                                            paths.fulfilled.map { path -> path.nodes.last() }
                                         val by = node.arguments.getOrNull(1)
 
-                                        if (filterCall != null && by != null) {
-                                            overlays +=
-                                                Filter(
-                                                    underlyingNode = filterCall,
-                                                    concept = dbAccess,
-                                                    by = by,
-                                                )
+                                        if (by != null) {
+                                            filterCalls.forEach { filterCall ->
+                                                overlays +=
+                                                    Filter(
+                                                        underlyingNode = filterCall,
+                                                        concept = dbAccess,
+                                                        by = by,
+                                                    )
+                                            }
                                         }
                                         overlays
                                     }
