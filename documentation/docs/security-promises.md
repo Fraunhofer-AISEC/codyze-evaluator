@@ -15,6 +15,13 @@ The underlying Query API allows the user to evaluate simple values, but its main
 This can be leveraged to express several security goals and verify if violating paths exist in the code.
 For all security goals which cannot be expressed by the Query API, the user can define custom checks which are then manually assessed.
 
+## Reproducibility
+
+With this approach, the definition of the security goals is highly versatile and can be adapted to the specific needs of the user.
+By allowing the user to precisely document right within the requirement how a manual assessment should be performed, the OpenStack Checker can provide reproducible steps even for manual assessment.
+The exact phrasing of these steps is crucial for the reproducibility of the assessment.
+
+
 ## Reasoning about Program Semantics
 
 The Security Goals are defined based on Concepts and Operations, whenever possible.

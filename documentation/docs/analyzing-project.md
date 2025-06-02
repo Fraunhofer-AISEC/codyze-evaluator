@@ -21,7 +21,9 @@ and how to write those queries.
                 ├── query1.kt               # This file contains one or multiple custom queries which are used in the requirements of the evaluation project. The filename can be aritrary but must end with `.kt`.
                 └── query2.kt               # This file contains one or multiple custom queries which are used in the requirements of the evaluation project. The filename can be aritrary but must end with `.kt`.
             └── Main.kt                     # The main file of the evaluation project. It calls the script `project.codyze.kts` to run the OpenStack Checker.
-    
+
+    Most importantly, the project requires the build file, the project definition and the Main-file.
+    The other files could be omitted and the contents could be integrated in the project file, but we recommend to keep them separate for better maintainability.
 
 === "Legacy"
   
@@ -66,7 +68,8 @@ and how to write those queries.
     ```
     
     The `tool` block can be used to fine-tune the configuration of the OpenStack Checker by registering additional passes or external libraries, among others.
-    The full list of options can be found in the documentation of the `TranslationConfiguration.Builder` which can be accessed here.
+    The full list of options can be found in the documentation of the `TranslationConfiguration.Builder`.
+    An instance of this class can be accessed within this block.
     An example of a `tool` block is:
     ```kotlin title="The tool description in project.codyze.kts"
     tool {
@@ -114,33 +117,41 @@ and how to write those queries.
     The automatic assessment is specified by using the `byQuery` function runs a check on the `TranslationResult` and must return a `QueryTree<Boolean>` object.
     ```kotlin title="The requirements description in project.codyze.kts"
     requirements {
-        // Each of the requirements has a name which is passed by the mandatory parameter.
-            requirement("Is Security Target Correctly specified") {
+        
+            requirement {
+                // Each of the requirements has a name
+                name = "Is Security Target Correctly specified"
+                // The description can provide additional information about the requirement.
+                description = "This requirement checks if the security target is correctly specified in the code. To verify this, the evaluator must check if there is a file provided which contains all information required by the class ASE for the EAL this TOE targets. Conformance is verified based on the common criteria."
                 // The requirement is composed by exactly one statement.
                 // In this case, we have to assess manually, if the requirement is satisfied, what is done by the `manualAssessmentOf` function.
                 // This function must be configured with a unique identifier of the check to be performed.
                 manualAssessmentOf("SEC-TARGET")
             }
     
-            requirement("Good Encryption") { result ->
+            requirement {
+                name = ""Good Encryption"
+                description = "This requirement checks if the encryption is done correctly. It is fully automated."
                 // This requirement is checked fully automatically by the query.
-                // The lambda receives the translation result as a parameter and must return a `Decision` object.
+                // The lambda receives the translation result as object in `this` and must return a `Decision` object.
                 // It uses the two helper functions `goodCryptoFunc` and `goodArgumentSize` which are part of the catalogue and return a `QueryTree<Boolean>` object.
                 // The `decide` function is called on the `QueryTree<Boolean>` object to get the final `Decision` object by assessing the acceptance of assumptions.
-                goodCryptoFunc(result).decide() and goodArgumentSize(result).decide()
+                goodCryptoFunc().decide() and goodArgumentSize().decide()
             }
       
-             requirement("Hybrid check") { result ->
-                // This requirement is checked by a hybrid approach. The first part is checked by the query specified in the `byQuery` function.
-                // The second part is checked manually by the `manualAssessmentOf` function.
+             requirement {
+                name = "Hybrid Check"
+                description = "This requirement is checked by a hybrid approach." +
+                    "The first part is checked by the query specified in the `query` function." +
+                    "The second part is checked manually by the `manualAssessmentOf` function."
                 // Both parts are combined by the `and` operator which returns a Decision object.
-                query(result).decide() and manualAssessmentOf("HYBRID")
+                query().decide() and manualAssessmentOf("HYBRID")
              }
         }
     ```
     The block `assumptions` is used to specify the assumptions which have to hold so that the analysis is meaningful.
-    It also allows to specify the state of the assumption (i.e., accepted, rejected, ignored or undecided).
-    To do so, the functions `accept`, `reject`, `ignore` and `undecided` can be called with the UUID of the respective assumption.
+    It also allows to specify the state of the assumption (i.e., accepted, rejected, ignored, or undecided).
+    To do so, the functions `accept`, `reject`, `ignore`, and `undecided` can be called with the UUID of the respective assumption.
     To list more assumptions for documentation purposes, the function `assumption` can be used.
     Note that this assumption does not have to be accepted manually and won't be included in the analysis or translation result.
     ```kotlin title="The assumptions descriptions of project.codyze.kts"

@@ -231,26 +231,3 @@ The top-level result of any query must be a `QueryTree<Boolean>`.
 However, it is sometimes necessary to aggregate the results of multiple sub-queries with methods of the kotlin standard library (such as `map` for collections), which does not return a `QueryTree<Boolean>` itself.
 In this case, you can simply create a `QueryTree<Boolean>` by calling the constructor.
 It may be handy to implement some helper functions for frequent purposes as part of the OpenStack-Checker and import these extensions in the query scripts.
-
-
-### Hints on writing queries
-
-**Handling of `null` values:**
-
-Kotlin differentiates between `null` and non-null values. To work with nullable values, use the `?` syntax/operator and
-implement checks using the `?.let` or `?:` operator rather than enforcing non-null values with `!!`. This ensures that
-all your queries will be evaluated even in the presence of null-values whereas using `!!` would immediately crash the
-execution. Keep in mind that the missing information in the check should likely result in a warning, which means you
-probably want to generate a failing result in this case (e.g. by creating a `QueryTree(false, ...)`).
-
-**Using variables:**
-
-Some data are likely to change frequently. Rather than hardcoding this information in the queries, you can use a
-variable. This makes it easier to update the information in subsequent usages of the same security statement or
-objectives.
-
-**Using extensions:**
-
-To keep the actual query small, we recommend getting familiar
-with [Kotlin Extensions](https://kotlinlang.org/docs/extensions.html) which can be used to extend existing classes with
-new functionality without having to inherit from the class. They can be used to add functions or properties.
