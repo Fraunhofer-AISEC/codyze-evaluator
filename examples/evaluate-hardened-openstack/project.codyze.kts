@@ -1,19 +1,12 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.openstack.queries.authentication.doNotRequireOrHaveTokenBasedAuthentication
-import de.fraunhofer.aisec.openstack.queries.authentication.endpointsAreAuthenticated
-import de.fraunhofer.aisec.openstack.queries.encryption.keyIsDeletedFromMemoryAfterUse
-import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutput
-import de.fraunhofer.aisec.openstack.queries.encryption.keyOnlyReachableThroughSecureKeyProvider
-import de.fraunhofer.aisec.openstack.queries.encryption.minimalKeyLengthIsEnforced
-import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncryptionIsUsed
-import de.fraunhofer.aisec.openstack.queries.encryption.transportEncryptionForKeys
-import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
-import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
-import de.fraunhofer.aisec.openstack.queries.keymanagement.keyOnyAccessibleByAuthenticatedEndpoint
-import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
-import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.openstack.queries.authentication.*
+import de.fraunhofer.aisec.openstack.queries.authorization.*
+import de.fraunhofer.aisec.openstack.queries.encryption.*
+import de.fraunhofer.aisec.openstack.queries.file.*
+import de.fraunhofer.aisec.openstack.queries.keymanagement.*
 import example.queries.keystoneAuthStrategyConfigured
 
 include { Tagging from "tagging.codyze.kts" }
@@ -80,11 +73,30 @@ project {
                     exclude("tests")
                 }
 
+                /**
+                 * The "conf" module contains specific OpenStack configuration files and
+                 * settings that are used for the specific OpenStack deployment.
+                 */
+                module("conf") {
+                    directory = "toe/conf"
+                    includeAll()
+                }
+
                 /** Oslo.config is a library for managing configuration files in OpenStack. */
                 module("oslo.config") {
                     directory = "toe/libraries/oslo.config"
                     include("oslo_config")
                     exclude("tests")
+                }
+
+                /**
+                 * Keystone Middleware is a library that provides middleware components for
+                 * OpenStack Keystone, the identity service.
+                 */
+                module("keystonemiddleware") {
+                    directory = "toe/libraries/keystonemiddleware"
+                    include("keystonemiddleware")
+                    exclude("tests", "migrations")
                 }
             }
         }
@@ -185,11 +197,13 @@ project {
                 description =
                     "This describes security requirements for tenant isolation in OpenStack environments."
 
-                /*When authorizing a request, the caller’s domain/project is used in the authorization check
-                Access to sensitive information is restricted to the user’s domain
-                When a user reads data from or writes data to a database, the user’s domain is used as a filter in the database query
-                Data flows from user requests are not stored in global variables (since they are assumed to be domain-independent) – or they are deleted after the request is answered
-                An access request to a resource from another domain is answered with “unauthorized” (i.e. no indirect information leakages via answers like “not found” or “already exists” happen)*/
+                requirement {
+                    name = "Use Keystone for authentication"
+                    description =
+                        "All authentication operations must use Keystone as the identity service."
+
+                    fulfilledBy { keystoneAuthStrategyConfigured() }
+                }
 
                 requirement {
                     name = "All Endpoints Must Have Authentication Enabled"
@@ -203,21 +217,36 @@ project {
                     name = "Token-based Authentication"
                     description = "All endpoints have token-based authentication."
 
-                    fulfilledBy { doNotRequireOrHaveTokenBasedAuthentication() }
-                }
-
-                requirement {
-                    name = "Access Token Validated with Domain/Project Context"
-                    description =
-                        "When an access token is validated, its context is tied to the user’s domain/project."
-
-                    fulfilledBy { keystoneAuthStrategyConfigured() }
+                    fulfilledBy { tokenBasedAuthenticationWhenRequired() }
                 }
 
                 requirement {
                     name = "Domain/Project used in Authorization Checks"
                     description =
-                        "When authorizing a request, the caller’s domain/project is used in the authorization check."
+                        "When authorizing an HTTP request, the caller’s domain/project is used in the authorization check." +
+                            "When a user reads data from or writes data to a database, the user’s domain is used as a filter in the database query."
+
+                    fulfilledBy {
+                        endpointAuthorizationBasedOnDomainOrProject() and
+                            databaseAccessBasedOnDomainOrProject()
+                    }
+                }
+
+                requirement {
+                    name = "No Data Flows to Globals"
+                    description =
+                        "Data flows from user requests are not stored in global variables (since they are assumed to be domain-independent) or they are deleted after the request is answered."
+
+                    fulfilledBy { noDataFlowsToGlobals<HttpRequest>() }
+                }
+
+                requirement {
+                    name = "Indistinguishable Responses for Unauthorized Access"
+                    description =
+                        "An access request to a resource from another domain is answered with “unauthorized”, " +
+                            "i.e. no indirect information leakages via answers like “not found” or “already exists” happen."
+
+                    // fulfilledBy { }
                 }
             }
         }

@@ -33,16 +33,14 @@ import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.existsExtended
-import de.fraunhofer.aisec.cpg.query.or
 import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.openstack.concepts.auth.UserInfo
-import de.fraunhofer.aisec.openstack.passes.*
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.PreAuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
-import de.fraunhofer.aisec.openstack.queries.authentication.doNotRequireOrHaveTokenBasedAuthentication
 import de.fraunhofer.aisec.openstack.queries.authentication.endpointsAreAuthenticated
+import de.fraunhofer.aisec.openstack.queries.authentication.tokenBasedAuthenticationWhenRequired
 import de.fraunhofer.aisec.openstack.queries.authentication.useKeystoneForAuthentication
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
@@ -244,7 +242,7 @@ class AuthenticationPassTest {
 
         with(result) {
             // Is a valid token provider configured?
-            val r = doNotRequireOrHaveTokenBasedAuthentication()
+            val r = tokenBasedAuthenticationWhenRequired()
             assertTrue(r.value)
             println(r.printNicely())
         }
