@@ -30,7 +30,7 @@ val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
  * efficiency"
  */
 context(TranslationResult)
-fun stateOfTheArtEncAlgorithms(): QueryTree<Boolean> {
+fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     // We currently allow the two ciphers aes-xts-plain64 and aes-cbc-essiv.
@@ -54,7 +54,7 @@ fun stateOfTheArtEncAlgorithms(): QueryTree<Boolean> {
  * algorithm A is employed, A must support a minimum key length L with L >= 256."
  */
 context(TranslationResult)
-fun minimalKeyLengthEnforced(): QueryTree<Boolean> {
+fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     // The inner predicate has to hold for each DiskEncryption concept

@@ -74,7 +74,10 @@ fun Node.dataLeavesComponent(): Boolean {
  * This query enforces the following statement: "Given a customer-managed key K stored in Barbican,
  * it must not be leaked via printing, logging, file writing or command execution input."
  */
-fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun keyNotLeakedThroughOutput(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     // The result of a `GetSecret` operation must not have a data flow
     // to a node which can be used to leak sensitive data according to
     // the function `dataLeavesComponent`.
@@ -104,9 +107,12 @@ fun keyNotLeakedThroughOutput(tr: TranslationResult): QueryTree<Boolean> {
  * This query enforces the following statement: "Given a customer-managed key K used for disk
  * encryption, K must only be accessible via the Barbican API endpoint."
  */
-fun keyOnlyReachableThroughSecureKeyProvider(result: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun keyOnlyReachableThroughSecureKeyProvider(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+
     val tree =
-        result.allExtended<DiskEncryption> { encryption ->
+        tr.allExtended<DiskEncryption> { encryption ->
             // We start with a disk encryption operation and check if the key is present.
             encryption.key?.let { key ->
                 // This key must originate from a secure key provider. In our case, this is the

@@ -1,12 +1,15 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncAlgorithms
+import de.fraunhofer.aisec.openstack.queries.encryption.keyIsDeletedFromMemoryAfterUse
+import de.fraunhofer.aisec.openstack.queries.encryption.keyNotLeakedThroughOutput
+import de.fraunhofer.aisec.openstack.queries.encryption.keyOnlyReachableThroughSecureKeyProvider
+import de.fraunhofer.aisec.openstack.queries.encryption.minimalKeyLengthIsEnforced
+import de.fraunhofer.aisec.openstack.queries.encryption.stateOfTheArtEncryptionIsUsed
 import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
 import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
 import de.fraunhofer.aisec.openstack.queries.keymanagement.noLoggingOfSecrets
 import de.fraunhofer.aisec.openstack.queries.keymanagement.secretsAreDeletedAfterUsage
-import example.queries.verySpecificQuery
 
 include { Tagging from "tagging.codyze.kts" }
 
@@ -135,9 +138,26 @@ project {
                     "Ensure that the OpenStack deployment supports Bring Your Own Key (BYOK) " +
                         "for disk encryption, allowing users to manage their own encryption keys."
 
-                requirement { fulfilledBy { stateOfTheArtEncAlgorithms() } }
+                requirement {
+                    name = "State-of-the-Art Disk Encryption Algorithm"
+                    description =
+                        "The block device encryption algorithm must be state of the art, e.g., refer to a TR."
 
-                requirement { fulfilledBy { verySpecificQuery() } }
+                    fulfilledBy { stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced() }
+                }
+
+                requirement {
+                    name = "Key Is Input to Disk Encryption"
+                    description =
+                        "Given a disk encryption operation, the key used in the operation must be " +
+                            "provided by a secure key provider."
+
+                    fulfilledBy {
+                        keyNotLeakedThroughOutput() and
+                            keyOnlyReachableThroughSecureKeyProvider() and
+                            keyIsDeletedFromMemoryAfterUse()
+                    }
+                }
             }
         }
     }
