@@ -213,6 +213,12 @@ project {
 
                     fulfilledBy { keystoneAuthStrategyConfigured() }
                 }
+
+                requirement {
+                    name = "Domain/Project used in Authorization Checks"
+                    description =
+                        "When authorizing a request, the caller’s domain/project is used in the authorization check."
+                }
             }
         }
     }
