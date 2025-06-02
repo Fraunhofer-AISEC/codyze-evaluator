@@ -4,16 +4,27 @@
 package auth
 
 import analyze
+import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
+import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Node
+import de.fraunhofer.aisec.cpg.graph.OverlayNode
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
+import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
+import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
+import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
@@ -23,6 +34,8 @@ import de.fraunhofer.aisec.cpg.query.mergeWithAll
 import de.fraunhofer.aisec.openstack.concepts.auth.AuthorizationWithPolicy
 import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
 import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.openstack.concepts.database.DatabaseAccess
+import de.fraunhofer.aisec.openstack.concepts.database.Filter
 import de.fraunhofer.aisec.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.openstack.passes.auth.AuthorizationPass
 import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
@@ -89,6 +102,95 @@ class AuthorizationPassTest {
             val targets = relatedAuthzOps.targets
             assertNotNull(targets, "Authorize operation should have targets")
         }
+    }
+
+    @Test
+    fun testDatabaseQueryFilter() {
+        val topLevel = Path("../projects/multi-tenancy/components")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.exclusionPatterns("tests", "drivers", "migrations")
+                it.registerPass<ControlFlowSensitiveDFGPass>()
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag =
+                            tag {
+                                each<CallExpression>(
+                                        predicate = { it.name.localName == "model_query" }
+                                    )
+                                    .withMultiple {
+                                        val overlays = mutableListOf<OverlayNode>()
+                                        val contextArg = node.arguments.getOrNull(0)
+                                        val dbAccess =
+                                            DatabaseAccess(
+                                                underlyingNode = node,
+                                                context = contextArg,
+                                            )
+                                        overlays += dbAccess
+
+                                        val paths =
+                                            node.followDFGEdgesUntilHit {
+                                                (it is MemberCallExpression ||
+                                                    it is MemberExpression) &&
+                                                    // It can be `filter` or `filter_by`
+                                                    it.name.localName.startsWith("filter") ||
+                                                    it.name.localName.startsWith("with_entities")
+                                            }
+
+                                        val filterCalls =
+                                            paths.fulfilled.map { path -> path.nodes.last() }
+                                        val by = node.arguments.getOrNull(1)
+
+                                        if (by != null) {
+                                            filterCalls.forEach { filterCall ->
+                                                overlays +=
+                                                    Filter(
+                                                        underlyingNode = filterCall,
+                                                        concept = dbAccess,
+                                                        by = by,
+                                                    )
+                                            }
+                                        }
+                                        overlays
+                                    }
+                            }
+                    )
+                )
+                it.softwareComponents(
+                    mutableMapOf(
+                        "cinder" to
+                            listOf(topLevel.resolve("cinder/cinder/db/sqlalchemy/api.py").toFile())
+                    )
+                )
+                it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
+            }
+
+        assertNotNull(result)
+        // When a user reads data from or writes data to a database, the user’s domain is used as a
+        // filter in the database query
+        val q =
+            result
+                .allExtended<DatabaseAccess>(
+                    mustSatisfy = {
+                        if (it.context == null) {
+                            QueryTree(
+                                value = false,
+                                node = it,
+                                stringRepresentation = "No context provided",
+                            )
+                        }
+                        QueryTree<Boolean>(it.ops.any { it is Filter })
+                    }
+                )
+                .assume(
+                    assumptionType = AssumptionType.DataFlowAssumption,
+                    message =
+                        "We assume that there exists a data flow from a method that performs a database access (e.g., within an HTTP endpoint) to the 'model_query' call expression represented by this node." +
+                            "To verify this assumption, it is necessary to check the data flow",
+                )
+        assertFalse(q.value)
     }
 
     @Test
