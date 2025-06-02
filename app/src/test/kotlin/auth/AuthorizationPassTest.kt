@@ -317,6 +317,7 @@ class AuthorizationPassTest {
                     ?.ops
                     ?.filterIsInstance<Authorize>()
                     ?.map { auth ->
+                        // ref contains the exception thrown by the authorization operation
                         val ref = auth.exception as? Reference
                         ref?.refersTo?.let { refs ->
                             val record = refs as? RecordDeclaration
@@ -324,8 +325,10 @@ class AuthorizationPassTest {
                             val message =
                                 record.fields[policy.throwMessageField]?.evaluate().toString()
                             QueryTree(
+                                // Checks that the exception's super-class is in the list of allowed classes.
                                 superClass?.name?.localName == policy.allowedExceptionParentClass &&
                                     policy.notAllowedThrowMessages.none {
+                                        // Checks if the message does not contain any of the forbidden words.
                                         message.contains(it, ignoreCase = true)
                                     }
                             )
