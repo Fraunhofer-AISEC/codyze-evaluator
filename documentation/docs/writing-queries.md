@@ -6,8 +6,10 @@ The main sources for the implementation can be found in the files `Query.kt`, `F
 
 ## Where to add Queries
 
-To ensure that the queries are executed after all concepts and operations have been tagged in the CPG and the CPG is stable (i.e., won't be modified any further), the queries should be added to the files with ending `.query.kts`.
-These are kotlin scripts which are executed last and whose results are collected for the evaluation.
+Queries can be added everywhere in the evaluation project.
+However, we recommend to add them to the `queries` folder to simplify finding them.
+They must be included in a kotlin file (file ending `.kt`) which is included in the sources of the project.
+Finally, you have to call the queries in the `requirements` block, or in a query called therein, of the evaluation project script (see [User Guide](user-guide.md)) or they won't be assessed.
 
 ## Starting point: Choosing between `allExtended` and `existsExtended`
 

@@ -6,6 +6,7 @@ SARIF aims to provide a standardized format for static analysis results, which c
 It is a JSON-based format that can be easily parsed and processed by various tools but is not really intended to by read by a human evaluator/analyst.
 
 To simplify the interpretation of the results for a human, various ways to visualize the results are available:
+
 * Plugins for IDEs
 * Integration in CI/CD pipelines (e.g. on GitHub)
 * The Web-UI of the openstack-checker
@@ -29,6 +30,7 @@ The blue exclamation mark in front of the finding indicates that the query "pass
 A red cross, in turn, indicates a violation.
 
 By clicking on the finding, you can display more information on the rule which was evaluated, most importantly these are:
+
 * The rule ID and name
 * A description of the rule. Currently, this is the text of the statement.
 * The "kind" (pass or fail)

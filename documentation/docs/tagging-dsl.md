@@ -12,7 +12,7 @@ The user can define own `Concept`s and `Operation`s in any kotlin file within th
 We recommend to first check the catalog of existing concepts and operations in the file and, if possible, to extend the catalog with the new concepts and operations instead of creating many project-specific ones.
 The project-specific tagging logic can be added in a kotlin script file which can be included in the evaluation project script using the `Tagging` import.
 It is also possible to create custom passes if the tagging logic is too complex for the DSL.
-This is a kotlin script files which are executed during the translation of the source code.
+These passes have to be registered in the `tool` block of the evaluation project script.
 
 ## Tagging the code
 
@@ -22,11 +22,11 @@ The following example shows a separate file `tagging.codyze.kts` which contains 
 project {
     tagging {
         tag {
-            // Tagging each node of the type NodeType and name "name" with the concept Concept
+            // Tagging each node of the type NodeType and name "name" with the concept "Concept"
             each<NodeType>("name").with { Concept() }
-            // Tagging each node of the type NodeType and specialProperty set to true with the concept Concept
+            // Tagging each node of the type NodeType and specialProperty set to true with the concept "Concept"
             each<NodeType>(predicate = { it.specialProperty == true } ).with { Concept() }
-            // Tagging each node of the type NodeType and name "name" with the concept Concept
+            // Tagging each node of the type NodeType and name "name" with the concept "Concept"
             each<NodeType>("name").with {
                 // Starting from each of the selected nodes of NodeType (they are kept in `node`), you can access specific properties and propagate tags to them.
                 // This is useful, e.g., if you want to tag specific arguments of a function call.
