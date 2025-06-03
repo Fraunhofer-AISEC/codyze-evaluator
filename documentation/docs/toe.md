@@ -1,11 +1,11 @@
-# Analysis of TOE's Security Features
+# Analysis of TOE's Security Posture
 
 As described in the Chapter [Methodology](./methodology.md), the OpenStack Checker receives two inputs which are compared against each other:
 
 * The *Concrete OpenStack Instance* representing the implementation of the Target of Evaluation (TOE).
 * The *OpenStack Checker Configuration* containing the security goals, Concepts and Operations and "tagging" logic.
 
-This Section describes how we model the Concrete OpenStack Instance in more detail and argues why it is suitable to provide an adequate and extensible description of the TOE's security features.
+This Section describes how we model the Concrete OpenStack Instance in more detail and argues why it is suitable to provide an adequate and extensible model of the TOE's security posture implementing the TOE's security features.
 
 ## The CPG
 
@@ -43,7 +43,7 @@ OpenStack provides these mechanisms in their own framework `stevedore` for which
 This pass analyzes the configuration of the OpenStack instance and loads the respective modules into the CPG and replaces function calls and variables with those loaded on runtime.
 This is essential to ensure that the analysis is conducted on the code which resembles the actual OpenStack instance.
 Failure to integrate the dynamically loaded modules would result in incomplete analysis and disconnecting the different modules from each other.
-This would prevent the OpenStack Checker from analyzing the OpenStack instance as whole and miss the implementation of security features of the instance which are spread across different modules.
+This would prevent the OpenStack Checker from analyzing the OpenStack instance as a whole and miss the implementation of security features of the instance which are spread across different modules.
 
 ## Representation of Assumptions in the Analysis
 

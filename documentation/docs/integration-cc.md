@@ -12,7 +12,7 @@ As mentioned above, in the scenario of a CC evaluation, two main sources can be 
 Once a catalogue of security goals has been derived, the evaluator may simply select the applicable goals for the product.
 
 In addition to the selection of the correct security goals, the tagging of the code with concepts and operations is a main task during the evaluation process.
-Currently, the vendor/developer of the product needs to describe the security feature and how they are implemented in the code.
+Currently, the vendor/developer of the product needs to describe the security features and how they are implemented in the code.
 This makes the Product Expert, who may be part of the development team, the ideal candidate for this task.
 Rather than writing a document, the product expert can provide the tagging logic of the code with concepts and operations.
 The evaluator would then review the tagging logic.

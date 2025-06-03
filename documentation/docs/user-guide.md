@@ -8,12 +8,12 @@ We expect the target audience to have average programming skills and extensive s
 
 ## General Setup
 
-Do develop the project using IntelliJ IDEA.
+We develop the project using IntelliJ IDEA.
 Starting with version 2025.1, IntelliJ comes with support for kotlin script files.
 To profit from this feature, it is, however, necessary to configure the IDE accordingly once.
 It is recommended to compile the project first using `./gradlew build` so that all classes are available in the IDE.
 In the settings, please search for "Languages & Frameworks -> Kotlin -> Kotlin Scripts" and click "Scan Classpath".
-This will add the `.codyze.kts` files and you will get syntax highlighting and code completion for them.
+This will add the `.codyze.kts` files, and you will get syntax highlighting and code completion for them.
 
 ### Known Bugs
 
@@ -23,7 +23,8 @@ In order to update the IDE cache after new queries have been added to the `codyz
 
 **Sources of Queries are not available**
 
-Sometimes, IntelliJ has difficulties finding the source files of the queries. For queries or concepts contained in the `codyze-query-catalog` it might be necessary to manually click on "Choose Sources" after click on a symbol and then choosing the folder `codyze-query-catalog/src/main/kotlin`. Similarilly, if a query or concept is defind directly in the evaluation project (as shown in the `evaluate-hardened-openstack` example project), "Choose Sources" must be chosen and the `src/main/kotlin` folder of the (example) evalaution project must be selected.
+Sometimes, IntelliJ has difficulties finding the source files of the queries. For queries or concepts contained in the `codyze-query-catalog` it might be necessary to manually click on "Choose Sources" after click on a symbol and then choosing the folder `codyze-query-catalog/src/main/kotlin`.
+Similarly, if a query or concept is defined directly in the evaluation project (as shown in the `evaluate-hardened-openstack` example project), "Choose Sources" must be chosen and the `src/main/kotlin` folder of the (example) evaluation project must be selected.
 
 ## Contents
 
