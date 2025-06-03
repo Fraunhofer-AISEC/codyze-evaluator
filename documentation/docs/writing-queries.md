@@ -139,7 +139,7 @@ A detailed explanation of the parameters `direction`, `type`, `sensitivities` an
 
 === "Goal of the function"
 
-    Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
+    Checks that the data originating from `this` reach a sink (fulfilling `predicate`) on each execution path.
 
 === "Parameters"
 
