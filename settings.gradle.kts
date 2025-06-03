@@ -16,7 +16,15 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
-rootProject.name = "openstack-checker"
-include("app")
+rootProject.name = "codyze-evaluator"
+include("codyze-evaluator")
+include("codyze-query-catalog")
+
+// Technologies
+include("codyze-technology-openstack")
+project(":codyze-technology-openstack").projectDir = file("technologies/codyze-technology-openstack")
+
+// Example Projects
 include("evaluate-hardened-openstack")
 project(":evaluate-hardened-openstack").projectDir = file("examples/evaluate-hardened-openstack")
+
