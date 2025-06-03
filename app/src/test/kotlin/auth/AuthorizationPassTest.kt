@@ -17,7 +17,6 @@ import de.fraunhofer.aisec.cpg.graph.OverlayNode
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement
@@ -25,7 +24,9 @@ import de.fraunhofer.aisec.cpg.graph.statements.ThrowExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
+import de.fraunhofer.aisec.cpg.graph.types.HasType
+import de.fraunhofer.aisec.cpg.graph.types.Type
+import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
 import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
@@ -399,6 +400,11 @@ class AuthorizationPassTest {
         )
     }
 
+    fun Type.isOrInherits(expectedClassName: String): Boolean {
+        return this.name.localName == expectedClassName ||
+            this.superTypes.any { it.isOrInherits(expectedClassName) }
+    }
+
     /**
      * Checks if an [HttpEndpoint] only throws "Not Authorized" exceptions of a permitted class and
      * none of the disallowed messages appear.
@@ -413,17 +419,18 @@ class AuthorizationPassTest {
                     ?.ops
                     ?.filterIsInstance<Authorize>()
                     ?.map { auth ->
-                        // ref contains the exception thrown by the authorization operation
-                        val ref = auth.exception as? Reference
-                        ref?.refersTo?.let { refs ->
-                            val record = refs as? RecordDeclaration
-                            val superClass = record?.superTypeDeclarations?.singleOrNull()
+                        // We get the type of the exception thrown by the authorization operation
+                        val exceptionType = (auth.exception as? HasType)?.type
+                        exceptionType?.let {
                             val message =
-                                record.fields[policy.throwMessageField]?.evaluate().toString()
+                                exceptionType.recordDeclaration
+                                    ?.fields[policy.throwMessageField]
+                                    ?.evaluate()
+                                    .toString()
                             QueryTree(
-                                // Checks that the exception's super-class is in the list of allowed
-                                // classes.
-                                superClass?.name?.localName == policy.allowedExceptionParentClass &&
+                                // Check if either its class name or the name of a parent class
+                                // matches the expected one
+                                exceptionType.isOrInherits(policy.allowedExceptionParentClass) &&
                                     policy.notAllowedThrowMessages.none {
                                         // Checks if the message does not contain any of the
                                         // forbidden words.
