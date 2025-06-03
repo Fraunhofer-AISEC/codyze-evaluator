@@ -19,8 +19,6 @@ objectives:
     description: All endpoints have token-based authentication.
     statements:
       - Token-based authentication is set for all endpoints.
-
-#
 #  - name: Sensitive information restricted to user´s domain
 #    description: Access to sensitive information must be restricted to the user's domain
 #    statements:
