@@ -241,12 +241,16 @@ project {
                 }
 
                 requirement {
-                    name = "Indistinguishable Responses for Unauthorized Access"
+                    name = "Not Unauthorized Access for Other Domains"
                     description =
                         "An access request to a resource from another domain is answered with “unauthorized”, " +
                             "i.e. no indirect information leakages via answers like “not found” or “already exists” happen."
 
-                    // fulfilledBy { }
+                    fulfilledBy {
+                        unauthorizedResponseFromAnotherDomainQuery(
+                            policy = UnauthorizedResponsePolicy()
+                        )
+                    }
                 }
             }
         }
