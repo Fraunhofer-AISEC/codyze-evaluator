@@ -3,22 +3,18 @@
  */
 package de.fraunhofer.aisec.codyze.concepts.auth
 
-import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.concepts.Concept
-import de.fraunhofer.aisec.cpg.graph.concepts.Operation
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext
 
 /**
- * Represents a request context. It is an inheritance of
- * [de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext]
+ * Represents a request context. It is an inheritance of [RequestContext]
  *
  * @param underlyingNode The underlying CPG node.
  * @param token The token.
  */
-open class ExtendedRequestContext(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val token: de.fraunhofer.aisec.cpg.graph.Node? = null,
-) : de.fraunhofer.aisec.cpg.graph.concepts.auth.RequestContext(underlyingNode = underlyingNode) {
+open class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node? = null) :
+    RequestContext(underlyingNode = underlyingNode) {
     var userInfo: UserInfo? = null
 }
 
@@ -33,13 +29,13 @@ open class ExtendedRequestContext(
  * @param domainId The domain ID.
  */
 open class UserInfo(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val userId: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val projectId: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val roles: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val systemScope: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val domainId: de.fraunhofer.aisec.cpg.graph.Node? = null,
-) : de.fraunhofer.aisec.cpg.graph.concepts.Concept(underlyingNode = underlyingNode)
+    underlyingNode: Node? = null,
+    val userId: Node? = null,
+    val projectId: Node? = null,
+    val roles: Node? = null,
+    val systemScope: Node? = null,
+    val domainId: Node? = null,
+) : Concept(underlyingNode = underlyingNode)
 
 /**
  * Abstract base class for user info operations.
@@ -47,14 +43,8 @@ open class UserInfo(
  * @param underlyingNode The underlying CPG node.
  * @param concept The associated concept.
  */
-abstract class UserInfoOperation(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?,
-    concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept,
-) :
-    de.fraunhofer.aisec.cpg.graph.concepts.Operation(
-        underlyingNode = underlyingNode,
-        concept = concept,
-    )
+abstract class UserInfoOperation(underlyingNode: Node?, concept: Concept) :
+    Operation(underlyingNode = underlyingNode, concept = concept)
 
 /**
  * Represents an operation to populate user info.
@@ -62,7 +52,5 @@ abstract class UserInfoOperation(
  * @param underlyingNode The underlying CPG node.
  * @param userInfo The user info to populate.
  */
-open class PopulateUserInfo(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    var userInfo: UserInfo,
-) : UserInfoOperation(underlyingNode = underlyingNode, concept = userInfo)
+open class PopulateUserInfo(underlyingNode: Node? = null, var userInfo: UserInfo) :
+    UserInfoOperation(underlyingNode = underlyingNode, concept = userInfo)
