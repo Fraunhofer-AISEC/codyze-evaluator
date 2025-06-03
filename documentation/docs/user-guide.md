@@ -31,10 +31,15 @@ The following chapters are currently available:
 
 * [How to analyze a project](analyzing-project.md),
 * [How to write queries](writing-queries.md),
-* [How to interpret the results](understanding-results.md),
+* [Basics of Program Analysis and its Application in the Query API](program-analysis-basics.md),
+* [Hints on Kotlin for Writing Sleek Queries](kotlin-for-queries.md),
 * [Information on implementing concepts and operations and how they are linked to the code](concepts-and-operations.md),
 * [A list of concepts and operations](list-concepts-and-operations.md),
+* [A description of the Tagging DSL](tagging-dsl.md),
 * [A concept for categorizing assumptions of the analysis](assumptions-concept.md),
-* [The tradeoff between assumptions and manual analysis](assumptions-tradeoff.md), and
+* [The tradeoff between assumptions and manual analysis](assumptions-tradeoff.md),
+* [Some Examples](examples.md),
+* [How to interpret the results](understanding-results.md),
+* [How to provide negative test results](negative-tests.md), and
 * [A list of further resources](more-resources.md).
 

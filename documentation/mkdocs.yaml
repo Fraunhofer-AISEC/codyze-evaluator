@@ -162,6 +162,7 @@ nav:
       - "Analysis of Security Claims": security-promises.md
       - "Analysis of the TOE's Security Features": toe.md
   - "User Guide":
+      - user-guide.md
       - "Analyzing a project": analyzing-project.md
       - "Queries":
         - "Writing queries": writing-queries.md
