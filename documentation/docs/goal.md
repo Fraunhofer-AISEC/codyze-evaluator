@@ -3,20 +3,20 @@
 The OpenStack Checker provides tooling and guidelines to assess the security of an instance of OpenStack.
 It considers two major aspects:
 
-* The compliance of the OpenStack code base and a specific configuration with respect to security goals, and
+* The compliance of the OpenStack code base and a specific configuration with respect to security claims, and
 * The ecosystem of OpenStack and its development workflow.
 
-## Compliance with Security Goals
+## Compliance with Security Claims
 
 Core of this project is a tool which supports an analyst with a semi-automated compliance checks of a specific OpenStack instance.
 
 It receives as an input:
 
-* A set of rules which define the security goals/claims to be evaluated,
+* A set of rules which define the security claims to be evaluated,
 * A set of relevant behavioral properties (in the form of so-called concepts and operations) and logic on how to "tag" the code base with them, and
 * The OpenStack code base, python interface (.pyi) files of libraries, and a specific configuration of the OpenStack instance.
 
-The tool then performs a static analysis of the code base and configuration and generates a report which indicates whether the security goals are met or not.
+The tool then performs a static analysis of the code base and configuration and generates a report which indicates whether the security claims are met or not.
 
 The following figure provides a high-level overview of the workflow:
 

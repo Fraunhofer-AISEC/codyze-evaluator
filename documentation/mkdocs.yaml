@@ -159,7 +159,7 @@ nav:
   - "Methodology":
       - methodology.md
       - "Integration into Evaluation Processes": integration-cc.md
-      - "Analysis of Security Claims": security-promises.md
+      - "Analysis of Security Claims": security-claims.md
       - "Analysis of the TOE's Security Features": toe.md
   - "User Guide":
       - user-guide.md
