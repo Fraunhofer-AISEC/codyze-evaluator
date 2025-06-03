@@ -479,7 +479,8 @@ class AuthorizationPassTest {
                                 // We invert the result of the dataflow query because its result is
                                 // bad.
                                 not(
-                                    // We check if the node flows into an exception which is allowed
+                                    // We check if the node flows into an exception which is not
+                                    // allowed
                                     dataFlow(
                                             node,
                                             // We only perform an intraprocedural data flow analysis
@@ -490,10 +491,11 @@ class AuthorizationPassTest {
                                                 FieldSensitive + ContextSensitive + Implicit,
                                             predicate = {
                                                 // We have a fulfilled path if the node throws an
-                                                // exception which is in the allowedExceptions list.
+                                                // exception which is not allowed by the
+                                                // allowedExceptions list.
                                                 if (node !is ThrowExpression) false
                                                 else {
-                                                    node.name.localName in policy.allowedExceptions
+                                                    node.name.localName !in policy.allowedExceptions
                                                 }
                                             },
                                             // If we reach a ReturnStatement, we stop following the
