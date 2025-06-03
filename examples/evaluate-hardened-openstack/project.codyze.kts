@@ -74,8 +74,8 @@ project {
                 }
 
                 /**
-                 * The "conf" module contains specific OpenStack configuration files and
-                 * settings that are used for the specific OpenStack deployment.
+                 * The "conf" module contains specific OpenStack configuration files and settings
+                 * that are used for the specific OpenStack deployment.
                  */
                 module("conf") {
                     directory = "toe/conf"
