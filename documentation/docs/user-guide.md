@@ -11,10 +11,11 @@ We expect the target audience to have average programming skills and extensive s
 Do develop the project using IntelliJ IDEA.
 Starting with version 2025.1, IntelliJ comes with support for kotlin script files.
 To profit from this feature, it is, however, necessary to configure the IDE accordingly once.
+It is recommended to compile the project first using `./gradlew build` so that all classes are available in the IDE.
 In the settings, please search for "Languages & Frameworks -> Kotlin -> Kotlin Scripts" and click "Scan Classpath".
 This will add the `.codyze.kts` files and you will get syntax highlighting and code completion for them.
-It is recommended to compile the project first using `./gradlew build` so that all classes are available in the IDE.
-An IDE restart and/or a Gradle project sync in the IDE might be necessary for the IDE cache to repopulate.
+
+In order to update the IDE cache after new queries have been added to the `codyze-query-catalog` or specific evaluation project, it might also be necessary to first build the project and then click on "Scan Classpath" again.
 
 ## Contents
 
