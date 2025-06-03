@@ -372,7 +372,7 @@ class AuthorizationPassTest {
                 result = result,
                 policy = UnauthorizedResponsePolicy(),
             )
-        assertTrue(q.value)
+        assertFalse(q.value)
     }
 
     data class UnauthorizedResponsePolicy(
