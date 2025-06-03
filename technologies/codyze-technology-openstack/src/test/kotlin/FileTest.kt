@@ -1,6 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.queries.file.AllWritesToFile
+import de.fraunhofer.aisec.codyze.queries.file.OnlyWritesFromASecret
+import de.fraunhofer.aisec.codyze.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.operationNodes
@@ -9,9 +12,6 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSo
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.openstack.queries.file.AllWritesToFile
-import de.fraunhofer.aisec.openstack.queries.file.OnlyWritesFromASecret
-import de.fraunhofer.aisec.openstack.queries.file.restrictiveFilePermissionsAreAppliedWhenWriting
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertFalse

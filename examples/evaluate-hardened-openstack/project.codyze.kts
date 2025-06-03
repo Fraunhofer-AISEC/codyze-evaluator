@@ -1,12 +1,12 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.queries.authentication.*
+import de.fraunhofer.aisec.codyze.queries.authorization.*
+import de.fraunhofer.aisec.codyze.queries.encryption.*
+import de.fraunhofer.aisec.codyze.queries.file.*
+import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
-import de.fraunhofer.aisec.openstack.queries.authentication.*
-import de.fraunhofer.aisec.openstack.queries.authorization.*
-import de.fraunhofer.aisec.openstack.queries.encryption.*
-import de.fraunhofer.aisec.openstack.queries.file.*
-import de.fraunhofer.aisec.openstack.queries.keymanagement.*
 import example.queries.keystoneAuthStrategyConfigured
 
 include { Tagging from "tagging.codyze.kts" }
