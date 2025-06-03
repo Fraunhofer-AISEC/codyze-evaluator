@@ -1,12 +1,19 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.codyze.queries.encryption.isSecureKeyProvider
+import de.fraunhofer.aisec.codyze.openstack.passes.MakeThingsWorkPrototypicallyPass
+import de.fraunhofer.aisec.codyze.openstack.passes.OsloConfigPass
+import de.fraunhofer.aisec.codyze.openstack.passes.PythonMemoryPass
+import de.fraunhofer.aisec.codyze.openstack.passes.SecretPass
+import de.fraunhofer.aisec.codyze.openstack.passes.StevedoreDynamicLoadingPass
+import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpPecanLibPass
+import de.fraunhofer.aisec.codyze.openstack.queries.encryption.dataLeavesOpenStackComponent
+import de.fraunhofer.aisec.codyze.openstack.queries.encryption.isSecureOpenStackKeyProvider
 import de.fraunhofer.aisec.codyze.queries.encryption.keyNotLeakedThroughOutput
+import de.fraunhofer.aisec.codyze.queries.encryption.keyOnlyReachableThroughSecureKeyProvider
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
 import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
-import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.config.Configuration
@@ -23,11 +30,7 @@ import de.fraunhofer.aisec.cpg.graph.invoke
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.ConstructExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
-import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
-import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.*
-import de.fraunhofer.aisec.openstack.passes.*
-import de.fraunhofer.aisec.openstack.passes.http.HttpPecanLibPass
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -36,71 +39,53 @@ class OpenStackTest {
     @Test
     fun testKeyInputOfOperation() {
         val topLevel = Path("external")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerPass<HttpPecanLibPass>()
-                it.registerPass<SecretPass>()
-                it.registerPass<DiskEncryptionPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
-                it.failOnError(false)
-                it.softwareComponents(
-                    mutableMapOf(
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                            ),
-                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "barbican" to topLevel.resolve("barbican").toFile(),
-                    )
-                )
-            }
+        val result = analyze(listOf(), topLevel, true)
         assertNotNull(result)
 
         val barbican = result.components["barbican"]
         assertNotNull(barbican)
 
-        val evaluationResult =
-            result.allExtended<DiskEncryption> { encryption ->
-                encryption.key?.let { key ->
-                    dataFlow(
-                        startNode = encryption,
-                        type = May,
-                        direction = Backward(GraphToFollow.DFG),
-                        sensitivities = FieldSensitive + ContextSensitive,
-                        scope = Interprocedural(),
-                        predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
-                    )
-                }
-                    ?: QueryTree(
-                        false,
-                        mutableListOf(QueryTree(encryption)),
-                        "encryptionOp.concept.key is null",
-                    )
+        /*val evaluationResult =
+        result.allExtended<DiskEncryption> { encryption ->
+            encryption.key?.let { key ->
+                dataFlow(
+                    startNode = encryption,
+                    type = May,
+                    direction = Backward(GraphToFollow.DFG),
+                    sensitivities = FieldSensitive + ContextSensitive,
+                    scope = Interprocedural(),
+                    predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
+                )
             }
-        println(evaluationResult.printNicely())
-        assertEquals(true, evaluationResult.value)
+                ?: QueryTree(
+                    false,
+                    mutableListOf(QueryTree(encryption)),
+                    "encryptionOp.concept.key is null",
+                )
+        }*/
+        with(result) {
+            val q =
+                keyOnlyReachableThroughSecureKeyProvider(
+                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                )
+            println(q.printNicely())
+            assertEquals(true, q.value)
 
-        val treeFunctions = evaluationResult.children
-        assertEquals(1, treeFunctions.size)
+            val treeFunctions = q.children
+            assertEquals(1, treeFunctions.size)
 
-        val validDataflows = treeFunctions.first().children.filter { it.value == true }
-        assertEquals(1, validDataflows.size)
+            val validDataflows = treeFunctions.first().children.filter { it.value == true }
+            assertEquals(1, validDataflows.size)
 
-        // It seems its sometimes 26 and sometimes 27
-        val longestValid =
-            validDataflows.map { it.children.first().value as List<*> }.maxByOrNull { it.size }
-        assertNotNull(longestValid)
-        assertTrue(longestValid.size >= 26)
+            // It seems its sometimes 26 and sometimes 27
+            val longestValid =
+                validDataflows.map { it.children.first().value as List<*> }.maxByOrNull { it.size }
+            assertNotNull(longestValid)
+            assertTrue(longestValid.size >= 26)
 
-        wrapInAnalysisResult(result, listOf(evaluationResult))
-            .writeSarifJson(File("key-input-of-operation.sarif"))
+            wrapInAnalysisResult(result, listOf(q))
+                .writeSarifJson(File("key-input-of-operation.sarif"))
+        }
     }
 
     @Test
@@ -132,16 +117,11 @@ class OpenStackTest {
     @Test
     fun testSecretNeverLeavesBarbicanWithoutAPI() {
         val topLevel = Path("external/barbican")
-        val result =
-            analyze(listOf(topLevel.resolve("barbican").toFile()), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
-                it.exclusionPatterns("tests")
-            }
+        val result = analyze(listOf(topLevel.resolve("barbican").toFile()), topLevel, true)
         assertNotNull(result)
 
         with(result) {
-            val noKeyLeakResult = keyNotLeakedThroughOutput()
+            val noKeyLeakResult = keyNotLeakedThroughOutput(Node::dataLeavesOpenStackComponent)
             println(noKeyLeakResult.printNicely())
             assertTrue(noKeyLeakResult.value)
         }
@@ -151,7 +131,7 @@ class OpenStackTest {
     fun testDeleteKey() {
         val topLevel = Path("external")
         val result =
-            analyze(listOf(), topLevel, true, persistNeo4j = false) {
+            analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<PythonMemoryPass>()
                 it.registerPass<SecretPass>()
@@ -203,7 +183,7 @@ class OpenStackTest {
     fun testCinderApiNoCrash() {
         val topLevel = Path("external")
         val result =
-            analyze(listOf(), topLevel, true, persistNeo4j = false) {
+            analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<PythonMemoryPass>()
                 it.registerPass<SecretPass>()
@@ -222,37 +202,7 @@ class OpenStackTest {
     @Test
     fun testSecureCommunication() {
         val topLevel = Path("external")
-        val result =
-            analyze(files = listOf(), topLevel = topLevel, usePasses = true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<OsloConfigPass>()
-                it.registerPass<IniFileConfigurationSourcePass>()
-                it.registerPass<SecureKeyRetrievalPass>()
-                it.registerPass<StevedoreDynamicLoadingPass>()
-                it.includePath("external/oslo.config")
-                it.includePath("external/stevedore")
-                it.exclusionPatterns("tests", "drivers")
-                it.softwareComponents(
-                    mutableMapOf(
-                        "castellan" to listOf(topLevel.resolve("castellan/castellan").toFile()),
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                                topLevel.resolve("cinder/cinder/common").toFile(),
-                            ),
-                        "conf" to listOf(topLevel.resolve("conf").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "castellan" to topLevel.resolve("castellan").toFile(),
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "conf" to topLevel.resolve("conf").toFile(),
-                    )
-                )
-            }
+        val result = analyze(files = listOf(), topLevel = topLevel, usePasses = true)
 
         assertNotNull(result)
 
@@ -290,52 +240,7 @@ class OpenStackTest {
     @Test
     fun testConfigAndLoadingMinimal() {
         val topLevel = Path("external")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<OsloConfigPass>()
-                it.registerPass<ProvideConfigPass>()
-                it.registerPass<IniFileConfigurationSourcePass>()
-                it.registerPass<StevedoreDynamicLoadingPass>()
-                it.exclusionPatterns("tests")
-                it.includePath("external/oslo.config")
-                it.includePath("external/stevedore")
-                it.softwareComponents(
-                    mutableMapOf(
-                        "castellan" to
-                            listOf(
-                                topLevel
-                                    .resolve("castellan/castellan/key_manager/__init__.py")
-                                    .toFile(),
-                                topLevel
-                                    .resolve("castellan/castellan/key_manager/key_manager.py")
-                                    .toFile(),
-                                topLevel
-                                    .resolve(
-                                        "castellan/castellan/key_manager/barbican_key_manager.py"
-                                    )
-                                    .toFile(),
-                            ),
-                        "cinder" to
-                            listOf(
-                                topLevel
-                                    .resolve("cinder/cinder/volume/flows/manager/create_volume.py")
-                                    .toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                                topLevel.resolve("cinder/cinder/common/config.py").toFile(),
-                            ),
-                        "conf" to listOf(topLevel.resolve("conf").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "castellan" to topLevel.resolve("castellan").toFile(),
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "conf" to topLevel.resolve("conf").toFile(),
-                    )
-                )
-            }
+        val result = analyze(listOf(), topLevel, true)
         assertNotNull(result)
 
         val configs = result.conceptNodes.filterIsInstance<Configuration>()
@@ -391,35 +296,7 @@ class OpenStackTest {
     @Test
     fun testOsloConfig() {
         val topLevel = Path("external")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<OsloConfigPass>()
-                it.registerPass<IniFileConfigurationSourcePass>()
-                it.registerPass<ProvideConfigPass>()
-                it.exclusionPatterns("tests")
-                it.includePath("external/oslo.config")
-                it.softwareComponents(
-                    mutableMapOf(
-                        "castellan" to listOf(topLevel.resolve("castellan/castellan").toFile()),
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                                topLevel.resolve("cinder/cinder/common/").toFile(),
-                            ),
-                        "conf" to listOf(topLevel.resolve("conf").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "castellan" to topLevel.resolve("castellan").toFile(),
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "conf" to topLevel.resolve("conf").toFile(),
-                    )
-                )
-            }
+        val result = analyze(listOf(), topLevel, true)
         assertNotNull(result)
 
         val configs = result.conceptNodes.filterIsInstance<Configuration>()

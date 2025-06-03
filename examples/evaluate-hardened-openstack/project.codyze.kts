@@ -1,11 +1,14 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.openstack.queries.authentication.*
+import de.fraunhofer.aisec.codyze.openstack.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import example.queries.keystoneAuthStrategyConfigured
 
@@ -231,8 +234,12 @@ project {
                             "provided by a secure key provider, leaked through other output and deleted after use."
 
                     fulfilledBy {
-                        keyNotLeakedThroughOutput() and
-                            keyOnlyReachableThroughSecureKeyProvider() and
+                        keyNotLeakedThroughOutput(
+                            dataLeavesComponent = Node::dataLeavesOpenStackComponent
+                        ) and
+                            keyOnlyReachableThroughSecureKeyProvider(
+                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                            ) and
                             keyIsDeletedFromMemoryAfterUse()
                     }
                 }
@@ -278,7 +285,15 @@ project {
                     name = "Token-based Authentication"
                     description = "All endpoints have token-based authentication."
 
-                    fulfilledBy { tokenBasedAuthenticationWhenRequired() }
+                    /**
+                     * Checks if all access tokens used for authentication are validated by the
+                     * token-based authentication and if they come from the request context.
+                     */
+                    fulfilledBy {
+                        tokenBasedAuthenticationWhenRequired() and
+                            usesSameTokenAsCredential() and
+                            hasDataFlowToToken()
+                    }
                 }
 
                 requirement {

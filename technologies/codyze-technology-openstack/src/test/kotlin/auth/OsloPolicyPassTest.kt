@@ -4,11 +4,9 @@
 package auth
 
 import analyze
-import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
+import de.fraunhofer.aisec.codyze.concepts.auth.Policy
+import de.fraunhofer.aisec.codyze.concepts.auth.PolicyRule
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.openstack.concepts.auth.Policy
-import de.fraunhofer.aisec.openstack.concepts.auth.PolicyRule
-import de.fraunhofer.aisec.openstack.passes.auth.OsloPolicyPass
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -19,23 +17,7 @@ class OsloPolicyPassTest {
     @Test
     fun testPolicies() {
         val topLevel = Path("external")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerPass<OsloPolicyPass>()
-                it.exclusionPatterns("tests", "drivers")
-                it.includePath("external/oslo.policy")
-                it.softwareComponents(
-                    mutableMapOf(
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/policies").toFile(),
-                                topLevel.resolve("cinder/cinder/policy.py").toFile(),
-                            )
-                    )
-                )
-                it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
-            }
+        val result = analyze(listOf(), topLevel, true)
         assertNotNull(result)
         val policies = result.conceptNodes.filterIsInstance<Policy>()
         assertNotNull(policies, "There should be Policies")

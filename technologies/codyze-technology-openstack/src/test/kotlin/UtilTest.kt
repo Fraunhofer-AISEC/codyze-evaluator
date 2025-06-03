@@ -8,9 +8,7 @@ import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.declarations.TranslationUnitDeclaration
-import de.fraunhofer.aisec.cpg.persistence.persist
 import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.openstack.connect
 import io.github.detekt.sarif4k.MultiformatMessageString
 import io.github.detekt.sarif4k.ReportingDescriptor
 import io.github.detekt.sarif4k.Run
@@ -21,7 +19,9 @@ import io.github.detekt.sarif4k.Version
 import java.io.File
 import java.nio.file.Path
 import java.util.function.Consumer
-import kotlin.use
+import kotlin.Boolean
+import kotlin.Exception
+import kotlin.Throws
 
 /**
  * Default way of parsing a list of files into a full CPG. All default passes are applied
@@ -38,7 +38,6 @@ fun analyze(
     files: List<File>,
     topLevel: Path,
     usePasses: Boolean,
-    persistNeo4j: Boolean = false,
     configModifier: Consumer<TranslationConfiguration.Builder>? = null,
 ): TranslationResult {
     val builder =
@@ -57,16 +56,6 @@ fun analyze(
     val config = builder.build()
     val analyzer = TranslationManager.builder().config(config).build()
     val result = analyzer.analyze().get()
-
-    if (persistNeo4j) {
-        val session = connect()
-        with(session) {
-            use {
-                executeWrite { tx -> tx.run("MATCH (n) DETACH DELETE n").consume() }
-                result.persist()
-            }
-        }
-    }
 
     return result
 }

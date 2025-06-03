@@ -1,12 +1,12 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.openstack.passes.PythonEntryPoint
+import de.fraunhofer.aisec.codyze.openstack.passes.PythonEntryPointPass
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.openstack.passes.PythonEntryPoint
-import de.fraunhofer.aisec.openstack.passes.PythonEntryPointPass
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test

@@ -4,16 +4,10 @@
 package http
 
 import analyze
+import de.fraunhofer.aisec.codyze.openstack.passes.http.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.graph.conceptNodes
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
-import de.fraunhofer.aisec.cpg.graph.evaluate
-import de.fraunhofer.aisec.cpg.graph.operationNodes
-import de.fraunhofer.aisec.openstack.passes.http.HttpCinderClientPass
-import de.fraunhofer.aisec.openstack.passes.http.HttpEndpointsBindingPass
-import de.fraunhofer.aisec.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.cpg.graph.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,7 +18,7 @@ class HttpEndpointsBindingPassTest {
     fun testHttpEndpointsBinding() {
         val topLevel = Path("external/")
         val result =
-            analyze(files = listOf(), topLevel = topLevel, usePasses = true, persistNeo4j = false) {
+            analyze(files = listOf(), topLevel = topLevel, usePasses = true) {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<HttpCinderClientPass>()
                 it.registerPass<HttpWsgiPass>()

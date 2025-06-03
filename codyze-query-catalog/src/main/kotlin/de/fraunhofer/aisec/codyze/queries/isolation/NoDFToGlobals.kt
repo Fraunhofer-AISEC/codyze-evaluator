@@ -10,20 +10,17 @@ import de.fraunhofer.aisec.cpg.query.*
 
 /**
  * Data flows from user requests are not stored in global variables (since they are assumed to be
- * domain-independent) or they are deleted after the request is answered.
+ * request-independent) or they are deleted after the request is answered.
  *
- * The [sel] parameter allows to select specific nodes of type [T] to check for data flows.
- *
- * This query enforces the following statement: "Given a user request, data must not be stored in
- * global variables, unless it is specific to the user's domain Any domain-specific data stored
- * temporarily should be deleted after the request is processed."
+ * The [requestSelector] parameter allows to select specific nodes of type [T] to consider to be
+ * "user requests" to check for data flows.
  */
 context(TranslationResult)
 inline fun <reified T : Node> noDataFlowsToGlobals(
-    noinline sel: (T) -> Boolean = { true }
+    noinline requestSelector: (T) -> Boolean = { true }
 ): QueryTree<Boolean> {
     val tr = this@TranslationResult
-    return tr.allExtended<T>(sel) { request ->
+    return tr.allExtended<T>(requestSelector) { request ->
         // Dataflows from the request do not flow into a global variable
         not(
             dataFlow(

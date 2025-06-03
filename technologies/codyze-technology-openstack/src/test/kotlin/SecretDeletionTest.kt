@@ -2,15 +2,6 @@
  * This file is part of the OpenStack Checker
  */
 import de.fraunhofer.aisec.codyze.queries.keymanagement.secretsAreDeletedAfterUsage
-import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
-import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
-import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
-import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
-import de.fraunhofer.aisec.openstack.passes.MakeThingsWorkPrototypicallyPass
-import de.fraunhofer.aisec.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.openstack.passes.PythonMemoryPass
-import de.fraunhofer.aisec.openstack.passes.SecureKeyRetrievalPass
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -23,22 +14,7 @@ class SecretDeletionTest {
     @Test
     fun testMagnumKeyDelete() {
         val topLevel = Path("external/magnum")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<OsloConfigPass>()
-                it.registerPass<IniFileConfigurationSourcePass>()
-                it.registerPass<ProvideConfigPass>()
-                it.registerPass<PythonFileConceptPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
-                it.registerPass<PythonMemoryPass>()
-                it.exclusionPatterns("tests")
-                it.softwareComponents(
-                    mutableMapOf("magnum" to listOf(topLevel.resolve("magnum").toFile()))
-                )
-                it.topLevels(mapOf("magnum" to topLevel.resolve("magnum").toFile()))
-            }
+        val result = analyze(listOf(), topLevel, true)
         assertNotNull(result)
 
         with(result) {
@@ -52,31 +28,7 @@ class SecretDeletionTest {
     @Test
     fun testEverythingDerivedFromSecretMustBeDeletedOnAllPaths() {
         val topLevel = Path("external")
-        val result =
-            analyze(files = listOf(), topLevel = topLevel, usePasses = true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerLanguage<IniFileLanguage>()
-                it.registerPass<SecureKeyRetrievalPass>()
-                it.registerPass<PythonMemoryPass>()
-                it.exclusionPatterns("tests", "drivers")
-                // it.registerFunctionSummaries(File("src/test/resources/function-summaries.yml"))
-                it.softwareComponents(
-                    mutableMapOf(
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                            ),
-                        "conf" to listOf(topLevel.resolve("conf").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "conf" to topLevel.resolve("conf").toFile(),
-                    )
-                )
-            }
+        val result = analyze(files = listOf(), topLevel = topLevel, usePasses = true)
 
         assertNotNull(result)
 
