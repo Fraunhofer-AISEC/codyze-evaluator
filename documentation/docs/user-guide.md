@@ -12,7 +12,9 @@ Do develop the project using IntelliJ IDEA.
 Starting with version 2025.1, IntelliJ comes with support for kotlin script files.
 To profit from this feature, it is, however, necessary to configure the IDE accordingly once.
 In the settings, please search for "Languages & Frameworks -> Kotlin -> Kotlin Scripts" and click "Scan Classpath".
-This will add the .query.kts and .concept.kts files and you will get syntax highlighting and code completion for them.
+This will add the `.codyze.kts` files and you will get syntax highlighting and code completion for them.
+It is recommended to compile the project first using `./gradlew build` so that all classes are available in the IDE.
+An IDE restart and/or a Gradle project sync in the IDE might be necessary for the IDE cache to repopulate.
 
 ## Contents
 
