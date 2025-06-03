@@ -1,6 +1,3 @@
 plugins { id("buildlogic.kotlin-application-conventions") }
 
-dependencies {
-    api(project(":app"))
-    api(libs.bundles.cpg)
-}
+dependencies { api(project(":codyze-evaluator")) }

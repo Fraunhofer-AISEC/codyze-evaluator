@@ -12,8 +12,8 @@ plugins {
 dependencies {
     implementation(kotlin("reflect"))
 
-    implementation(libs.bundles.cpg) { isChanging = true }
-    implementation(libs.jep)
+    api(libs.bundles.cpg) { isChanging = true }
+    api(libs.jep)
 
     implementation("com.charleskorn.kaml:kaml:0.67.0")
     // implementation("com.github.ajalt.clikt:clikt:5.0.2")
