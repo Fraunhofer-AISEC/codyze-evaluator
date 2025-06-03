@@ -12,7 +12,7 @@ This Section describes the OpenStack Checker Configuration in more detail and ar
 The security claims are described by queries which are run against the CPG of the Concrete OpenStack Instance.
 These queries include elements which require manual assessment, have the ability to express assumptions, and can be extended by the user.
 The underlying Query API allows the user to evaluate simple values, but its main strength is the ability to track data and control flow across the TOE in a highly configurable way.
-This can be leveraged to express several security claims and verify if violating paths exist in the code.
+This can be leveraged to express several security claims and verify that no violating paths exist in the code.
 For all security claims which cannot be expressed by the Query API, the user can define custom checks which are then manually assessed.
 
 ## Reproducibility

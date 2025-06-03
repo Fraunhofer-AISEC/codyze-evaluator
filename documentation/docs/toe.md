@@ -31,7 +31,7 @@ To address this issue, the CPG loads various modules of OpenStack at the same ti
 In order to keep the architectural structure visible, the CPG holds one `Component` for each module.
 
 The different modules interact with each other through HTTP APIs and calls.
-To represent this, the OpenStack Checker aims to automatically detect the respective endpoints, the calls thereof.
+To represent this, the OpenStack Checker aims to automatically detect the respective endpoints and the calls thereof.
 The OpenStack Checker connects the calls with the endpoints across module boundaries and also includes dataflow edges across these boundaries.
 This happens in custom passes which are implemented for the frameworks WSGI and Pecan, which are used in the OpenStack code base.
 

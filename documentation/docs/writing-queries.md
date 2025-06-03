@@ -6,10 +6,10 @@ The main sources for the implementation can be found in the files `Query.kt`, `F
 
 ## Where to add Queries
 
-Queries can be added everywhere in the evaluation project.
+Queries can be added everywhere in the [evaluation project](analyzing-project.md#project-structure).
 However, we recommend to add them to the `queries` folder to simplify finding them.
 They must be included in a kotlin file (file ending `.kt`) which is included in the sources of the project.
-Finally, you have to call the queries in the `requirements` block, or in a query called therein, of the evaluation project script (see [User Guide](user-guide.md)) or they won't be assessed.
+Finally, you have to call the queries in the `requirements` block, or in a query called therein, of the [evaluation project script](analyzing-project.md#defining-an-analysis-project), or they won't be assessed.
 
 ## Starting point: Choosing between `allExtended` and `existsExtended`
 

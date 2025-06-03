@@ -5,6 +5,10 @@
 This guideline targets the roles of the OpenStack Checker expert, evaluator or product expert, and any other person who aims to write custom rules for the OpenStack Checker or "tag" a program with concepts and operations.
 
 We expect the target audience to have average programming skills and extensive security knowledge.
+Depending on the [Role of the User](methodology.md#user-roles-and-skills), the qualifications may vary:
+Users who want to use this project to analyze an application should have basic programming skills to be able to understand the queries.
+Also, good knowledge of security concepts like encryption mechanisms are required to understand the analysis and its results.
+To write queries, advanced programming skills in Kotlin are beneficial.
 
 ## General Setup
 

@@ -20,7 +20,7 @@ An evaluation project for the OpenStack Checker requires few files to be include
             └── query2.kt               # This file contains one or multiple custom queries which are used in the requirements of the evaluation project. The filename can be aritrary but must end with `.kt`.
         └── Main.kt                     # The main file of the evaluation project. It calls the script `project.codyze.kts` to run the OpenStack Checker.
 
-Most importantly, the project requires the build file, the project definition and the Main-file.
+Most importantly, the project requires the build file, the project definition, and the main file.
 The other files could be omitted and the contents could be integrated in the project file, but we recommend to keep them separate for better maintainability.
 
 ## Defining an analysis project
@@ -32,7 +32,7 @@ In the following, we describe how to configure the analysis project using the DS
 
 The project is defined in a file called `project.codyze.kts` which is then passed to the OpenStack Checker.
 
-The outer element is the `project` element which has a `name` can contain the declarative blocks `tool`, `toe`, `requirements`, and `assumptions`.
+The outer element is the `project` element which has a `name` and can contain the declarative blocks `tool`, `toe`, `requirements`, and `assumptions`.
 ```kotlin title="project.codyze.kts"
 project {
     name = "This is the evaluation of OpenStack"
