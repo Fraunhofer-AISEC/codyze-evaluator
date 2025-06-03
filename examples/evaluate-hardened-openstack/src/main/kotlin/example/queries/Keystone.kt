@@ -18,7 +18,7 @@ fun keystoneAuthStrategyConfigured(): QueryTree<Boolean> {
     return tr.allExtended<ConfigurationOptionSource>(
         sel = { it.name.localName == "auth_strategy" },
         mustSatisfy = {
-            QueryTree<Boolean>(
+            QueryTree(
                 value = it.evaluate().toString() == "keystone",
                 stringRepresentation = "Component config: ${it.location?.artifactLocation}",
             )

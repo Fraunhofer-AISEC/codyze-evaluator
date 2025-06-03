@@ -82,8 +82,7 @@ class SecretDeletionTest {
 
         with(result) {
             // For all data which originate from a GetSecret operation, all execution paths must
-            // flow
-            // through a DeAllocate operation of the respective value
+            // flow through a DeAllocate operation of the respective value
 
             val allSecretsDeletedOnEOGPaths = secretsAreDeletedAfterUsage()
             println(allSecretsDeletedOnEOGPaths.printNicely())

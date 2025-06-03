@@ -35,14 +35,10 @@ project {
          */
         architecture {
             modules {
-                /**
-                 * Barbican is the OpenStack key manager service that provides secure storage and
-                 * management of secrets, such as encryption keys, passwords, and certificates.
-                 */
-                module("barbican") {
-                    directory = "toe/modules/barbican"
-                    include("barbican")
-                    exclude("tests")
+                module("nova") {
+                    directory = "toe/modules/nova"
+                    include("nova")
+                    exclude("tests", "drivers")
                 }
 
                 /**
@@ -53,7 +49,17 @@ project {
                 module("cinder") {
                     directory = "toe/modules/cinder"
                     include("cinder")
-                    exclude("tests", "drivers")
+                    exclude("tests", "drivers", "libvirt")
+                }
+
+                /**
+                 * Barbican is the OpenStack key manager service that provides secure storage and
+                 * management of secrets, such as encryption keys, passwords, and certificates.
+                 */
+                module("barbican") {
+                    directory = "toe/modules/barbican"
+                    include("barbican")
+                    exclude("tests")
                 }
 
                 /**
