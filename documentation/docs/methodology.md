@@ -141,7 +141,7 @@ The result of each query is a verdict if it holds together with a list of all st
 
 In total, the internal workflow of the OpenStack Checker can be summarized as follows:
 First, the source code is parsed to an abstract syntax tree (AST) and enriched by several passes to a CPG.
-Then, the "tagging" logic is applied to the CPG, which adds semantic information to the code and may trigger re-evaluating sub-graphs in the passes.
+Then, the tagging logic is applied to the CPG, which adds semantic information to the code and may trigger re-evaluating sub-graphs in the passes.
 This results in the final version of the CPG which is then used to run all the queries.
 These should no longer modify the graph to avoid any side effects.
 The results of the queries are collected and returned to the user.
@@ -175,7 +175,7 @@ The underlying CPG library already supports various programming languages, and p
 Hence, it is only necessary to adapt the OpenStack Checker Configuration for a new project.
 This configuration can be adapted to assess the fulfillment of security goals in any software project.
 If the security goals (in terms of queries) are formulated in a general way, as it is the case for queries using concepts and operations, they can be applied to any software project with the same goals.
-Similarly, framework-specific "tagging" logic and queries (e.g., to check the correct usage of a certain framework) can be used across all projects which use the same framework.
+Similarly, framework-specific tagging logic and queries (e.g., to check the correct usage of a certain framework) can be used across all projects which use the same framework.
 
 Obviously, highly customized queries and tagging logic are not portable to other projects.
 This might be the case when using specific names of functions, classes, or variables of the respective project, or when relying on any other specific implementation details of the project.

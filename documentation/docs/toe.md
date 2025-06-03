@@ -3,7 +3,7 @@
 As described in the Chapter [Methodology](./methodology.md), the OpenStack Checker receives two inputs which are compared against each other:
 
 * The *Concrete OpenStack Instance* representing the implementation of the Target of Evaluation (TOE).
-* The *OpenStack Checker Configuration* containing the security goals, Concepts and Operations and "tagging" logic.
+* The *OpenStack Checker Configuration* containing the security goals, Concepts and Operations and tagging logic.
 
 This Section describes how we model the Concrete OpenStack Instance in more detail and argues why it is suitable to provide an adequate and extensible model of the TOE's security posture implementing the TOE's security features.
 

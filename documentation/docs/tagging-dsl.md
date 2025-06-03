@@ -1,4 +1,4 @@
-# The "Tagging" DSL
+# The Tagging DSL
 
 To simplify the process of tagging the source code with `Concept`s and `Operation`s, we provide a DSL (Domain Specific Language).
 In general, the user can define custom `Concept`s and `Operation`s within the Kotlin Scripts.
