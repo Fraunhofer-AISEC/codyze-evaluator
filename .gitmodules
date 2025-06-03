@@ -1,66 +1,127 @@
 [submodule "external/nova"]
-	path = external/nova
+	path = technologies/codyze-technology-openstack/external/nova
 	url = https://github.com/openstack/nova.git
 	branch = stable/2024.2
 [submodule "external/cinder"]
-	path = external/cinder
+	path = technologies/codyze-technology-openstack/external/cinder
 	url = https://github.com/openstack/cinder.git
 	branch = stable/2024.2
 [submodule "external/keystone"]
-	path = external/keystone
+	path = technologies/codyze-technology-openstack/external/keystone
 	url = https://github.com/openstack/keystone.git
 	branch = stable/2024.2
 [submodule "external/barbican"]
-	path = external/barbican
+	path = technologies/codyze-technology-openstack/external/barbican
 	url = https://github.com/openstack/barbican.git
 	branch = stable/2024.2
 [submodule "external/typeshed"]
-	path = external/typeshed
+	path = technologies/codyze-technology-openstack/external/typeshed
 	url = https://github.com/python/typeshed.git
 	branch = main
 [submodule "external/castellan"]
-	path = external/castellan
+	path = technologies/codyze-technology-openstack/external/castellan
 	url = https://github.com/openstack/castellan.git
 	branch = stable/2024.2
 [submodule "external/oslo.log"]
-	path = external/oslo.log
+	path = technologies/codyze-technology-openstack/external/oslo.log
 	url = https://github.com/openstack/oslo.log.git
 	branch = stable/2024.2
 [submodule "external/oslo.config"]
-	path = external/oslo.config
+	path = technologies/codyze-technology-openstack/external/oslo.config
 	url = https://github.com/openstack/oslo.config.git
 	branch = stable/2024.2
 [submodule "external/python-cinderclient"]
-	path = external/python-cinderclient
+	path = technologies/codyze-technology-openstack/external/python-cinderclient
 	url = https://github.com/openstack/python-cinderclient.git
 	branch = stable/2024.2
 [submodule "external/stevedore"]
-	path = external/stevedore
+	path = technologies/codyze-technology-openstack/external/stevedore
 	url = https://github.com/openstack/stevedore.git
 	branch = stable/2024.2
 [submodule "external/python-barbicanclient"]
-	path = external/python-barbicanclient
+	path = technologies/codyze-technology-openstack/external/python-barbicanclient
 	url = https://github.com/openstack/python-barbicanclient.git
 	branch = stable/2024.2
 [submodule "external/magnum"]
-	path = external/magnum
+	path = technologies/codyze-technology-openstack/external/magnum
 	url = https://github.com/openstack/magnum.git
+	branch = stable/2024.2
 [submodule "external/keystoneauth"]
-	path = external/keystoneauth
+	path = technologies/codyze-technology-openstack/external/keystoneauth
 	url = https://github.com/openstack/keystoneauth.git
 	branch = stable/2024.2
 [submodule "external/keystonemiddleware"]
-	path = external/keystonemiddleware
+	path = technologies/codyze-technology-openstack/external/keystonemiddleware
 	url = https://github.com/openstack/keystonemiddleware.git
 	branch = stable/2024.2
-[submodule "external/webob"]
-	path = external/webob
-	url = https://github.com/Pylons/webob
 [submodule "external/oslo.policy"]
-	path = external/oslo.policy
+	path = technologies/codyze-technology-openstack/external/oslo.policy
 	url = https://github.com/openstack/oslo.policy
 	branch = stable/2024.2
 [submodule "external/oslo.context"]
-	path = external/oslo.context
+	path = technologies/codyze-technology-openstack/external/oslo.context
 	url = https://github.com/openstack/oslo.context.git
     branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/stevedore"]
+	path = technologies/codyze-technology-openstack/external/stevedore
+	url = https://github.com/openstack/stevedore.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/keystonemiddleware"]
+	path = technologies/codyze-technology-openstack/external/keystonemiddleware
+	url = https://github.com/openstack/keystonemiddleware.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/python-barbicanclient"]
+	path = technologies/codyze-technology-openstack/external/python-barbicanclient
+	url = https://github.com/openstack/python-barbicanclient.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/python-cinderclient"]
+	path = technologies/codyze-technology-openstack/external/python-cinderclient
+	url = https://github.com/openstack/python-cinderclient.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/oslo.policy"]
+	path = technologies/codyze-technology-openstack/external/oslo.policy
+	url = https://github.com/openstack/oslo.policy
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/nova"]
+	path = technologies/codyze-technology-openstack/external/nova
+	url = https://github.com/openstack/nova.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/typeshed"]
+	path = technologies/codyze-technology-openstack/external/typeshed
+	url = https://github.com/python/typeshed.git
+	branch = main
+[submodule "technologies/codyze-technology-openstack/external/keystone"]
+	path = technologies/codyze-technology-openstack/external/keystone
+	url = https://github.com/openstack/keystone.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/oslo.context"]
+	path = technologies/codyze-technology-openstack/external/oslo.context
+	url = https://github.com/openstack/oslo.context.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/barbican"]
+	path = technologies/codyze-technology-openstack/external/barbican
+	url = https://github.com/openstack/barbican.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/oslo.config"]
+	path = technologies/codyze-technology-openstack/external/oslo.config
+	url = https://github.com/openstack/oslo.config.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/oslo.log"]
+	path = technologies/codyze-technology-openstack/external/oslo.log
+	url = https://github.com/openstack/oslo.log.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/castellan"]
+	path = technologies/codyze-technology-openstack/external/castellan
+	url = https://github.com/openstack/castellan.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/keystoneauth"]
+	path = technologies/codyze-technology-openstack/external/keystoneauth
+	url = https://github.com/openstack/keystoneauth.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/cinder"]
+	path = technologies/codyze-technology-openstack/external/cinder
+	url = https://github.com/openstack/cinder.git
+	branch = stable/2024.2
+[submodule "technologies/codyze-technology-openstack/external/magnum"]
+	path = technologies/codyze-technology-openstack/external/magnum
+	url = https://github.com/openstack/magnum.git

@@ -8,5 +8,6 @@ plugins { id("buildlogic.kotlin-library-conventions") }
 
 dependencies {
     implementation(libs.jep)
-    implementation(project(":codyze-evaluator"))
+    api(project(":codyze-evaluator"))
+    api(project(":codyze-query-catalog"))
 }
