@@ -9,7 +9,10 @@ import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import example.queries.keystoneAuthStrategyConfigured
 
-include { Tagging from "tagging.codyze.kts" }
+include {
+    Tagging from "tagging.codyze.kts"
+    ManualAssessment from "assessment.codyze.kts"
+}
 
 project {
     name = "Evaluation Project for Hardened OpenStack"
@@ -110,6 +113,58 @@ project {
                 name = "Check Security Target Description for Consistency"
 
                 fulfilledBy { manualAssessmentOf("SEC-TARGET") }
+            }
+
+            category("Eco-System") {
+                requirement {
+                    name = "No Known Vulnerabilities"
+                    description =
+                        "Identify and assess open and unresolved vulnerabilities in the project's codebase or dependencies, using services like OSV, to ensure important fixes are integrated."
+
+                    fulfilledBy { manualAssessmentOf("Dependencies") }
+                }
+
+                requirement {
+                    name = "Continuous Maintenance"
+                    description =
+                        "Assure that timely updates of dependencies are continuously integrated, using tools like proposal bots. Verify active development and maintenance activities, ensuring adherence to security policies and having proper licenses."
+                }
+
+                requirement {
+                    name = "CI/CD Best Practices"
+                    description =
+                        "Review adherence to best practices for open-source projects, including key-hardening headers and dynamic analysis tools for major releases. Check the project's OSSF best practices badge."
+                }
+
+                requirement {
+                    name = "Continuous Testing"
+                    description =
+                        "Verify the execution of CI tests and mandatory and correct integration of tools like Zuul before code merges. Also look into the usage of fuzzing, SAST tools, and evaluate the testing interface consistency across projects."
+                }
+
+                requirement {
+                    name = "CI/CD Security"
+                    description =
+                        "Ensure that CI / CD security settings are properly configured, including Gerrit settings, branch protection, token permissions, and the evaluation of dangerous workflows to prevent unauthorized code changes."
+
+                    fulfilledBy { manualAssessmentOf("Branch-Protection") }
+                }
+                requirement {
+                    name = "Code Contributions and Reviews"
+                    description =
+                        "Ensure that code changes undergo human reviews, assessing contributor diversity, and reviewing metrics related to code contributions, such as contributor frequency and code review participation."
+
+                    fulfilledBy {
+                        manualAssessmentOf("Release-Reviewers-Nova") and
+                            manualAssessmentOf("Contributor-Diversity-Nova")
+                    }
+                }
+
+                requirement {
+                    name = "Build Risks"
+                    description =
+                        "Check for binary artifacts in repositories, assess dependency pinning, evaluate packaging and signed releases to mitigate build risks, ensuring reproducibility and security of artifacts."
+                }
             }
 
             category("General") {

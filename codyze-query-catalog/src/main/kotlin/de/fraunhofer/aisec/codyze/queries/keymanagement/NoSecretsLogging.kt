@@ -12,9 +12,8 @@ import de.fraunhofer.aisec.cpg.query.*
 /**
  * This query enforces the following statement: Secrets must not be logged.
  *
- * This query checks if there is a data flow from any
- * [de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret] concept to a [ogWrite`
- * Operation possible.
+ * This query checks if there is a data flow from any [Secret] concept to a [LogWrite] Operation
+ * possible.
  *
  * **Important note for this query to work as intended:** The nodes implementing the `Secret`
  * concept must have an outgoing DFG edge (typically to the underlyingNode). If this is not desired,
