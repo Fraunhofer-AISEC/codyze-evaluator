@@ -15,7 +15,15 @@ It is recommended to compile the project first using `./gradlew build` so that a
 In the settings, please search for "Languages & Frameworks -> Kotlin -> Kotlin Scripts" and click "Scan Classpath".
 This will add the `.codyze.kts` files and you will get syntax highlighting and code completion for them.
 
+### Known Bugs
+
+**(New) Queries from the Catalog are shown as unresolved in .codyze.kts**
+
 In order to update the IDE cache after new queries have been added to the `codyze-query-catalog` or specific evaluation project, it might also be necessary to first build the project and then click on "Scan Classpath" again.
+
+**Sources of Queries are not available**
+
+Sometimes, IntelliJ has difficulties finding the source files of the queries. For queries or concepts contained in the `codyze-query-catalog` it might be necessary to manually click on "Choose Sources" after click on a symbol and then choosing the folder `codyze-query-catalog/src/main/kotlin`. Similarilly, if a query or concept is defind directly in the evaluation project (as shown in the `evaluate-hardened-openstack` example project), "Choose Sources" must be chosen and the `src/main/kotlin` folder of the (example) evalaution project must be selected.
 
 ## Contents
 
