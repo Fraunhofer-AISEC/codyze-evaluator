@@ -1,11 +1,13 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
 import example.queries.keystoneAuthStrategyConfigured
 
@@ -18,14 +20,14 @@ project {
     name = "Evaluation Project for Hardened OpenStack"
 
     /**
-     * This block describes the target of evaluation. It is used to define the properties of the ToE
-     * (e.g., its name), its architecture, and the requirements that need to be checked.
+     * This block describes the Target of Evaluation (ToE). It is used to define the properties of
+     * the ToE (e.g., its name), its architecture, and the requirements that need to be checked.
+     *
+     * This specific ToE represents a version of OpenStack that is hardened with a specific
+     * configuration to meet security requirements.
      */
     toe {
         name = "Hardened OpenStack"
-        description =
-            "This ToE represents a version of OpenStack that is hardened " +
-                "with a specific configuration to meet security requirements."
         version = "2024.2"
 
         /**
@@ -42,7 +44,7 @@ project {
                 }
 
                 /**
-                 * Cinder is the OpenStack block storage service that provides persistent block
+                 * [Cinder] is the OpenStack block storage service that provides persistent block
                  * storage to instances. It supports various backends and allows users to manage
                  * volumes.
                  */
@@ -53,7 +55,7 @@ project {
                 }
 
                 /**
-                 * Barbican is the OpenStack key manager service that provides secure storage and
+                 * [Barbican] is the OpenStack key manager service that provides secure storage and
                  * management of secrets, such as encryption keys, passwords, and certificates.
                  */
                 module("barbican") {
@@ -63,7 +65,7 @@ project {
                 }
 
                 /**
-                 * Magnum is the OpenStack container orchestration service that provides container
+                 * [Magnum] is the OpenStack container orchestration service that provides container
                  * management capabilities.
                  */
                 module("magnum") {
@@ -73,7 +75,7 @@ project {
                 }
 
                 /**
-                 * Castellan is a library for managing secrets in OpenStack, providing abstraction
+                 * [Castellan] is a library for managing secrets in OpenStack, providing abstraction
                  * over various key management services, such as Barbican.
                  */
                 module("castellan") {
@@ -91,7 +93,7 @@ project {
                     includeAll()
                 }
 
-                /** Oslo.config is a library for managing configuration files in OpenStack. */
+                /** [OsloConfig] is a library for managing configuration files in OpenStack. */
                 module("oslo.config") {
                     directory = "toe/libraries/oslo.config"
                     include("oslo_config")
@@ -99,7 +101,7 @@ project {
                 }
 
                 /**
-                 * Keystone Middleware is a library that provides middleware components for
+                 * [KeystoneMiddleware] is a library that provides middleware components for
                  * OpenStack Keystone, the identity service.
                  */
                 module("keystonemiddleware") {
@@ -121,44 +123,58 @@ project {
                 fulfilledBy { manualAssessmentOf("SEC-TARGET") }
             }
 
+            /** This category contains requirements related to the ecosystem of OpenStack. */
             category("Eco-System") {
+                /**
+                 * Identify and assess open and unresolved vulnerabilities in the project's codebase
+                 * or dependencies, using services like OSV, to ensure important fixes are
+                 * integrated.
+                 */
                 requirement {
                     name = "No Known Vulnerabilities"
-                    description =
-                        "Identify and assess open and unresolved vulnerabilities in the project's codebase or dependencies, using services like OSV, to ensure important fixes are integrated."
 
                     fulfilledBy { manualAssessmentOf("Dependencies") }
                 }
 
-                requirement {
-                    name = "Continuous Maintenance"
-                    description =
-                        "Assure that timely updates of dependencies are continuously integrated, using tools like proposal bots. Verify active development and maintenance activities, ensuring adherence to security policies and having proper licenses."
-                }
+                /**
+                 * Assure that timely updates of dependencies are continuously integrated, using
+                 * tools like proposal bots. Verify active development and maintenance activities,
+                 * ensuring adherence to security policies and having proper licenses.
+                 */
+                requirement { name = "Continuous Maintenance" }
 
-                requirement {
-                    name = "CI/CD Best Practices"
-                    description =
-                        "Review adherence to best practices for open-source projects, including key-hardening headers and dynamic analysis tools for major releases. Check the project's OSSF best practices badge."
-                }
+                /**
+                 * Review adherence to best practices for open-source projects, including
+                 * key-hardening headers and dynamic analysis tools for major releases. Check the
+                 * project's OSSF best practices badge.
+                 */
+                requirement { name = "CI/CD Best Practices" }
 
-                requirement {
-                    name = "Continuous Testing"
-                    description =
-                        "Verify the execution of CI tests and mandatory and correct integration of tools like Zuul before code merges. Also look into the usage of fuzzing, SAST tools, and evaluate the testing interface consistency across projects."
-                }
+                /**
+                 * Verify the execution of CI tests and mandatory and correct integration of tools
+                 * like Zuul before code merges. Also look into the usage of fuzzing, SAST tools,
+                 * and evaluate the testing interface consistency across projects.
+                 */
+                requirement { name = "Continuous Testing" }
 
+                /**
+                 * Ensure that CI/CD security settings are properly configured, including Gerrit
+                 * settings, branch protection, token permissions, and the evaluation of dangerous
+                 * workflows to prevent unauthorized code changes.
+                 */
                 requirement {
                     name = "CI/CD Security"
-                    description =
-                        "Ensure that CI / CD security settings are properly configured, including Gerrit settings, branch protection, token permissions, and the evaluation of dangerous workflows to prevent unauthorized code changes."
 
                     fulfilledBy { manualAssessmentOf("Branch-Protection") }
                 }
+
+                /**
+                 * Ensure that code changes undergo human reviews, assessing contributor diversity,
+                 * and reviewing metrics related to code contributions, such as contributor
+                 * frequency and code review participation.
+                 */
                 requirement {
                     name = "Code Contributions and Reviews"
-                    description =
-                        "Ensure that code changes undergo human reviews, assessing contributor diversity, and reviewing metrics related to code contributions, such as contributor frequency and code review participation."
 
                     fulfilledBy {
                         manualAssessmentOf("Release-Reviewers-Nova") and
@@ -166,22 +182,24 @@ project {
                     }
                 }
 
-                requirement {
-                    name = "Build Risks"
-                    description =
-                        "Check for binary artifacts in repositories, assess dependency pinning, evaluate packaging and signed releases to mitigate build risks, ensuring reproducibility and security of artifacts."
-                }
+                /**
+                 * Check for binary artifacts in repositories, assess dependency pinning, evaluate
+                 * packaging and signed releases to mitigate build risks, ensuring reproducibility
+                 * and security of artifacts.
+                 */
+                requirement { name = "Build Risks" }
             }
 
+            /** This describes generic security requirements for all OpenStack components. */
             category("General") {
                 name = "General Security Requirements"
-                description =
-                    "This describes generic security requirements for all OpenStack components."
 
+                /**
+                 * See
+                 * [Guideline on Restrictive File Permissions](https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html).
+                 */
                 requirement {
                     name = "Apply Restrictive File Permissions"
-                    description =
-                        "See https://security.openstack.org/guidelines/dg_apply-restrictive-file-permissions.html."
 
                     // This query checks if restrictive file permissions are applied when writing
                     // files. But only if the file is written from a secret.
@@ -192,100 +210,123 @@ project {
                     }
                 }
 
+                /** Secret data should be deleted from memory, ideally right after usage. */
                 requirement {
                     name = "Delete Secrets after Usage"
-                    description =
-                        "Secret data should be deleted from memory, ideally right after usage."
 
                     // We can use method references when we do not need to pass any parameters.
                     fulfilledBy(::secretsAreDeletedAfterUsage)
                 }
 
+                /**
+                 * Secret data must not be logged, i.e., they must not flow into a
+                 * logging-statement.
+                 */
                 requirement {
                     name = "Secrets Must not be Logged"
-                    description =
-                        "Secret data must not be logged, i.e., they must not flow into a logging-statement."
 
                     fulfilledBy(::noLoggingOfSecrets)
                 }
             }
 
+            /**
+             * Ensure that the OpenStack deployment supports Bring Your Own Key (BYOK) for disk
+             * encryption, allowing users to manage their own encryption keys.
+             */
             category("BYOK") {
                 name = "Bring Your Own Key (BYOK)"
-                description =
-                    "Ensure that the OpenStack deployment supports Bring Your Own Key (BYOK) " +
-                        "for disk encryption, allowing users to manage their own encryption keys."
 
+                /**
+                 * The block device encryption algorithm must be state of the art, e.g., refer to a
+                 * TR.
+                 */
                 requirement {
                     name = "State-of-the-Art Disk Encryption Algorithm"
-                    description =
-                        "The block device encryption algorithm must be state of the art, e.g., refer to a TR."
 
                     fulfilledBy { stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced() }
                 }
 
+                /**
+                 * Given a disk encryption operation, the key used in the operation must be provided
+                 * by a secure key provider, leaked through other output and deleted after use.
+                 *
+                 * This is a more complex requirement that checks multiple aspects of key
+                 * management.
+                 */
                 requirement {
                     name = "Key for Disk Encryption is Kept Secure"
-                    description =
-                        "Given a disk encryption operation, the key used in the operation must be " +
-                            "provided by a secure key provider, leaked through other output and deleted after use."
 
                     fulfilledBy {
-                        keyNotLeakedThroughOutput() and
-                            keyOnlyReachableThroughSecureKeyProvider() and
+                        keyNotLeakedThroughOutput(
+                            dataLeavesComponent = Node::dataLeavesOpenStackComponent
+                        ) and
+                            keyOnlyReachableThroughSecureKeyProvider(
+                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                            ) and
                             keyIsDeletedFromMemoryAfterUse()
                     }
                 }
 
+                /** The key must be protected when in transit. */
                 requirement {
                     name = "Transport Encryption of Key"
-                    description = "The key must be protected when in transit."
 
                     fulfilledBy { transportEncryptionForKeys() }
                 }
 
+                /**
+                 * The key must only be accessible by a valid user and through the REST API of
+                 * [Barbican].
+                 */
                 requirement {
                     name = "Key Accessible Only By Valid User"
-                    description =
-                        "The key must only be accessible by a valid user and through the REST API of barbican."
 
                     fulfilledBy { keyOnyAccessibleByAuthenticatedEndpoint() }
                 }
             }
 
+            /**
+             * This category contains requirements related to multi-tenancy in OpenStack, ensuring
+             * that the system is designed to support multiple tenants securely and efficiently.
+             */
             category("Multi-Tenancy") {
                 name = "Multi-Tenancy"
-                description =
-                    "This describes security requirements for tenant isolation in OpenStack environments."
 
+                /** All authentication operations must use Keystone as the identity service. */
                 requirement {
                     name = "Use Keystone for authentication"
-                    description =
-                        "All authentication operations must use Keystone as the identity service."
 
                     fulfilledBy { keystoneAuthStrategyConfigured() }
                 }
 
+                /** All private endpoints must only be accessible after authentication. */
                 requirement {
                     name = "All Endpoints Must Have Authentication Enabled"
-                    description =
-                        "All private endpoints must only be accessible after authentication."
 
                     fulfilledBy { endpointsAreAuthenticated() }
                 }
 
+                /** All endpoints have token-based authentication. */
                 requirement {
                     name = "Token-based Authentication"
-                    description = "All endpoints have token-based authentication."
 
-                    fulfilledBy { tokenBasedAuthenticationWhenRequired() }
+                    // Checks if all access tokens used for authentication are validated by the
+                    // token-based authentication and if they come from the request context.
+                    fulfilledBy {
+                        tokenBasedAuthenticationWhenRequired() and
+                            usesSameTokenAsCredential() and
+                            hasDataFlowToToken() and
+                            useKeystoneForAuthentication()
+                    }
                 }
 
+                /**
+                 * When authorizing an HTTP request, the caller’s domain/project is used in the
+                 * authorization check. When a user reads data from or writes data to a database,
+                 * the user’s domain is used as a filter in the database query.
+                 */
                 requirement {
                     name = "Domain/Project used in Authorization Checks"
-                    description =
-                        "When authorizing an HTTP request, the caller’s domain/project is used in the authorization check." +
-                            "When a user reads data from or writes data to a database, the user’s domain is used as a filter in the database query."
 
                     fulfilledBy {
                         endpointAuthorizationBasedOnDomainOrProject() and
@@ -293,19 +334,24 @@ project {
                     }
                 }
 
+                /**
+                 * Data flows from user requests are not stored in global variables (since they are
+                 * assumed to be domain-independent) or they are deleted after the request is
+                 * answered.
+                 */
                 requirement {
                     name = "No Data Flows to Globals"
-                    description =
-                        "Data flows from user requests are not stored in global variables (since they are assumed to be domain-independent) or they are deleted after the request is answered."
 
                     fulfilledBy { noDataFlowsToGlobals<HttpRequest>() }
                 }
 
+                /**
+                 * An access request to a resource from another domain is answered with
+                 * “unauthorized”, i.e. no indirect information leakages via answers like “not
+                 * found” or “already exists” happen.
+                 */
                 requirement {
                     name = "Not Unauthorized Access for Other Domains"
-                    description =
-                        "An access request to a resource from another domain is answered with “unauthorized”, " +
-                            "i.e. no indirect information leakages via answers like “not found” or “already exists” happen."
 
                     fulfilledBy {
                         unauthorizedResponseFromAnotherDomainQuery(

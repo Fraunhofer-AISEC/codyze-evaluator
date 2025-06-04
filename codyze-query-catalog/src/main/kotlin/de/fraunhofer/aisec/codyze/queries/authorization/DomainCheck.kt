@@ -3,6 +3,8 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authorization
 
+import de.fraunhofer.aisec.codyze.concepts.auth.*
+import de.fraunhofer.aisec.codyze.concepts.database.*
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.assumptions.assume
@@ -31,15 +33,9 @@ import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.mergeWithAll
 import de.fraunhofer.aisec.cpg.query.not
 import de.fraunhofer.aisec.cpg.query.toQueryTree
-import de.fraunhofer.aisec.openstack.concepts.auth.AuthorizationWithPolicy
-import de.fraunhofer.aisec.openstack.concepts.auth.Authorize
-import de.fraunhofer.aisec.openstack.concepts.auth.CheckDomainScope
-import de.fraunhofer.aisec.openstack.concepts.auth.ExtendedRequestContext
-import de.fraunhofer.aisec.openstack.concepts.database.DatabaseAccess
-import de.fraunhofer.aisec.openstack.concepts.database.Filter
 
 /**
- * Retrieves all [de.fraunhofer.aisec.openstack.concepts.auth.Authorize] operations related to the
+ * Retrieves all [Authorize] operations related to the
  * [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] and checks if there is a data
  * flow from each of these authorizations' authorization targets to one of the provided
  * [targetValues]. If there is no

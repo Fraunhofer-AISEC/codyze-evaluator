@@ -50,7 +50,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
       - name: Build ${{ env.version }}
         run: |
-          ./gradlew --parallel -Pversion=$VERSION spotlessCheck -x spotlessApply build -x distZip -x distTar
+          ./gradlew --parallel -Pversion=$VERSION spotlessCheck -x spotlessApply build integrationTest -x distZip -x distTar
         id: build
         env:
           VERSION: ${{ env.version }}

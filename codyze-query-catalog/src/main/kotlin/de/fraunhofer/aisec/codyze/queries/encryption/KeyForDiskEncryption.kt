@@ -7,78 +7,15 @@ import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
-import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
-import de.fraunhofer.aisec.cpg.graph.concepts.logging.LogWrite
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.query.*
-import de.fraunhofer.aisec.openstack.queries.OpenStackComponents
-
-/**
- * A list of whitelisted [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint]s that are
- * considered secure key providers.
- *
- * These endpoints are allowed receive secret material without it being a leak.
- */
-val secretsWhitelist =
-    listOf(
-        "barbican.api.controllers.secrets.SecretController.payload.HttpEndpoint",
-        "barbican.api.controllers.secrets.SecretController.on_get.HttpEndpoint",
-    )
-
-/**
- * These functions are considered leaks of sensitive data outside the component, if secrets are
- * written with them.
- */
-val leakingFunctions = listOf("write", "println", "execute", "log")
-
-/**
- * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
- * checks if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] is invoked on is
- * considered a secure key provider.
- *
- * The following http endpoints are considered as a secure key provider:
- * * GET /v1/secrets/{encryption_key_id}/payload in the `Component` "Barbican"
- *
- * @return `true` if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] is a secure key
- *   provider, `false` otherwise
- */
-fun HttpEndpoint.isSecureKeyProvider(): Boolean {
-    return httpMethod == HttpMethod.GET &&
-        path == "/v1/secrets/{secret_id}/payload" &&
-        this.underlyingNode?.firstParentOrNull<Component> {
-            it.name.localName == OpenStackComponents.BARBICAN
-        } != null
-}
-
-/**
- * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
- * checks if the [de.fraunhofer.aisec.cpg.graph.Node] it is invoked on may be used to leak sensitive
- * data outside of the component by considering the following channels:
- * - Writing to a file
- * - Writing to a log
- * - Printing to the console (via a call expression `println`)
- * - Executing a command (via a call expression `execute`)
- * - Being exposed via an Http endpoint which is not explicitly whitelisted by being a "secure key
- *   provider"
- *
- * @return `true` if this [de.fraunhofer.aisec.cpg.graph.Node] can be used to leak data.
- */
-fun Node.dataLeavesComponent(): Boolean {
-    return this is WriteFile ||
-        this is LogWrite ||
-        ((this is CallExpression) && (this.name.localName in leakingFunctions)) ||
-        (this is HttpEndpoint && this.name.toString() !in secretsWhitelist)
-}
 
 /**
  * This query enforces the following statement: "Given a customer-managed key K stored in Barbican,
  * it must not be leaked via printing, logging, file writing or command execution input."
  */
 context(TranslationResult)
-fun keyNotLeakedThroughOutput(): QueryTree<Boolean> {
+fun keyNotLeakedThroughOutput(dataLeavesComponent: Node.() -> Boolean): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     // The result of a `GetSecret` operation must not have a data flow
@@ -96,7 +33,7 @@ fun keyNotLeakedThroughOutput(): QueryTree<Boolean> {
                     type = May,
                     // Consider all paths across functions.
                     scope = Interprocedural(),
-                    // Use the function `dataLeavesComponent` defined above to represent a sink.
+                    // Use the function `dataLeavesComponent` above to represent a sink.
                     predicate = { it.dataLeavesComponent() },
                 ) // If this returns a QueryTree<Boolean> with value `true`, a dataflow may be
                 // present.
@@ -111,7 +48,9 @@ fun keyNotLeakedThroughOutput(): QueryTree<Boolean> {
  * encryption, K must only be accessible via the Barbican API endpoint."
  */
 context(TranslationResult)
-fun keyOnlyReachableThroughSecureKeyProvider(): QueryTree<Boolean> {
+inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
+    crossinline isSecureKeyProvider: T.() -> Boolean
+): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     val tree =
@@ -139,7 +78,7 @@ fun keyOnlyReachableThroughSecureKeyProvider(): QueryTree<Boolean> {
                     // The requirement is satisified if the key comes from a secure key provider.
                     // We use the extension function `isSecureKeyProvider` defined above to perform
                     // this check.
-                    predicate = { it is HttpEndpoint && it.isSecureKeyProvider() },
+                    predicate = { it is T && it.isSecureKeyProvider() },
                 )
             }
                 // If there's no key present for the encryption, there's something wrong.
