@@ -24,8 +24,12 @@ class HttpPecanLibPass(ctx: TranslationContext) : ComponentPass(ctx) {
         if (pecanApp != null) {
             // First argument is base Controller
             val controller =
-                (pecanApp.arguments.first() as ConstructExpression).instantiates
-                    as RecordDeclaration
+                (pecanApp.arguments.first() as? ConstructExpression)?.instantiates
+                    as? RecordDeclaration
+            if (controller == null) {
+                return
+            }
+
             val versionId = controller.refs["version_id"]
             val basePath =
                 ((versionId?.astParent as AssignExpression).rhs.firstOrNull() as Literal<*>)

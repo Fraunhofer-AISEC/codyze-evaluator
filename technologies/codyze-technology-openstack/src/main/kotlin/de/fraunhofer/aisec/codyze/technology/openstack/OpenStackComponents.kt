@@ -64,3 +64,6 @@ object PythonCinderClient : OpenStackLibrary("python-cinderclient")
 
 /** Keystone Auth is a library for authentication in OpenStack services. */
 object KeystoneAuth : OpenStackLibrary("keystoneauth")
+
+/** Keystone Middleware is a library for interacting with [Keystone]. */
+object KeystoneMiddleware : OpenStackLibrary("keystonemiddleware")
