@@ -1,6 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.dsl.fulfilledBy
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
@@ -243,7 +244,10 @@ project {
                 requirement {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
-                    fulfilledBy { stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced() }
+                    fulfilledBy {
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
+                            manualAssessmentOf("Careful-Crypto-Analysis")
+                    }
                 }
 
                 /**
@@ -257,13 +261,15 @@ project {
                     name = "Key for Disk Encryption is Kept Secure"
 
                     fulfilledBy {
-                        keyNotLeakedThroughOutput(
-                            dataLeavesComponent = Node::dataLeavesOpenStackComponent
-                        ) and
-                            keyOnlyReachableThroughSecureKeyProvider(
-                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                        val notLeakedAndReachable =
+                            keyNotLeakedThroughOutput(
+                                dataLeavesComponent = Node::dataLeavesOpenStackComponent
                             ) and
-                            keyIsDeletedFromMemoryAfterUse()
+                                keyOnlyReachableThroughSecureKeyProvider(
+                                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                                )
+
+                        notLeakedAndReachable and keyIsDeletedFromMemoryAfterUse()
                     }
                 }
 
