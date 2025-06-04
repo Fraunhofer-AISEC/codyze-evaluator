@@ -96,7 +96,7 @@ In the following, multiple ecosystem-related security criteria are described and
 | Packaging                                  | No                                                                        |
 | Signed Releases                            | No                                                                        |
 
-### Overview Guidelines
+### Overview and Selection of Guidelines
 
 - [G1: Checking Known Vulnerabilities](#g1-checking-known-vulnerabilities)
 - [G2: Checking Continuous Maintenance](#g2-checking-continuous-maintenance)
@@ -105,6 +105,13 @@ In the following, multiple ecosystem-related security criteria are described and
 - [G5: Checking CI/CD Security](#g5-checking-cicd-security)
 - [G6: Checking Code Contributions and Reviews](#g6-checking-code-contributions-and-reviews)
 - [G7: Checking Build Risks](#g7-checking-build-risks)
+
+In the development of security guidelines for evaluating OpenStack's ecosystem, our selection was aimed at a comprehensive assessment of project health and security. The criteria were selected to not only address code vulnerabilities but also to encompass broader security practices and risk factors, ensuring a thorough examination of a project's trustworthiness and overall health. The guidelines are therefore written to address real-world security risks, such as supply-chain threats including malicious maintainers, build system compromises, and unauthorized code modifications.
+By enforcing security policies, code reviews, branch protections, and signed releases, these guidelines directly mitigate known threats. Specifically, [G1: Checking Known Vulnerabilities](#g1-checking-known-vulnerabilities) is crucial for identifying and addressing open, unresolved vulnerabilities that could be exploited. Our criteria align with established industry standards, ensuring that they are grounded in widely accepted practices for secure software development. This alignment guarantees that the evaluated criteria are not arbitrary but are rooted in recognized best practices, as reflected in [G3: Checking CII Best Practices](#g3-checking-cii-best-practices). Automation and scalability are integral, enabling assessments to be conducted across numerous projects. This facilitates actionable insights and remediation strategies, such as verifying repository code review enforcement or using read-only workflow tokens, as highlighted in [G5: Checking CI/CD Security](#g5-checking-cicd-security). 
+The guidelines span various lifecycle stages of a project, from setup to ongoing maintenance, addressing both technical and social factors. This comprehensive approach considers the impact of maintainer responsiveness and project activity on security. The checks for continuous maintenance and ongoing security assessment are encapsulated within [G2: Checking Continuous Maintenance](#g2-checking-continuous-maintenance) and [G4: Checking Continuous Testing](#g4-checking-continuous-testing).
+The inclusion of checks such as [G6: Checking Code Contributions and Reviews](#g6-checking-code-contributions-and-reviews) and [G7: Checking Build Risks](#g7-checking-build-risks) further enhance the robustness of the security evaluation process. For G6, the focus on code contributions and reviews is important, as it ensures that all changes to the codebase undergo thorough reviews, reducing the likelihood of introducing vulnerabilities. This check promotes collaborative security practices and encourages the adoption of peer review procedures that are critical for maintaining code integrity and spotting potential security flaws early in the development cycle. G7 addresses build risks by examining the security measures in place during the build process. This includes verifying the integrity of dependencies and the security of the build environment itself, thus preventing the introduction of compromised components and ensuring the reliability of the software artifacts produced.
+
+In summary, the selection of these criteria is based on their efficacy in addressing tangible security risks, their congruence with industry best practices, their automation capabilities, and their comprehensive appraisal of critical aspects of open-source project security. This methodical approach ensures that the guidelines provide meaningful, actionable insights into a project's security posture, beyond just code vulnerabilities. 
 
 ### G1: Checking Known Vulnerabilities
 
