@@ -6,8 +6,6 @@ package de.fraunhofer.aisec.codyze.concepts.auth
 import de.fraunhofer.aisec.cpg.graph.MetadataProvider
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.*
-import kotlin.apply
-
 /**
  * Creates a new [ExtendedRequestContext] concept.
  *
