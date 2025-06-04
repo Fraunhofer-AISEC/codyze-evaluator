@@ -1,9 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.queries.authentication
+package de.fraunhofer.aisec.codyze.queries.authentication
 
-import de.fraunhofer.aisec.codyze.openstack.queries.OpenStackComponents
+import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackComponents
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.evaluate

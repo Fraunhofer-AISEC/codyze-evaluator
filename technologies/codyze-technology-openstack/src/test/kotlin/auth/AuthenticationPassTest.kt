@@ -4,13 +4,18 @@
 package auth
 
 import analyze
-import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
-import de.fraunhofer.aisec.codyze.openstack.queries.authentication.useKeystoneForAuthentication
+import de.fraunhofer.aisec.codyze.openstack.passes.auth.AuthenticationPass
+import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.codyze.queries.authentication.endpointsAreAuthenticated
+import de.fraunhofer.aisec.codyze.queries.authentication.hasDataFlowToToken
 import de.fraunhofer.aisec.codyze.queries.authentication.tokenBasedAuthenticationWhenRequired
+import de.fraunhofer.aisec.codyze.queries.authentication.useKeystoneForAuthentication
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.assumptions.assume
+import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
+import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.allChildrenWithOverlays
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
@@ -19,11 +24,10 @@ import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.evaluate
-import de.fraunhofer.aisec.cpg.query.Must
+import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
-import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.existsExtended
 import kotlin.io.path.Path
 import kotlin.test.assertEquals
@@ -112,11 +116,39 @@ class AuthenticationPassTest {
     @Test
     fun testTokenBasedAuthentication() {
         val topLevel = Path("external")
-        val result = analyze(listOf(), topLevel, true)
+        val result =
+            analyze(listOf(), topLevel, true) {
+                it.registerLanguage<PythonLanguage>()
+                it.registerLanguage<IniFileLanguage>()
+                it.registerPass<IniFileConfigurationSourcePass>()
+                it.registerPass<AuthenticationPass>()
+                it.registerPass<HttpPecanLibPass>()
+                it.registerPass<HttpWsgiPass>()
+                it.exclusionPatterns("tests", "drivers")
+                it.softwareComponents(
+                    mutableMapOf(
+                        "cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                        "keystonemiddleware" to
+                            listOf(
+                                topLevel.resolve("keystonemiddleware/keystonemiddleware").toFile()
+                            ),
+                        "conf" to listOf(topLevel.resolve("conf").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "cinder" to topLevel.resolve("cinder").toFile(),
+                        "barbican" to topLevel.resolve("barbican").toFile(),
+                        "keystonemiddleware" to topLevel.resolve("keystonemiddleware").toFile(),
+                        "conf" to topLevel.resolve("conf").toFile(),
+                    )
+                )
+            }
 
         assertNotNull(result)
 
-        with(result) {
+        with<TranslationResult, Unit>(result) {
             // Is a valid token provider configured?
             val r = tokenBasedAuthenticationWhenRequired()
             assertTrue(r.value)
@@ -215,12 +247,10 @@ class AuthenticationPassTest {
         val result = analyze(listOf(), topLevel, true)
 
         assertNotNull(result)
-        val q = accessTokenIsTiedToRequestContextQuery(tr = result)
-        assertFalse(q.value)
-    }
-
-    fun accessTokenIsTiedToRequestContextQuery(tr: TranslationResult): QueryTree<Boolean> {
-        return tr.usesSameTokenAsCredential() and tr.hasDataFlowToToken()
+        with(result) {
+            val q = usesSameTokenAsCredential() and hasDataFlowToToken()
+            assertFalse(q.value)
+        }
     }
 
     /**
@@ -233,35 +263,6 @@ class AuthenticationPassTest {
                 val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
                 val isSameToken = tokens.all { it.token == token.credential }
                 QueryTree(value = isSameToken, node = token)
-            }
-        )
-    }
-
-    /**
-     * Checks if there is a data flow from the [ExtendedRequestContext.token] into the
-     * [TokenBasedAuth].
-     */
-    fun TranslationResult.hasDataFlowToToken(): QueryTree<Boolean> {
-        return this.allExtended<ExtendedRequestContext>(
-            mustSatisfy = { ctx ->
-                val token = ctx.token
-                if (
-                    token == null ||
-                        ctx.userInfo?.userId == null ||
-                        ctx.userInfo?.domainId == null ||
-                        ctx.userInfo?.projectId == null
-                ) {
-                    QueryTree(false, node = ctx, stringRepresentation = "Invalid Request context")
-                } else {
-                    dataFlow(
-                        startNode = token,
-                        direction = Backward(GraphToFollow.DFG),
-                        type = Must,
-                        predicate = { token ->
-                            token.overlays.filterIsInstance<TokenBasedAuth>().isNotEmpty()
-                        },
-                    )
-                }
             }
         )
     }

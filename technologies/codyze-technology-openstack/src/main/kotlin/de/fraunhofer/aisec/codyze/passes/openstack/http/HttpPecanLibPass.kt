@@ -1,9 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.passes.http
+package de.fraunhofer.aisec.codyze.passes.openstack.http
 
-import de.fraunhofer.aisec.codyze.openstack.concepts.mapHttpMethod
+import de.fraunhofer.aisec.codyze.concepts.mapHttpMethod
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.Annotation
@@ -13,6 +13,8 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.newHttpRequestHandler
 import de.fraunhofer.aisec.cpg.graph.concepts.http.newRegisterHttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.declarations.MethodDeclaration
 import de.fraunhofer.aisec.cpg.graph.declarations.RecordDeclaration
+import de.fraunhofer.aisec.cpg.graph.get
+import de.fraunhofer.aisec.cpg.graph.invoke
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver

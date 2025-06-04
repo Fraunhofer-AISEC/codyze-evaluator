@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.queries.authentication
+package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.cpg.*

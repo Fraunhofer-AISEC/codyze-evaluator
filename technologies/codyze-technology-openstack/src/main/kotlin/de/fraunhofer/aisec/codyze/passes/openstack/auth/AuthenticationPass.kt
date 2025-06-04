@@ -6,8 +6,8 @@ package de.fraunhofer.aisec.codyze.openstack.passes.auth
 import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.codyze.concepts.auth.newRequestContext
 import de.fraunhofer.aisec.codyze.concepts.auth.newUserInfo
-import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpPecanLibPass
 import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*

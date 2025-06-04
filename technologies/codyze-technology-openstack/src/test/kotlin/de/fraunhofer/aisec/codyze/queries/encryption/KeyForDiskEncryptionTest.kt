@@ -1,0 +1,128 @@
+/*
+ * This file is part of the OpenStack Checker
+ */
+package de.fraunhofer.aisec.codyze.queries.encryption
+
+import analyze
+import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackProfile
+import de.fraunhofer.aisec.cpg.graph.Backward
+import de.fraunhofer.aisec.cpg.graph.ContextSensitive
+import de.fraunhofer.aisec.cpg.graph.FieldSensitive
+import de.fraunhofer.aisec.cpg.graph.GraphToFollow
+import de.fraunhofer.aisec.cpg.graph.Interprocedural
+import de.fraunhofer.aisec.cpg.graph.Node
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.get
+import de.fraunhofer.aisec.cpg.query.May
+import de.fraunhofer.aisec.cpg.query.QueryTree
+import de.fraunhofer.aisec.cpg.query.allExtended
+import de.fraunhofer.aisec.cpg.query.dataFlow
+import java.io.File
+import kotlin.io.path.Path
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
+import wrapInAnalysisResult
+
+class KeyForDiskEncryptionTest {
+    /**
+     * Test case for [keyOnlyReachableThroughSecureKeyProvider] using [isSecureOpenStackKeyProvider]
+     * with [OpenStackProfile].
+     */
+    @Test
+    fun testKeyOnlyReachableThroughSecureKeyProvider() {
+        val topLevel = Path("external")
+        val result =
+            analyze(listOf(), topLevel, true) {
+                OpenStackProfile(it)
+                it.failOnError(false)
+                it.softwareComponents(
+                    mutableMapOf(
+                        "cinder" to
+                            listOf(
+                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
+                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
+                            ),
+                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
+                    )
+                )
+                it.topLevels(
+                    mapOf(
+                        "cinder" to topLevel.resolve("cinder").toFile(),
+                        "barbican" to topLevel.resolve("barbican").toFile(),
+                    )
+                )
+            }
+        assertNotNull(result)
+
+        val barbican = result.components["barbican"]
+        assertNotNull(barbican)
+
+        with(result) {
+            val q =
+                /*keyOnlyReachableThroughSecureKeyProvider(
+                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                )*/
+                result.allExtended<DiskEncryption> { encryption ->
+                    encryption.key?.let { key ->
+                        dataFlow(
+                            startNode = encryption,
+                            // TODO(oxisto): The original query used `Must` here, which has failing
+                            // paths - why
+                            type = May,
+                            direction = Backward(GraphToFollow.DFG),
+                            sensitivities = FieldSensitive + ContextSensitive,
+                            scope = Interprocedural(),
+                            predicate = { it is HttpEndpoint && it.isSecureOpenStackKeyProvider() },
+                        )
+                    }
+                        ?: QueryTree(
+                            false,
+                            mutableListOf(QueryTree(encryption)),
+                            "encryptionOp.concept.key is null",
+                        )
+                }
+            println(q.printNicely())
+            assertEquals(true, q.value)
+
+            val treeFunctions = q.children
+            assertEquals(1, treeFunctions.size)
+
+            val validDataflows = treeFunctions.first().children.filter { it.value == true }
+            // TODO(oxisto): It seems that the two paths are actually the same
+            assertEquals(2, validDataflows.size)
+
+            // It seems its sometimes 26 and sometimes 27
+            val longestValid =
+                validDataflows.map { it.children.first().value as List<*> }.maxByOrNull { it.size }
+            assertNotNull(longestValid)
+            assertTrue(longestValid.size >= 26)
+
+            wrapInAnalysisResult(result, listOf(q))
+                .writeSarifJson(File("key-input-of-operation.sarif"))
+        }
+    }
+
+    /**
+     * Test case for [keyNotLeakedThroughOutput] using [dataLeavesOpenStackComponent] with
+     * [OpenStackProfile].
+     */
+    @Test
+    fun testKeyNotLeakedThroughOutput() {
+        val topLevel = Path("external/barbican")
+        val result =
+            analyze(listOf(topLevel.resolve("barbican").toFile()), topLevel, true) {
+                OpenStackProfile(it)
+                it.exclusionPatterns("tests")
+            }
+        assertNotNull(result)
+
+        with(result) {
+            val noKeyLeakResult = keyNotLeakedThroughOutput(Node::dataLeavesOpenStackComponent)
+            println(noKeyLeakResult.printNicely())
+            assertTrue(noKeyLeakResult.value)
+        }
+    }
+}

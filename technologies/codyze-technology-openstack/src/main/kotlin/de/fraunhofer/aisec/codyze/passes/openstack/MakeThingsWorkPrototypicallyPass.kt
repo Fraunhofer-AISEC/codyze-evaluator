@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.openstack.passes
 
-import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpPecanLibPass
+import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*

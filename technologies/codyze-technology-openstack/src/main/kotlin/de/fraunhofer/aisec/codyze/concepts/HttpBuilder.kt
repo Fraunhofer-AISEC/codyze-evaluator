@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.concepts
+package de.fraunhofer.aisec.codyze.concepts
 
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpMethod
 

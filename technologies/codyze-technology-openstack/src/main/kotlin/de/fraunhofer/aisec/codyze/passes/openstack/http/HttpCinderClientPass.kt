@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.openstack.passes.http
 
-import de.fraunhofer.aisec.codyze.openstack.concepts.mapHttpMethod
+import de.fraunhofer.aisec.codyze.concepts.mapHttpMethod
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.calls

@@ -3,7 +3,7 @@
  */
 package example
 
-import de.fraunhofer.aisec.codyze.openstack.OpenStackProfile
+import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackProfile
 import de.fraunhofer.aisec.openstack.evaluateWithCodyze
 
 fun main() {

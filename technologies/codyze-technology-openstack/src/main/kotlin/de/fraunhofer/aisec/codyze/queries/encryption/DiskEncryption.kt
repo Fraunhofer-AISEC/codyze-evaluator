@@ -1,9 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.queries.encryption
+package de.fraunhofer.aisec.codyze.queries.encryption
 
-import de.fraunhofer.aisec.codyze.openstack.queries.OpenStackComponents
+import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackComponents
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
