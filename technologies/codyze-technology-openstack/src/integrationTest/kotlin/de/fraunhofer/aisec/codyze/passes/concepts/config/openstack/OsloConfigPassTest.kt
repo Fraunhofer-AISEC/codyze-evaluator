@@ -13,6 +13,8 @@ import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.config.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.get
+import de.fraunhofer.aisec.cpg.graph.invoke
 import de.fraunhofer.aisec.cpg.passes.concepts.config.*
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.*
 import de.fraunhofer.aisec.cpg.query.*

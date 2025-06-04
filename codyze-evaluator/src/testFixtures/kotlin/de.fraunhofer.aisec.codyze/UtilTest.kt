@@ -27,8 +27,6 @@ import kotlin.Exception
  * @return A list of [TranslationUnitDeclaration] nodes, representing the CPG roots
  * @throws Exception Any exception thrown during the parsing process
  */
-@JvmOverloads
-@Throws(Exception::class)
 fun analyze(
     files: List<File>,
     topLevel: Path,
@@ -57,6 +55,7 @@ fun analyze(
     return result
 }
 
+/** Wraps a [TranslationResult] and a list of [QueryTree]s into an [AnalysisResult]. */
 fun wrapInAnalysisResult(tr: TranslationResult, trees: List<QueryTree<Boolean>>): AnalysisResult {
     val rules =
         trees.mapIndexed { index, tree ->

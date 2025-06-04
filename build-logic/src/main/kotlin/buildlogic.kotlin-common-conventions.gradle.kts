@@ -40,6 +40,23 @@ testing {
                 }
             }
         }
+
+        // Our integration tests
+        val integrationTest by registering(JvmTestSuite::class) {
+            description = "Runs the integration tests. These tests usually require external resources, for example the concrete technology that is being analyzed."
+            dependencies {
+                implementation(project())
+                implementation(testFixtures(project(":codyze-evaluator")))
+            }
+
+            targets {
+                all {
+                    testTask.configure {
+                        maxHeapSize = "4048m"
+                    }
+                }
+            }
+        }
     }
 }
 

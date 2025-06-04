@@ -10,4 +10,6 @@ dependencies {
     implementation(libs.jep)
     api(project(":codyze-evaluator"))
     api(project(":codyze-query-catalog"))
+
+    testImplementation(testFixtures(project(":codyze-evaluator")))
 }
