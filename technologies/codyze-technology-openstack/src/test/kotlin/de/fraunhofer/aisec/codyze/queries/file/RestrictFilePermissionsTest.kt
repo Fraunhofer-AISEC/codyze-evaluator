@@ -3,9 +3,9 @@
  */
 package de.fraunhofer.aisec.codyze.queries.file
 
-import analyze
-import de.fraunhofer.aisec.codyze.openstack.passes.MakeThingsWorkPrototypicallyPass
-import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
+import de.fraunhofer.aisec.codyze.analyze
+import de.fraunhofer.aisec.codyze.passes.concepts.config.openstack.OsloConfigPass
+import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.codyze.technology.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
@@ -13,10 +13,7 @@ import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
 import kotlin.io.path.Path
-import kotlin.test.Test
-import kotlin.test.assertFalse
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
+import kotlin.test.*
 
 /** This test suite contains tests for file-based queries using the [OpenStackProfile]. */
 class RestrictFilePermissionsTest {

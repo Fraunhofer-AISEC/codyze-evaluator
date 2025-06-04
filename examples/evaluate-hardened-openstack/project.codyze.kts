@@ -292,7 +292,8 @@ project {
                     fulfilledBy {
                         tokenBasedAuthenticationWhenRequired() and
                             usesSameTokenAsCredential() and
-                            hasDataFlowToToken() and useKeystoneForAuthentication()
+                            hasDataFlowToToken() and
+                            useKeystoneForAuthentication()
                     }
                 }
                 requirement {

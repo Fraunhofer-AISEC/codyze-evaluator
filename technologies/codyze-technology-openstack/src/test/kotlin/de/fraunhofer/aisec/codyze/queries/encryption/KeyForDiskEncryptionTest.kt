@@ -3,29 +3,15 @@
  */
 package de.fraunhofer.aisec.codyze.queries.encryption
 
-import analyze
+import de.fraunhofer.aisec.codyze.*
 import de.fraunhofer.aisec.codyze.technology.openstack.*
-import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackProfile
-import de.fraunhofer.aisec.cpg.graph.Backward
-import de.fraunhofer.aisec.cpg.graph.ContextSensitive
-import de.fraunhofer.aisec.cpg.graph.FieldSensitive
-import de.fraunhofer.aisec.cpg.graph.GraphToFollow
-import de.fraunhofer.aisec.cpg.graph.Interprocedural
-import de.fraunhofer.aisec.cpg.graph.Node
+import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.get
-import de.fraunhofer.aisec.cpg.query.May
-import de.fraunhofer.aisec.cpg.query.QueryTree
-import de.fraunhofer.aisec.cpg.query.allExtended
-import de.fraunhofer.aisec.cpg.query.dataFlow
+import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
 import kotlin.io.path.Path
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
-import wrapInAnalysisResult
+import kotlin.test.*
 
 /** This test suite contains tests for disk encryption queries using the [OpenStackProfile]. */
 class KeyForDiskEncryptionTest {

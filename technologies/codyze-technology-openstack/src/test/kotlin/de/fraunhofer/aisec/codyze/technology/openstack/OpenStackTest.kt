@@ -3,22 +3,22 @@
  */
 package de.fraunhofer.aisec.codyze.technology.openstack
 
-import analyze
-import de.fraunhofer.aisec.codyze.openstack.passes.*
-import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
+import de.fraunhofer.aisec.codyze.*
+import de.fraunhofer.aisec.codyze.openstack.passes.PythonMemoryPass
+import de.fraunhofer.aisec.codyze.passes.concepts.crypto.encryption.openstack.CinderKeyManagerSecretPass
+import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.cpg.*
-import de.fraunhofer.aisec.cpg.frontends.python.*
+import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
-import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.*
-import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
-import de.fraunhofer.aisec.cpg.graph.edges.*
+import de.fraunhofer.aisec.cpg.graph.edges.get
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.*
-import wrapInAnalysisResult
 
 /**
  * This test suite contains tests for general OpenStack functionality, such as parsing [Barbican]

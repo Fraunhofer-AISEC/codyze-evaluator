@@ -3,17 +3,16 @@
  */
 package de.fraunhofer.aisec.codyze.technology.openstack
 
-import de.fraunhofer.aisec.codyze.openstack.passes.MakeThingsWorkPrototypicallyPass
-import de.fraunhofer.aisec.codyze.openstack.passes.PythonMemoryPass
-import de.fraunhofer.aisec.codyze.openstack.passes.SecureKeyRetrievalPass
-import de.fraunhofer.aisec.codyze.openstack.passes.StevedoreDynamicLoadingPass
-import de.fraunhofer.aisec.codyze.openstack.passes.auth.AuthenticationPass
-import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpWsgiPass
-import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
-import de.fraunhofer.aisec.codyze.passes.openstack.DiskEncryptionPass
-import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
-import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPointPass
-import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
+import de.fraunhofer.aisec.codyze.openstack.passes.*
+import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthenticationPass
+import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthorizationPass
+import de.fraunhofer.aisec.codyze.passes.concepts.crypto.encryption.openstack.CinderKeyManagerSecretPass
+import de.fraunhofer.aisec.codyze.passes.concepts.diskEncryption.openstack.CinderDiskEncryptionPass
+import de.fraunhofer.aisec.codyze.passes.concepts.flows.python.PythonEntryPointPass
+import de.fraunhofer.aisec.codyze.passes.concepts.http.openstack.SecureKeyRetrievalPass
+import de.fraunhofer.aisec.codyze.passes.concepts.http.python.*
+import de.fraunhofer.aisec.codyze.passes.concepts.memory.openstack.StevedoreDynamicLoadingPass
+import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
@@ -30,13 +29,13 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
 
     // Required passes for OpenStack analysis
     it.registerPass<CinderKeyManagerSecretPass>()
-    it.registerPass<DiskEncryptionPass>()
+    it.registerPass<CinderDiskEncryptionPass>()
     it.registerPass<PythonMemoryPass>()
     it.registerPass<HttpPecanLibPass>()
     it.registerPass<HttpWsgiPass>()
     it.registerPass<AuthenticationPass>()
+    it.registerPass<AuthorizationPass>()
     it.registerPass<SecureKeyRetrievalPass>()
-    it.registerPass<OsloConfigPass>()
     it.registerPass<IniFileConfigurationSourcePass>()
     it.registerPass<PythonEntryPointPass>()
     it.registerPass<StevedoreDynamicLoadingPass>()
