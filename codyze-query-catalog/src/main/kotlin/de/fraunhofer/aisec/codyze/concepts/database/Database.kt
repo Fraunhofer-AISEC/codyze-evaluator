@@ -13,10 +13,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.Operation
  * @param underlyingNode The underlying CPG node.
  * @param context The context holding the user's domain information
  */
-class DatabaseAccess(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val context: de.fraunhofer.aisec.cpg.graph.Node?,
-) : de.fraunhofer.aisec.cpg.graph.concepts.Concept(underlyingNode)
+class DatabaseAccess(underlyingNode: Node? = null, val context: Node?) : Concept(underlyingNode)
 
 /**
  * Represents a filter operation on a database access.
@@ -25,11 +22,8 @@ class DatabaseAccess(
  * @param concept The database access.
  * @param by The node representing the filter condition.
  */
-class Filter(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node?,
-    concept: DatabaseAccess,
-    val by: de.fraunhofer.aisec.cpg.graph.Node,
-) : de.fraunhofer.aisec.cpg.graph.concepts.Operation(underlyingNode, concept) {
+class Filter(underlyingNode: Node?, concept: DatabaseAccess, val by: Node) :
+    Operation(underlyingNode, concept) {
     init {
         concept.ops.add(this)
     }

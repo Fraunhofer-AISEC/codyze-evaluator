@@ -5,22 +5,19 @@ package de.fraunhofer.aisec.codyze.concepts.auth
 
 import de.fraunhofer.aisec.cpg.graph.MetadataProvider
 import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.concepts.newConcept
+import de.fraunhofer.aisec.cpg.graph.concepts.*
 import kotlin.apply
 
 /**
  * Creates a new [Policy] concept.
  *
  * @param underlyingNode The underlying CPG node.
- * @param connect @param connect If `true`, the created
- *   [de.fraunhofer.aisec.cpg.graph.concepts.Concept] will be connected to the underlying node by
- *   setting its `underlyingNode`..
+ * @param connect @param connect If `true`, the created [Concept] will be connected to the
+ *   underlying node by setting its `underlyingNode`..
  * @return The created [Policy] concept.
  */
-fun de.fraunhofer.aisec.cpg.graph.MetadataProvider.newPolicy(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node,
-    connect: Boolean,
-) = newConcept(::Policy, underlyingNode = underlyingNode, connect = connect)
+fun MetadataProvider.newPolicy(underlyingNode: Node, connect: Boolean) =
+    newConcept(::Policy, underlyingNode = underlyingNode, connect = connect)
 
 /**
  * Creates a new [PolicyRule] concept.
@@ -28,12 +25,12 @@ fun de.fraunhofer.aisec.cpg.graph.MetadataProvider.newPolicy(
  * @param underlyingNode The underlying CPG node.
  * @param concept The `Policy` to associate the rule with.
  * @param roles The roles for the policy rule.
- * @param connect If `true`, the created [de.fraunhofer.aisec.cpg.graph.concepts.Concept] will be
- *   connected to the underlying node by setting its `underlyingNode`.
+ * @param connect If `true`, the created [Concept] will be connected to the underlying node by
+ *   setting its `underlyingNode`.
  * @return The created [PolicyRule] concept.
  */
-fun de.fraunhofer.aisec.cpg.graph.MetadataProvider.newPolicyRule(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node,
+fun MetadataProvider.newPolicyRule(
+    underlyingNode: Node,
     concept: Policy,
     roles: Set<Role>,
     connect: Boolean,

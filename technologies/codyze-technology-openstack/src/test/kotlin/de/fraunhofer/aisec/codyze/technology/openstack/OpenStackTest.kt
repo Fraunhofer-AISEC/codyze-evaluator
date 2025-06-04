@@ -80,7 +80,6 @@ class OpenStackTest {
                 it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
             }
         assertNotNull(result)
-        result.benchmarkResults.print()
 
         val memory = result.allChildrenWithOverlays<Memory>().singleOrNull()
         assertNotNull(memory)

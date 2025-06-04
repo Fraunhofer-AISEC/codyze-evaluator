@@ -52,6 +52,8 @@ fun analyze(
     val analyzer = TranslationManager.builder().config(config).build()
     val result = analyzer.analyze().get()
 
+    result.benchmarkResults.print()
+
     return result
 }
 
