@@ -1,51 +1,53 @@
 # OpenStack Ecosystem Security Analysis
 
-The purpose of this analysis is to provide a guideline to assessing the security of OpenStack's ecosystem. It underscores that choosing a cloud platform is a fundamental decision that influences many subsequent choices and which is dependent on many variables. Therefore, we also analyze the OpenStack ecosystem regarding the context it provides for good overall security, e.g., to address potential vulnerabilities.
+The purpose of this analysis is to provide a guideline to assessing the security of OpenStack's ecosystem. It underscores that choosing a cloud platform is a fundamental decision that influences many subsequent choices and which is dependent on many variables, especially its overall security posture. In this document, we therefore analyze the OpenStack ecosystem regarding the context it provides for good overall security, e.g., to address new vulnerabilities and maintain a healthy reviewer community.
 
-The analysis methodology for the OpenStack security ecosystem focuses on examining the broader context surrounding the OpenStack system. It seeks to clarify essential questions such as which members have the authority to make decisions, the long-term goals of the project, and the rules or voting processes regarding changes, including merge requests or more significant conceptual modifications. Additionally, the quality of the publicly accessible toolchain is scrutinized, addressing how dependencies are managed to prevent supply chain attacks, how high code quality is ensured through build pipelines, and how authorship of contributions to the codebase is verified. The analysis also aims to identify further potential questions within this domain and provide answers to them.
+The analysis methodology for the OpenStack security ecosystem focuses on examining the broader context surrounding the OpenStack system. It seeks to clarify essential questions such as which members have the authority to make decisions, the long-term goals of the project, and the rules or voting processes regarding changes, including merge requests or more significant conceptual modifications. Additionally, the quality of the publicly accessible toolchain is scrutinized, addressing how dependencies are managed to prevent supply chain attacks, how high code quality is ensured through build pipelines, and how authorship of contributions to the codebase is verified. This document first and foremost provides guidelines that enable users to conduct the security analysis themselves, but it also provides sample analyses.
 
 This document is divided into two major parts: First, a general description of multiple OpenStack ecosystem elements, like the vulnerability management process and the contribution processes. Second, a hands-on guideline for evaluating several concrete security criteria, including appropriate tooling that can be used to (semi-)automatically conduct the checks.
 
 ## Security-Relevant Elements in the OpenStack Ecosystem 
 
 ### Contribution Process
-
-The OpenStack contribution process is a transparent framework that aims as balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. 
+The OpenStack contribution process is a transparent framework that aims at balancing open community involvement and maintaining code quality and security. Contributions are submitted through a review system where changes are assessed by core reviewers. This process includes automated testing and manual code reviews to ensure that any introduced code meets security standards. In the following, the contribution process is briefly explained to provide an initial understanding of what needs to be done to get a contribution accepted, for example in case a new feature is desired to be introduced.
 
 The starting point for OpenStack contributors is its [Contributor Guide](https://docs.openstack.org/contributors/code-and-documentation/index.html).
 
-- TODO: Describe briefly the most important contents of the contributor guide
-- TODO: Step-by-step description of how to get a contribution accepted
+The most important aspects of being able to contribute to an OpenStack project are explained in the [Quick Start Guide](https://docs.openstack.org/contributors/code-and-documentation/quick-start.html#set-up-accounts-and-configure-environment). Further information for working on OpenStack code can be found in the [Opendev Development Workflow](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#development-workflow). The specific contribution workflows may differ between OpenStack projects and are usually described in the project documentations (e.g. [nova contribution guide](https://docs.openstack.org/nova/latest/contributor/contributing.html)).
+
+Major steps for getting a contribution accepted:
+1. Commit changes according to [guideline](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#committing-changes)
+2. Submit change for review with `git review`
+3. Pass initial [automated testing](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#automated-testing): get a `Verified +1` by passing the check-pipeline
+4. Update change according to test results and [peer-review process](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
+5. If there are positive `+1` reviews, try to get attention of core-developers via [IRC](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review)
+6. Get `+2` reviews from two different core-developers and a `Workflow +1` from one core developer in order to trigger the `gate-pipeline`
+7. If the change passes the [gate](https://docs.opendev.org/opendev/infra-manual/latest/developers.html#peer-review), it is merged automatically
 
 ### CI/CD Architecture
 
 The CI/CD architecture employs automated testing pipelines that run unit tests, integration tests, and security checks on every code change before it is merged. This systematic approach helps identify vulnerabilities early in the development cycle, reducing the risk of security issues in production. Tools like Zuul facilitate this automation, ensuring that only code that passes all tests is deployed.
 
-- TODO: Describe the zuul architecture/hierarchy, e.g. which configs are included in the individual projects, and which configs are maintained in the central repository for zuul configs 
-
-
-- Openstack development infrastructure: 
+Below is an overview of Openstack's development infrastructure: 
 
 ![](./images/Overview_Openstack_Devops.svg)
 
-- High level processes for code changes: (also available via `contributing.rst` in component repository)
-    * Gerrit based workflow:
-        1. Submit change for review
-        2. review process:
-            * code-review: +1 one vote from normal reviewers
-            * code-review: +2 vote from core reviewers (at least one, normally two needed for approval)
-            * verified: +1 automated testing (ZUUL)
-            * workflow: +1 (only core-reviewers) -> indicates approval for gate pipeline
-        3. ZUUL merges changes automatically if prerequisites are met
+- The general processes for code changes is structured as follows. It uses the Gerrit system:
+  1. Submit change for review
+  2. review process:
+      * code-review: +1 one vote from normal reviewers
+      * code-review: +2 vote from core reviewers (at least one, normally two needed for approval)
+      * verified: +1 automated testing (ZUUL)
+      * workflow: +1 (only core-reviewers) -> indicates approval for gate pipeline
+  3. ZUUL merges changes automatically if prerequisites are met
 
-- Openstack Zuul config hierarchy:
-  - zuul/zuul-jobs: opendev-global definitions / templates for zuul jobs and roles
-  - openstack-zuul-roles: ansible roles
-  - openstack-zuul-jobs: openstack-global definitions / templates for zuul-jobs
-  - project-config: central repository for all infra related configs (two folders: `zuul.d`, `zuul`)
-      - `zuul`: `main.yaml` defines tenants, integrates all projects
-      - `zuul.d`: pipeline definition, secrets, job-templates, openstack global jobs, ...
-  - project(e.g. nova): project-specific settings in `.zuul.yaml`
+The OpenStack Zuul config hierarchy divides component-specific configurations and global configurations, and looks as follows (arrows symbolize dependencies):
+  - [zuul/zuul-jobs](https://opendev.org/zuul/zuul-jobs): opendev-global definitions / templates for zuul jobs and roles
+  - [openstack-zuul-jobs](https://opendev.org/openstack/openstack-zuul-jobs): OpenStack-global definitions / templates for zuul-jobs
+  - [project-config](https://opendev.org/openstack/project-config): central repository for all infrastructure related OpenStack configs (two folders: `zuul.d`, `zuul`)
+      - [zuul](https://opendev.org/openstack/project-config/src/branch/master/zuul): main entrypoint for OpenStack Zuul configuration (s. [documentation](https://docs.opendev.org/opendev/system-config/latest/zuul.html))
+      - [zuul.d](https://opendev.org/openstack/project-config/src/branch/master/zuul.d): pipeline definitions, secrets, job-templates, OpenStack global jobs, etc.
+  - project(e.g. [nova](https://opendev.org/openstack/nova)): project-specific settings in `.zuul.yaml`
       - job-definitions
       - which jobs are performed in which pipeline
 
@@ -63,7 +65,11 @@ For private reports, patches are developed privately and pre-approved by core re
  
 ![The OpenStack Vulnerability Management Process](./images/vmt-process.png)
 
-- TODO: Describe step-by-step how to report a security issue
+See the [official recommendations](https://security.openstack.org/reporting.html) on how to report a security issue. The major aspects about this reporting process to keep in mind are the following:
+- Ensure private reporting by either sending an encrypted email or checking the respective `private` and `security related` checkboxes for a [bug report](https://security.openstack.org/reporting.html)
+- Reports are embargoed for a maximum of 90 days before being made public, regardless the resolution state
+
+See the following example security bug report for `nova`: <https://bugs.launchpad.net/nova/+bug/2071734>
 
 ## Guideline for Security Assessment
 
@@ -110,10 +116,10 @@ For the purpose of assessing open vulnerabilities for OpenStack components, the 
 #### HowTo:
 
 - Create a list of components to be used, e.g. Nova, Barbican, etc.
-- Use [osv.dev](osv.dev) to search for vulnerabilities in the specified components. The GitHub repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
+- Use [osv.dev](http://osv.dev) to search for vulnerabilities in the specified components. The github repository link can be used to search for the concrete project, e.g. github.com/openstack/nova
 - Assess the severity of the vulnerabilities, check if fixes are available, and ensure that they are integrated
 
-Result: A [search for openstack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
+Result: A [search for OpenStack vulnerabilities in the github.com/openstack/nova package](https://osv.dev/list?q=github.com%2Fopenstack%2Fnova&ecosystem=) results in various potential vulnerabilities. One listed vulnerability, for example, is [CVE-2022-47951](https://osv.dev/vulnerability/CVE-2022-47951) which shows that the vulnerability has been fixed.
 For severe security issues, [OpenStack security advisories](https://security.openstack.org/ossalist.html) (OSSAs) are published. In 2024, five such OSSAs have been published. It should thus also be checked if current OSSAs exist for the components that are planned to be used.
 
 
@@ -127,7 +133,7 @@ Using a dependency update tool ensures that updates are done timely for all depe
 
 #### HowTo:
  
-- Verify that the proposal bot is in active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
+- Verify that the proposal bot is active on OpenDev, filtering for contributions by the bot using https://review.opendev.org/q/owner:proposal-bot
 
 At the time of writing, the OpenStack proposal bot is in active use.
 
@@ -151,22 +157,19 @@ OpenStack maintains a general security policy for the projects. A security polic
 
 #### HowTo:
 
-The requirements for the Security-Policy check (based on OSSF criteria) are as follows (based on the OSSF criteria):
+The requirements for the Security-Policy check (based on OSSF criteria) are as follows:
 
 Linking Requirements (one or more):
-
 - A valid form of an email address to contact for vulnerabilities
 - A valid form of an http/https address to support vulnerability reporting
 
 Free Form Text:
-
 - Free form text is present in the security policy file which is beyond simply having an http/https address and/or email in the file
 - The string length of any such links in the policy file do not count towards detecting free form text
 
 Security Policy Specific Text:
-
 - Specific text providing basic or general information about vulnerability and disclosure practices, expectations, and/or timelines
-- Text should include a total of 2 or more hits which match (case-insensitive) vuln and as in "Vulnerability" or "vulnerabilities"; disclos as "Disclosure" or "disclose"; and numbers which convey expectations of times, e.g., 30 days or 90 days
+- Text should include a total of 2 or more hits which match (case-insensitive) vuln as in "Vulnerability" or "vulnerabilities"; disclos as in "Disclosure" or "disclose"; and numbers which convey expectations of times, e.g., 30 days or 90 days
 
 OpenStack has a vulnerability management team [with four members](https://security.openstack.org/vmt.html) and a documented [Vulnerability Management Process](https://security.openstack.org/vmt-process.html). Email addresses to contact in relation to vulnerabilities are published on the respective web pages.
 The Free Form Text criterion as well as the Security Policy Specific Text criterion are thus also fulfilled by the OpenStack [Vulnerability Management Process](https://security.openstack.org/vmt-process.html) (VMP). The VMP also defines time periods, for example for the disclosure to downstream stakeholders. However, to the best of the authors' knowledge, no time frame is defined for the patch development and review.
@@ -196,7 +199,7 @@ The OpenSSF Best Practices Badge Program specifies best practices for open-sourc
 
 OpenStack [has the _passing_ badge](https://www.bestpractices.dev/de/projects?q=openstack), which is the lowest of three levels. Some of the criteria that are not fulfilled or are not clearly assessed for the silver and gold badges, [include the following](https://www.bestpractices.dev/de/projects/246?criteria_level=2):
 
-- The project website, the repository, and the downloaded pages (if separate) MUST include key-hardening headers with non-permeable values
+- The project website, the repository, and the download site (if separate) MUST include key-hardening headers with non-permeable values
 - The project MUST apply at least one dynamic analysis tool to each upcoming major production release of the software produced by the project before its release.
 
 ### HowTo:
@@ -215,7 +218,12 @@ According to the CII assessment, there is one that is not fulfilled for Openstac
 Executing tests allows developers to identify errors at an early stage, which can reduce the number of vulnerabilities that enter a project. This check therefore aims to verify whether tests are executed prior to merging pull requests. 
 
 OpenStack projects use [Zuul](https://zuul-ci.org/). Also, the OpenStack documentation gives insight into the [testing procedures](https://docs.openstack.org/project-team-guide/testing.html).
-Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of success and failures.
+Zuul results can be reviewed on [opensearch](https://opensearch.logs.openstack.org/_dashboards/app/discover?security_tenant=global) with the credentials openstack/openstack. One can filter results, e.g., for failed builds or visualize charts about the ratio of successes and failures.
+
+Examples (links require previous login into opensearch):
+- to get the Zuul results for nova, one needs to filter the field `project` for `openstack/nova`: [link](https://opensearch.logs.openstack.org/_dashboards/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'94869730-aea8-11ec-9e6a-83741af3fdcd',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_q=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova)))),query:(language:kuery,query:'')))
+- to only see not successfull builds, one can filter the field `build_status`: [link](https://opensearch.logs.openstack.org/_dashboards/app/data-explorer/discover#?_a=(discover:(columns:!(_source),isDirty:!f,sort:!()),metadata:(indexPattern:'94869730-aea8-11ec-9e6a-83741af3fdcd',view:discover))&_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_q=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova))),('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:build_status,negate:!t,params:(query:SUCCESS),type:phrase),query:(match_phrase:(build_status:SUCCESS)))),query:(language:kuery,query:'')))
+- to see a visualization of the build-status of a given project (e.g. `nova`), one can choose`build_status` in the tab `visualization` and filter for the desired project: [link](https://opensearch.logs.openstack.org/_dashboards/app/visualize#/edit/0a602da0-ab88-11ec-a51d-47e50a820c7c?_g=(filters:!(),refreshInterval:(pause:!t,value:0),time:(from:now-7d,to:now))&_a=(filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:'94869730-aea8-11ec-9e6a-83741af3fdcd',key:project,negate:!f,params:(query:openstack%2Fnova),type:phrase),query:(match_phrase:(project:openstack%2Fnova)))),linked:!f,query:(language:kuery,query:''),uiState:(),vis:(aggs:!((enabled:!t,id:'1',params:(field:build_uuid.keyword),schema:metric,type:cardinality),(enabled:!t,id:'2',params:(customLabel:'Build%20status',field:build_status.keyword,missingBucket:!f,missingBucketLabel:Missing,order:desc,orderBy:'1',otherBucket:!f,otherBucketLabel:Other,size:5),schema:segment,type:terms)),params:(addLegend:!t,addTooltip:!t,isDonut:!t,labels:(last_level:!t,show:!f,truncate:100,values:!t),legendPosition:right,type:pie),title:'Build%20status',type:pie)))
 
 Note also that a consistent [testing interface](https://governance.openstack.org/tc/reference/project-testing-interface.html) has been defined across OpenStack projects and common requirements for testing are defined.
 
@@ -318,8 +326,6 @@ Potential checks (OSSF groups these in different tiers) include:
 * require branch to be up to date before pushing
 * require approval of the most recent reviewable push
 * require automated checks for approval
-
-Open issues: Verification that official workflow can not be easily bypassed (e.g. missing api restrictions).
 
 Opendev Gerrit-Workflow ensures the following aspects:
 
@@ -443,14 +449,16 @@ KPI Checks:
 - select the desired metric under `Metric` (e.g. reviews in [nova](https://www.stackalytics.io/?project_type=openstack&release=epoxy&metric=marks&module=opendev.org/openstack/nova))
 
 - Metric `Reviews`
-  - by Company: More than one company? Well known companies?
-  - by Contributor: Several Contributors with a more or less equal amount of performed reviews?
+  - by Company: More than one company? Well known companies? (e.g. >2)
+  - by Contributor: Several Contributors with a similar amount of performed reviews? (e.g. >10)
 - Metric `Patch sets`
-  - by Company: More than one company? Well known companies?
-  - by Contributor: Several Contributors with a more or less equal amount of submitted patch sets?
+  - by Company: More than one company? Well known companies? (e.g. >2)
+  - by Contributor: Several Contributors with a similar amount of submitted patch sets? (e.g. >10)
 - Metric `Person-day Effort`
-  - by Company: Several companies with more or less equal shares? One or few well known companies with large(r) shares?
-  - by Contributor: Several contributors with more or less equal shares?
+  - by Company: Several companies with similar shares? One or few well known companies with large(r) shares? (e.g. >2)
+  - by Contributor: Several contributors with similar size of shares? (e.g. >5 days)
+
+Note that the example values for the review metrics above should be adapted according to the size of the project.
 
 ### G7: Checking Build Risks
 
@@ -486,7 +494,7 @@ Openstack manages requirements globally for all projects, but also allows projec
 
 ##### HowTo:
 
-- this is possible by applying the OSSF scorecards tool on the GitHub mirror of a given project.
+- apply the OSSF scorecards tool on the GitHub mirror of a given project.
   - [install OSSF scorecard docker container](https://github.com/ossf/scorecard?tab=readme-ov-file#installation)
   - [create personal GitHub access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#creating-a-personal-access-token-classic)
   - run scorecard tool Pinned-Dependencies check on desired repository (e.g. nova):
@@ -507,7 +515,7 @@ Opendev supports automatic publishing of releases on [PyPI](https://docs.opendev
 ##### HowTo:
 
 - official OpenStack projects should be released automatically on PyPi by the [openstackci](https://pypi.org/user/openstackci/) user as described in the [Project Creators Guide](https://docs.opendev.org/opendev/infra-manual/latest/creators.html#give-opendev-exclusive-permission-to-publish-releases)
-- check for a given project whether it can be found on PyPi and is maintained the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
+- check for a given project whether it can be found on PyPi and is maintained by the `openstackci` user (e.g. [nova](https://pypi.org/project/nova/))
 
 #### Signed Releases
 
@@ -517,6 +525,8 @@ into such artifacts.
 
 ##### HowTo:
 
-- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if releases are signed, i.e., if cryptographic signature files are provided
+- Check on [opendev.org](https://tarballs.opendev.org/openstack/nova/) if cryptographic signature files are provided for release files
 
-Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/), i.e., asc files are provided to enable an integrity and authenticity check. The signature is not, however, visible on  https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
+Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Furthermore, OpenStack documents [processes for cryptographic signatures](https://releases.openstack.org/#cryptographic-signatures)
+and maintains a [signing system](https://docs.opendev.org/opendev/system-config/latest/signing.html). 
+However, the signatures are not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
