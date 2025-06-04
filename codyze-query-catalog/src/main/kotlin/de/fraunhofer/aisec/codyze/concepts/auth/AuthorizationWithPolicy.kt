@@ -4,37 +4,31 @@
 package de.fraunhofer.aisec.codyze.concepts.auth
 
 import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.concepts.Concept
-import de.fraunhofer.aisec.cpg.graph.concepts.Operation
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
+import de.fraunhofer.aisec.cpg.graph.concepts.*
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.*
 
-class AuthorizationWithPolicy(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    val policy: Policy,
-) : de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization(underlyingNode = underlyingNode)
+class AuthorizationWithPolicy(underlyingNode: Node? = null, val policy: Policy) :
+    Authorization(underlyingNode = underlyingNode)
 
 /** Represents a common abstract class for authorization operations. */
-abstract class AuthorizationOperation(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    concept: de.fraunhofer.aisec.cpg.graph.concepts.Concept,
-) : de.fraunhofer.aisec.cpg.graph.concepts.Operation(underlyingNode = underlyingNode, concept)
+abstract class AuthorizationOperation(underlyingNode: Node? = null, concept: Concept) :
+    Operation(underlyingNode = underlyingNode, concept)
 
 /**
  * Represents an [Authorize] operation.
  *
  * @param underlyingNode The underlying CPG node.
- * @param concept The associated [de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization]
- *   concept.
+ * @param concept The associated [Authorization] concept.
  * @param action The action used for authorization.
  * @param targets A set of nodes representing the target resource of the action. These nodes
  *   typically include identifiers such as `project_id` and `user_id`.
  */
 open class Authorize(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    concept: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization,
-    val action: de.fraunhofer.aisec.cpg.graph.Node,
-    val targets: Set<de.fraunhofer.aisec.cpg.graph.Node>,
-    val exception: de.fraunhofer.aisec.cpg.graph.Node,
+    underlyingNode: Node? = null,
+    concept: Authorization,
+    val action: Node,
+    val targets: Set<Node>,
+    val exception: Node,
 ) : AuthorizationOperation(underlyingNode = underlyingNode, concept = concept)
 
 /**
@@ -43,8 +37,5 @@ open class Authorize(
  * @param underlyingNode The underlying CPG node.
  * @param rule The rule used for the domain scope check.
  */
-open class CheckDomainScope(
-    underlyingNode: de.fraunhofer.aisec.cpg.graph.Node? = null,
-    concept: de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization,
-    val rule: de.fraunhofer.aisec.cpg.graph.Node,
-) : AuthorizationOperation(underlyingNode = underlyingNode, concept)
+open class CheckDomainScope(underlyingNode: Node? = null, concept: Authorization, val rule: Node) :
+    AuthorizationOperation(underlyingNode = underlyingNode, concept)

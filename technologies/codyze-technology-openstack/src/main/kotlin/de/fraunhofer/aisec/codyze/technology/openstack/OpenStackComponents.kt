@@ -67,3 +67,6 @@ object KeystoneAuth : OpenStackLibrary("keystoneauth")
 
 /** Keystone Middleware is a library for interacting with [Keystone]. */
 object KeystoneMiddleware : OpenStackLibrary("keystonemiddleware")
+
+/** SQLAlchemy is a SQL toolkit and Object-Relational Mapping (ORM) system for Python. */
+object SqlAlchemy : OpenStackLibrary("sqlalchemy")

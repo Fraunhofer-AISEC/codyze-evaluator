@@ -3,8 +3,11 @@
  */
 package de.fraunhofer.aisec.codyze.technology.openstack
 
+import de.fraunhofer.aisec.codyze.concepts.auth.CheckDomainScope
 import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.codyze.concepts.auth.UserInfo
+import de.fraunhofer.aisec.codyze.concepts.database.DatabaseAccess
+import de.fraunhofer.aisec.codyze.concepts.database.Filter
 import de.fraunhofer.aisec.codyze.openstack.passes.*
 import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthenticationPass
 import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthorizationPass
@@ -20,12 +23,16 @@ import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.OverlayNode
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
+import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
+import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.get
 import de.fraunhofer.aisec.cpg.graph.methods
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberExpression
+import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.each
@@ -38,6 +45,9 @@ import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
  * projects.
  */
 val OpenStackProfile = { it: TranslationConfiguration.Builder ->
+    // Extra analysis passes for OpenStack projects
+    it.registerPass<ProgramDependenceGraphPass>()
+
     // Required languages (Python and IniFile)
     it.registerLanguage<PythonLanguage>()
     it.registerLanguage<IniFileLanguage>()
@@ -95,4 +105,43 @@ fun TaggingContext.tagKeystoneMiddlewareAuthentication() {
             overlays.add(reqContext)
             overlays
         }
+}
+
+/** Tagging profile to tag database access in OpenStack components that use [SqlAlchemy]. */
+fun TaggingContext.tagDatabaseAccess() {
+    each<CallExpression>(predicate = { it.name.localName == "model_query" }).withMultiple {
+        val overlays = mutableListOf<OverlayNode>()
+        val contextArg = node.arguments.getOrNull(0)
+        val dbAccess = DatabaseAccess(underlyingNode = node, context = contextArg)
+        overlays += dbAccess
+
+        val paths =
+            node.followDFGEdgesUntilHit {
+                (it is MemberCallExpression || it is MemberExpression) &&
+                    // It can be `filter` or `filter_by`
+                    it.name.localName.startsWith("filter") ||
+                    it.name.localName.startsWith("with_entities")
+            }
+
+        val filterCalls = paths.fulfilled.map { path -> path.nodes.last() }
+        val by = node.arguments.getOrNull(1)
+
+        if (by != null) {
+            filterCalls.forEach { filterCall ->
+                overlays += Filter(underlyingNode = filterCall, concept = dbAccess, by = by)
+            }
+        }
+        overlays
+    }
+}
+
+/**
+ * Tags the scope enforcement calls in [OsloPolicy] that use [Authorization]. This is typically used
+ * to enforce domain-specific scopes in authorization checks.
+ */
+fun TaggingContext.tagDomainScope() {
+    each<MemberCallExpression>(predicate = { it.name.localName == "_enforce_scope" }).with {
+        // Authorization concept is already set in the `AuthorizationPass`
+        CheckDomainScope(underlyingNode = node, concept = Authorization(), rule = node.arguments[1])
+    }
 }

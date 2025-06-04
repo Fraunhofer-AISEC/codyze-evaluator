@@ -6,8 +6,8 @@ package de.fraunhofer.aisec.codyze.queries.authentication
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.technology.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
-import de.fraunhofer.aisec.cpg.passes.concepts.*
 import de.fraunhofer.aisec.cpg.query.and
+import de.fraunhofer.aisec.openstack.taggingProfiles
 import kotlin.io.path.Path
 import kotlin.test.*
 import org.junit.jupiter.api.Test
@@ -85,12 +85,7 @@ class TokenBasedTest {
                         KeystoneMiddleware.name to topLevel.resolve("keystonemiddleware").toFile()
                     )
                 )
-                it.registerPass<TagOverlaysPass>()
-                it.configurePass<TagOverlaysPass>(
-                    TagOverlaysPass.Configuration(
-                        tag = tag { tagKeystoneMiddlewareAuthentication() }
-                    )
-                )
+                it.taggingProfiles { tagKeystoneMiddlewareAuthentication() }
             }
 
         assertNotNull(result)
