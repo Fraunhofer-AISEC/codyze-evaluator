@@ -5,16 +5,13 @@ package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.*
-import de.fraunhofer.aisec.codyze.queries.authentication.*
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.passes.concepts.*
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
-import de.fraunhofer.aisec.cpg.query.*
 import kotlin.io.path.Path
 import kotlin.test.*
 import org.junit.jupiter.api.Test

@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.technology.openstack
+package de.fraunhofer.aisec.codyze.profiles.openstack
 
 import de.fraunhofer.aisec.codyze.concepts.auth.CheckDomainScope
 import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext

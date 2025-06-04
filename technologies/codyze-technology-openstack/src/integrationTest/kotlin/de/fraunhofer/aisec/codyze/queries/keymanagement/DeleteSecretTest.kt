@@ -4,7 +4,7 @@
 package de.fraunhofer.aisec.codyze.queries.keymanagement
 
 import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import kotlin.io.path.Path
 import kotlin.test.*
 

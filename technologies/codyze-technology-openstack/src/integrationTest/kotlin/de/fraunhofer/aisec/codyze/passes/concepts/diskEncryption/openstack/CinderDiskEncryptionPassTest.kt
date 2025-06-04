@@ -5,7 +5,7 @@ package de.fraunhofer.aisec.codyze.passes.concepts.diskEncryption.openstack
 
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.passes.concepts.crypto.encryption.openstack.CinderKeyManagerSecretPass
-import de.fraunhofer.aisec.codyze.technology.openstack.Cinder
+import de.fraunhofer.aisec.codyze.profiles.openstack.Cinder
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption

@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
-import de.fraunhofer.aisec.codyze.technology.openstack.Cinder
+import de.fraunhofer.aisec.codyze.profiles.openstack.Cinder
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.SubscriptExpression

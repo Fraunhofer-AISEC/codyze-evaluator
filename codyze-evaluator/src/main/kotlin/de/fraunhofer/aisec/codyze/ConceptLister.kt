@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.openstack
+package de.fraunhofer.aisec.codyze
 
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.main

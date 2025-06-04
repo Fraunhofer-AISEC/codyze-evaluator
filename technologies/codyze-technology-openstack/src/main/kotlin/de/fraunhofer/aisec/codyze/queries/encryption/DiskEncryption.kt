@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.queries.encryption
 
-import de.fraunhofer.aisec.codyze.technology.openstack.Barbican
+import de.fraunhofer.aisec.codyze.profiles.openstack.Barbican
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile

@@ -4,10 +4,10 @@
 package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
+import de.fraunhofer.aisec.codyze.taggingProfiles
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.query.and
-import de.fraunhofer.aisec.openstack.taggingProfiles
 import kotlin.io.path.Path
 import kotlin.test.*
 import org.junit.jupiter.api.Test

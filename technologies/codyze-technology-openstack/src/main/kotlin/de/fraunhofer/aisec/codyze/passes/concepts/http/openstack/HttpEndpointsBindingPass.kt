@@ -5,7 +5,7 @@ package de.fraunhofer.aisec.codyze.passes.concepts.http.openstack
 
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.HttpWsgiPass
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.getAnnotation
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.*

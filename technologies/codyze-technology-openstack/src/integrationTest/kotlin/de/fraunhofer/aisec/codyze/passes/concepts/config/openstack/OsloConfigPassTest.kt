@@ -6,7 +6,7 @@ package de.fraunhofer.aisec.codyze.passes.concepts.config.openstack
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.passes.concepts.http.openstack.SecureKeyRetrievalPass
 import de.fraunhofer.aisec.codyze.passes.concepts.memory.openstack.StevedoreDynamicLoadingPass
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage

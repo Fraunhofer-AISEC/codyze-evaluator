@@ -6,7 +6,7 @@ package de.fraunhofer.aisec.codyze.passes.concepts.file.python
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.passes.concepts.config.openstack.OsloConfigPass
 import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
-import de.fraunhofer.aisec.codyze.technology.openstack.Magnum
+import de.fraunhofer.aisec.codyze.profiles.openstack.Magnum
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.concepts.Operation

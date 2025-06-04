@@ -1,10 +1,8 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.openstack
+package de.fraunhofer.aisec.codyze
 
-import de.fraunhofer.aisec.codyze.AnalysisProject
-import de.fraunhofer.aisec.codyze.AnalysisResult
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext

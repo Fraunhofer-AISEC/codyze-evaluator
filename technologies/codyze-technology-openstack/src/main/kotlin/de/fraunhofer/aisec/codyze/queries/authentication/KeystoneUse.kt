@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authentication
 
-import de.fraunhofer.aisec.codyze.technology.openstack.Keystone
+import de.fraunhofer.aisec.codyze.profiles.openstack.Keystone
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.evaluate

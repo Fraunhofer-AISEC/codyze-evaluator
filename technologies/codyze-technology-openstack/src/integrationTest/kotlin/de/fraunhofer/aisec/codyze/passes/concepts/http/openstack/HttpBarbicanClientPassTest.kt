@@ -4,7 +4,7 @@
 package de.fraunhofer.aisec.codyze.passes.concepts.http.openstack
 
 import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*

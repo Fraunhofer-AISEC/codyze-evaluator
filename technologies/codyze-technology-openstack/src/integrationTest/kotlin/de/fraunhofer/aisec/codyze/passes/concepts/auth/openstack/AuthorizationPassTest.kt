@@ -6,13 +6,11 @@ package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.concepts.auth.Authorize
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.HttpWsgiPass
-import de.fraunhofer.aisec.codyze.queries.authorization.*
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.conceptNodes
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.passes.concepts.*
 import kotlin.io.path.Path
 import kotlin.test.*
 

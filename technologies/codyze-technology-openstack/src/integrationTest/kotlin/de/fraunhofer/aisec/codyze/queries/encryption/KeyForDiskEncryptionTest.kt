@@ -4,7 +4,7 @@
 package de.fraunhofer.aisec.codyze.queries.encryption
 
 import de.fraunhofer.aisec.codyze.*
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint

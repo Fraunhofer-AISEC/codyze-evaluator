@@ -3,11 +3,9 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authorization
 
-import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.technology.openstack.*
+import de.fraunhofer.aisec.codyze.*
+import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
-import de.fraunhofer.aisec.cpg.passes.concepts.*
-import de.fraunhofer.aisec.openstack.taggingProfiles
 import kotlin.io.path.Path
 import kotlin.test.*
 
