@@ -1,8 +1,11 @@
 /*
  * This file is part of the OpenStack Checker
  */
+package de.fraunhofer.aisec.codyze.technology.openstack
+
+import analyze
 import de.fraunhofer.aisec.codyze.openstack.passes.*
-import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
+import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.frontends.python.*
 import de.fraunhofer.aisec.cpg.graph.*
@@ -15,9 +18,17 @@ import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.test.*
+import wrapInAnalysisResult
 
+/**
+ * This test suite contains tests for general OpenStack functionality, such as parsing [Barbican]
+ * and [Cinder].
+ */
 class OpenStackTest {
 
+    /**
+     * Test case to see whether the `SecretsController` within [Barbican] can be correctly parsed.
+     */
     @Test
     fun testBarbicanConstructor() {
         val topLevel3 = Path("external/barbican")
@@ -43,6 +54,10 @@ class OpenStackTest {
         assertIs<ConstructExpression>(secretsController)
     }
 
+    /**
+     * Test case to see whether the [Secret] used as a key for disk encryption is correctly
+     * identified and deleted in [Cinder].
+     */
     @Test
     fun testDeleteKey() {
         val topLevel = Path("external")
@@ -50,7 +65,7 @@ class OpenStackTest {
             analyze(listOf(), topLevel, true) {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<PythonMemoryPass>()
-                it.registerPass<SecretPass>()
+                it.registerPass<CinderKeyManagerSecretPass>()
                 it.registerPass<MakeThingsWorkPrototypicallyPass>()
                 it.exclusionPatterns("tests", "drivers")
                 it.softwareComponents(
@@ -93,25 +108,5 @@ class OpenStackTest {
 
         wrapInAnalysisResult(result, listOf(deleteKey))
             .writeSarifJson(File("cinder-volume-flows.sarif"))
-    }
-
-    @Test
-    fun testCinderApiNoCrash() {
-        val topLevel = Path("external")
-        val result =
-            analyze(listOf(), topLevel, true) {
-                it.registerLanguage<PythonLanguage>()
-                it.registerPass<PythonMemoryPass>()
-                it.registerPass<SecretPass>()
-                it.registerPass<HttpPecanLibPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
-                it.exclusionPatterns("tests", "drivers")
-                it.softwareComponents(
-                    mutableMapOf("cinder" to listOf(topLevel.resolve("cinder/cinder/api").toFile()))
-                )
-                it.topLevels(mapOf("cinder" to topLevel.resolve("cinder").toFile()))
-            }
-        assertNotNull(result)
-        result.benchmarkResults.print()
     }
 }

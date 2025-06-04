@@ -3,16 +3,16 @@
  */
 package de.fraunhofer.aisec.codyze.technology.openstack
 
-import de.fraunhofer.aisec.codyze.openstack.passes.DiskEncryptionPass
 import de.fraunhofer.aisec.codyze.openstack.passes.MakeThingsWorkPrototypicallyPass
-import de.fraunhofer.aisec.codyze.openstack.passes.OsloConfigPass
-import de.fraunhofer.aisec.codyze.openstack.passes.PythonEntryPointPass
 import de.fraunhofer.aisec.codyze.openstack.passes.PythonMemoryPass
-import de.fraunhofer.aisec.codyze.openstack.passes.SecretPass
 import de.fraunhofer.aisec.codyze.openstack.passes.SecureKeyRetrievalPass
 import de.fraunhofer.aisec.codyze.openstack.passes.StevedoreDynamicLoadingPass
 import de.fraunhofer.aisec.codyze.openstack.passes.auth.AuthenticationPass
 import de.fraunhofer.aisec.codyze.openstack.passes.http.HttpWsgiPass
+import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
+import de.fraunhofer.aisec.codyze.passes.openstack.DiskEncryptionPass
+import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
+import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPointPass
 import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
@@ -29,7 +29,7 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
     it.registerLanguage<IniFileLanguage>()
 
     // Required passes for OpenStack analysis
-    it.registerPass<SecretPass>()
+    it.registerPass<CinderKeyManagerSecretPass>()
     it.registerPass<DiskEncryptionPass>()
     it.registerPass<PythonMemoryPass>()
     it.registerPass<HttpPecanLibPass>()

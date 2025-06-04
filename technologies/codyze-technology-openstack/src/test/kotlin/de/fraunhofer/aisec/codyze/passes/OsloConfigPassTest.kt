@@ -4,9 +4,9 @@
 package de.fraunhofer.aisec.codyze.passes
 
 import analyze
-import de.fraunhofer.aisec.codyze.openstack.passes.OsloConfigPass
 import de.fraunhofer.aisec.codyze.openstack.passes.SecureKeyRetrievalPass
 import de.fraunhofer.aisec.codyze.openstack.passes.StevedoreDynamicLoadingPass
+import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
 import de.fraunhofer.aisec.cpg.evaluation.MultiValueEvaluator
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
@@ -26,8 +26,9 @@ import kotlin.test.*
  * [IniFileConfigurationSourcePass] and [StevedoreDynamicLoadingPass].
  */
 class OsloConfigPassTest {
+
     /**
-     * This test verifies correct functioning of the [OsloConfigPass],
+     * Test case to verify correct functioning of the [OsloConfigPass],
      * [IniFileConfigurationSourcePass] and [StevedoreDynamicLoadingPass] by analyzing the way
      * cinder access the barbican key manager API through castellan.
      *
@@ -136,7 +137,7 @@ class OsloConfigPassTest {
     }
 
     /**
-     * This test verifies correct functioning of the [OsloConfigPass] and
+     * Test case to verify the correct functioning of the [OsloConfigPass] and
      * [IniFileConfigurationSourcePass] by analyzing the way cinder accesses the barbican key
      * manager API through castellan, but this time it uses the oslo.config configuration source.
      */
@@ -222,7 +223,7 @@ class OsloConfigPassTest {
     }
 
     /**
-     * This test verifies that the [OsloConfigPass] correctly identifies that secure communication
+     * Test case to verify that the [OsloConfigPass] correctly identifies that secure communication
      * is used to Barbican through the Castellan API.
      */
     @Test

@@ -292,10 +292,9 @@ project {
                     fulfilledBy {
                         tokenBasedAuthenticationWhenRequired() and
                             usesSameTokenAsCredential() and
-                            hasDataFlowToToken()
+                            hasDataFlowToToken() and useKeystoneForAuthentication()
                     }
                 }
-
                 requirement {
                     name = "Domain/Project used in Authorization Checks"
                     description =

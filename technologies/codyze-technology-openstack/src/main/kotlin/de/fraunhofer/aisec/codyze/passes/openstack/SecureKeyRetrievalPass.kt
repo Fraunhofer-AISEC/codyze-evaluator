@@ -3,6 +3,8 @@
  */
 package de.fraunhofer.aisec.codyze.openstack.passes
 
+import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
+import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
 import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
@@ -21,7 +23,7 @@ import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 
 @DependsOn(SymbolResolver::class)
-@DependsOn(SecretPass::class)
+@DependsOn(CinderKeyManagerSecretPass::class)
 @DependsOn(HttpPecanLibPass::class)
 @DependsOn(OsloConfigPass::class)
 class SecureKeyRetrievalPass(ctx: TranslationContext) : TranslationResultPass(ctx) {

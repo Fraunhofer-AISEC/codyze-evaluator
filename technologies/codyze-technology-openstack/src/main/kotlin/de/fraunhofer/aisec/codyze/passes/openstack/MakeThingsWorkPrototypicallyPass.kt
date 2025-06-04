@@ -3,6 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.openstack.passes
 
+import de.fraunhofer.aisec.codyze.passes.openstack.CinderKeyManagerSecretPass
 import de.fraunhofer.aisec.codyze.passes.openstack.http.HttpPecanLibPass
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.TranslationResult
@@ -30,7 +31,7 @@ import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 
 @DependsOn(ControlFlowSensitiveDFGPass::class)
 @DependsOn(EvaluationOrderGraphPass::class)
-@DependsOn(SecretPass::class)
+@DependsOn(CinderKeyManagerSecretPass::class)
 @DependsOn(HttpPecanLibPass::class)
 @DependsOn(PythonMemoryPass::class)
 class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationResultPass(ctx) {

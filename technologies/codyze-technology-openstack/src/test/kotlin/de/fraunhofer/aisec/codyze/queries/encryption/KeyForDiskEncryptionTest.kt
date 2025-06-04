@@ -4,6 +4,7 @@
 package de.fraunhofer.aisec.codyze.queries.encryption
 
 import analyze
+import de.fraunhofer.aisec.codyze.technology.openstack.*
 import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackProfile
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.ContextSensitive
@@ -26,10 +27,12 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 import wrapInAnalysisResult
 
+/** This test suite contains tests for disk encryption queries using the [OpenStackProfile]. */
 class KeyForDiskEncryptionTest {
+
     /**
      * Test case for [keyOnlyReachableThroughSecureKeyProvider] using [isSecureOpenStackKeyProvider]
-     * with [OpenStackProfile].
+     * with [OpenStackProfile]. The analyzed components are [Cinder] and [Barbican].
      */
     @Test
     fun testKeyOnlyReachableThroughSecureKeyProvider() {
@@ -107,7 +110,7 @@ class KeyForDiskEncryptionTest {
 
     /**
      * Test case for [keyNotLeakedThroughOutput] using [dataLeavesOpenStackComponent] with
-     * [OpenStackProfile].
+     * [OpenStackProfile]. The analyzed component is [Barbican].
      */
     @Test
     fun testKeyNotLeakedThroughOutput() {

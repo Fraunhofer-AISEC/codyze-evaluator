@@ -3,6 +3,9 @@
  */
 package de.fraunhofer.aisec.codyze.openstack.passes
 
+import de.fraunhofer.aisec.codyze.passes.openstack.OsloConfigPass
+import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPoint
+import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPointPass
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.Forward
@@ -74,8 +77,8 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
      * We instantiate a new variable with a [ConstructExpression] based on the record that is chosen
      * by the driver manager:
      * - The first argument is the key of the entry points we need to look at (see
-     *   [PythonEntryPoint.group]). This will give us a list of entries points that we can choose
-     *   from.
+     *   [de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPoint.group]). This will give us a
+     *   list of entries points that we can choose from.
      * - The second argument is the value we need to look at. The entry point should contain a
      *   [ConstructorDeclaration] we can invoke. This is most likely coming from a configuration.
      *   Ideally when we invoke [OsloConfigPass] and [IniFileConfigurationPass] beforehand, there
@@ -105,8 +108,8 @@ class StevedoreDynamicLoadingPass(ctx: TranslationContext) : ConceptPass(ctx) {
      * We instantiate a new variable with a [ConstructExpression] based on the record that is chosen
      * by the driver manager:
      * - The first argument is the key of the entry points we need to look at (see
-     *   [PythonEntryPoint.group]). This will give us a list of entries points that we can choose
-     *   from.
+     *   [de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPoint.group]). This will give us a
+     *   list of entries points that we can choose from.
      * - The second argument is the value we need to look at. The entry point should contain a
      *   [ConstructorDeclaration] we can invoke. This is most likely coming from a configuration.
      *   Ideally when we invoke [OsloConfigPass] and [IniFileConfigurationPass] beforehand, there

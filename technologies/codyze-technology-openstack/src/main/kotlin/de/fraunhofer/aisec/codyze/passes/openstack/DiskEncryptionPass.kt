@@ -1,12 +1,13 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.passes
+package de.fraunhofer.aisec.codyze.passes.openstack
 
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.newCipher
+import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.newDiskEncryption
 import de.fraunhofer.aisec.cpg.graph.edges.get
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
@@ -16,13 +17,12 @@ import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteLate
 
 /**
- * Adds [de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption] concept nodes to the
- * OpenStack function:
+ * Adds [DiskEncryption] concept nodes to the OpenStack function:
  * - `cinder/volume/flows/manager/create_volume.py:_rekey_volume()`
  */
 @ExecuteLate
 @DependsOn(
-    SecretPass::class
+    CinderKeyManagerSecretPass::class
 ) // we are connecting the [DiskEncryption] key to the [Secret] created by the [SecretPass]
 class DiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun cleanup() {

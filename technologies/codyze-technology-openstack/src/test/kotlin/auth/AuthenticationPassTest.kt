@@ -107,10 +107,11 @@ class AuthenticationPassTest {
         val result = analyze(listOf(), topLevel, true)
 
         assertNotNull(result)
-
-        val query = useKeystoneForAuthentication(result)
-        println(query.printNicely())
-        assertEquals(true, query.value)
+        with(result) {
+            val query = useKeystoneForAuthentication()
+            println(query.printNicely())
+            assertEquals(true, query.value)
+        }
     }
 
     @Test

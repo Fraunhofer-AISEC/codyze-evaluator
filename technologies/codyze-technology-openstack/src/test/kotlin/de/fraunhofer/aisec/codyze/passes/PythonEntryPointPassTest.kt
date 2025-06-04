@@ -1,8 +1,10 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.codyze.openstack.passes.PythonEntryPoint
-import de.fraunhofer.aisec.codyze.openstack.passes.PythonEntryPointPass
+package de.fraunhofer.aisec.codyze.passes
+
+import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPoint
+import de.fraunhofer.aisec.codyze.passes.openstack.PythonEntryPointPass
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.TranslationManager
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
@@ -11,8 +13,13 @@ import kotlin.io.path.Path
 import kotlin.test.assertEquals
 import org.junit.jupiter.api.Test
 
-class PythonEntryPointTest {
+/**
+ * This test suite contains tests for the [PythonEntryPointPass], which identifies entry points in
+ * Python projects based on the `setup.cfg` file.
+ */
+class PythonEntryPointPassTest {
 
+    /** Test case to check if the [PythonEntryPointPass] correctly skips empty components. */
     @Test
     fun testEmpty() {
         val topLevel = Path("src/test/resources/entrypoints")
@@ -40,6 +47,10 @@ class PythonEntryPointTest {
         assert(components.first().incomingInteractions.isEmpty())
     }
 
+    /**
+     * Test case to check if the [PythonEntryPointPass] correctly skips components without a
+     * `setup.cfg` file.
+     */
     @Test
     fun testNoSetupCfg() {
         val topLevel = Path("src/test/resources/entrypoints")
@@ -68,6 +79,10 @@ class PythonEntryPointTest {
         assert(components.first().incomingInteractions.isEmpty())
     }
 
+    /**
+     * Test case to check if the [PythonEntryPointPass] correctly handles components with no entry
+     * points but a valid `setup.cfg` file.
+     */
     @Test
     fun testNoEntryPoints() {
         val topLevel = Path("src/test/resources/entrypoints")
@@ -96,6 +111,10 @@ class PythonEntryPointTest {
         assert(components.first().incomingInteractions.isEmpty())
     }
 
+    /**
+     * Test case to check if the [PythonEntryPointPass] correctly identifies entry points in a
+     * Python module based on the `setup.cfg` file.
+     */
     @Test
     fun testModule() {
         val topLevel = Path("src/test/resources/entrypoints")

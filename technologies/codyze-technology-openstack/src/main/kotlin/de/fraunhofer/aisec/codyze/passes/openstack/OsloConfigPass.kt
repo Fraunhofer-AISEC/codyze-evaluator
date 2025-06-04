@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.openstack.passes
+package de.fraunhofer.aisec.codyze.passes.openstack
 
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.*

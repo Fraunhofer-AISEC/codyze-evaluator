@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.queries.encryption
 
-import de.fraunhofer.aisec.codyze.technology.openstack.OpenStackComponents
+import de.fraunhofer.aisec.codyze.technology.openstack.Barbican
 import de.fraunhofer.aisec.cpg.graph.Component
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.file.WriteFile
@@ -42,9 +42,8 @@ val leakingFunctions = listOf("write", "println", "execute", "log")
 fun HttpEndpoint.isSecureOpenStackKeyProvider(): Boolean {
     return httpMethod == HttpMethod.GET &&
         path == "/v1/secrets/{secret_id}/payload" &&
-        this.underlyingNode?.firstParentOrNull<Component> {
-            it.name.localName == OpenStackComponents.BARBICAN
-        } != null
+        this.underlyingNode?.firstParentOrNull<Component> { it.name.localName == Barbican.name } !=
+            null
 }
 
 /**
