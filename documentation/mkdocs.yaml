@@ -1,14 +1,14 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 # Project information
-site_name: OpenStack Checker
-site_url: https://fraunhofer-aisec.github.io/openstack-checker/
+site_name: Codyze Evaluator
+site_url: https://github.com/Fraunhofer-AISEC/codyze-evaluator
 site_author: Fraunhofer AISEC
-site_description: OpenStack Checker
+site_description: Codyze Evaluator
 
 # Repository
-repo_name: Fraunhofer-AISEC/openstack-checker
-repo_url: https://github.com/Fraunhofer-AISEC/openstack-checker
+repo_name: Fraunhofer-AISEC/codyze-evaluator
+repo_url: https://github.com/Fraunhofer-AISEC/codyze-evaluator
 edit_uri: edit/main/documentation/
 
 # Copyright
@@ -27,7 +27,7 @@ theme:
   language: en
   features:
     - content.code.annotate
-    - content.tabs.link
+    # - content.tabs.link
     - content.tooltips
     # - header.autohide
     # - navigation.expand
@@ -91,7 +91,7 @@ extra:
       name: Visit us on GitHub to get involved.
     - icon: fontawesome/solid/envelope
       link: mailto:codyze@aisec.fraunhofer.de
-      name: Email us about the OpenStack Checker project.
+      name: Email us about the Codyze Evaluator project.
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/FraunhoferAISEC
       name: Follow Fraunhofer AISEC on Twitter.
@@ -156,11 +156,18 @@ markdown_extensions:
 nav:
   - "Home": index.md
   - "Goal": goal.md
-  - "Methodology": methodology.md
+  - "Methodology":
+      - methodology.md
+      - "Integration into Evaluation Processes": integration-cc.md
+      - "Analysis of Security Claims": security-claims.md
+      - "Analysis of the TOE's Security Features": toe.md
   - "User Guide":
+      - user-guide.md
       - "Analyzing a project": analyzing-project.md
       - "Queries":
         - "Writing queries": writing-queries.md
+        - "Basics of Program Analysis": program-analysis-basics.md
+        - "Hints on Kotlin for Writing Sleek Queries": kotlin-for-queries.md
       - "Concepts and Operations":
         - "Implementing Concepts and Operations": concepts-and-operations.md
         - "List": list-concepts-and-operations.md
@@ -168,6 +175,7 @@ nav:
       - "Assumptions":
         - "Concept for categorizing assumptions of the analysis": assumptions-concept.md
         - "Tradeoff between assumptions and manual analysis": assumptions-tradeoff.md
+      - "Examples": examples.md
       - "Interpreting Results": understanding-results.md
       - "Providing negative test results": negative-tests.md
       - "Further resources": more-resources.md

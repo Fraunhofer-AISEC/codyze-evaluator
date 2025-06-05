@@ -4,7 +4,7 @@ Concepts and operations serve as a representation of program semantics.
 Operations are used to model a certain behavior of the program whereas concepts represent a high-level abstraction of some program behavior, arguments or anything else.
 They mainly serve to simplify writing queries and to provide a more semantic view of the program.
 Thus, they serve as a main entry-point for an analyst writing custom queries.
-This document aims to provide a list of all concepts and operations that are available in the OpenStack Checker.
+This document aims to provide a list of all concepts and operations that are available in the Codyze Evaluator and its technology-specific profiles.
 
 # Concepts
 ## EntryPoint

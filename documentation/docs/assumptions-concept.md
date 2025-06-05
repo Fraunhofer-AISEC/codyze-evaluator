@@ -43,6 +43,7 @@ When a `QueryTree` is returned as a result, it is printed into a SARIF output. T
 *InferenceAssumption*, *ClosedMacroAssumption*, *UnsupportedLanguageProblem*, *MissingCodeProblem*, ...
 
 Examples:
+
  - Missing code
  - Missing macros definitions: We have to assume that it is a closed subtree in the AST
  - Ambiguities
@@ -52,6 +53,7 @@ Examples:
 *AmbiguityAssumption*, ...
 
 Examples:
+
  - Ambiguities, can be result of incomplete code (see above) or insufficient parser complexity.
    - e.g. Assuming the expressions `a(b)` is a call to function `a` with argument `b` and not a cast of `b` to type `a`. 
  - Warnings when we make nodes after finding a parser output that we did not expect.
@@ -70,12 +72,14 @@ An assumption that we correctly captured a program semantic, e.g. logging of dat
 *CompletenessAssumption*, *SoundnessAssumption*, ...
 
 Examples:
+
  - If the same flow is at some point not sound and at some point not correct, it is relaxed to a general approximation
 
 ### Assumptions on Data and Control Flow Approximations
 *CFIntegrityAssumption*, *NoExceptionsAssumption*, *CFAllOrNothingExecutesAssumption*, *TrustedConfigAssumption*, *ExternalDataAssumption*, ...
 
 Examples:
+
  - Try statements and their disruption of control flow
  - Assumptions on external input or labeling that an input is external
  - Assumptions on a config data point. Assumptions is e.g., that configs are saved, cannot be injected
@@ -84,6 +88,7 @@ Examples:
 *NetworkAvailableAssumption*, *ResourceExistsAssumption*, *ServiceReachableAssumption*, ...
 
 Examples:
+
  - Resource assumptions: the file, that is opened here, exists; network connection is available; the database runs and is reachable.
  - Assumptions on the platform or the execution environment, e.g. runs on Linux, etc.
  - Assuming one behavior over another when our CPG representation does not contain or cannot know behavioral differences at runtime, e.g., different platform or execution environment.
@@ -92,6 +97,7 @@ Examples:
 *AtomicExecutionAssumption*, ... 
 
 Examples:
+
  - Assumption that a critical section is atomic, e.g. that the execution of a line of statements is not disrupted by other threads.
  - Just whether we assume that execution is sequential or if we know there is some parallel execution, and we assume that it does not influence sequentiality when reading data.
 
@@ -99,6 +105,7 @@ Examples:
 *TrustBoundaryAssumption*, *DataRangeAssumption*, *TrustedInputAssumption*, ...
 
 Examples:
+
  - Assumption on entry points (or endpoints): Data coming from here are external to the application.
  - Data ranges on input that can be specified.
  - Assumption that data is trusted input.
@@ -107,7 +114,8 @@ Examples:
 
 Problems and limitations during analysis influence how trustworthy results of an evaluation can be. As such they should be reported to the user when they influence the queries. This is the same motivation we have with assumptions, and we therefore plan to make them part of the same feature. However, strictly speaking they are different from assumptions.
 
-Two solutions are possible in the categorization sense: 
+Two solutions are possible in the categorization sense:
+
  1. Problems and limitations are on the same level as assumptions:
    Categories:
   

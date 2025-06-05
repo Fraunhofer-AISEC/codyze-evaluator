@@ -1,4 +1,4 @@
-# Providing negative test results
+# Providing negative test results for OpenStack
 
 This repository contains specific versions of selected OpenStack components which we used for testing.
 In particular, it contains some violations against the rules we implemented.
