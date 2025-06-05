@@ -23,7 +23,18 @@ fun evaluateWithCodyze(
 ): AnalysisResult? {
     val absoluteFile = Path(scriptFile).absolute()
     val project = AnalysisProject.fromScript(absoluteFile) { profile(it) }
-    return project?.analyze()
+    val result = project?.analyze() ?: return null
+
+    // Print some performance metrics
+    result.translationResult.benchmarkResults.print()
+
+    println("# Analysis Results")
+
+    for (requirement in result.requirementsResults) {
+        println("## Requirement ${requirement.key}: ${requirement.value}")
+    }
+
+    return result
 }
 
 /** Registers the tagging profiles in the [TranslationConfiguration] builder. */

@@ -11,11 +11,13 @@ import de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
- * This query enforces the following statement: "Given a customer-managed key K stored in Barbican,
- * it must not be leaked via printing, logging, file writing or command execution input."
+ * This query enforces the following statement: Given a customer-managed (retrieved by a [GetSecret]
+ * operation), it must not leave the component via any data flow that can is considered a leak.
+ *
+ * Which data flow is considered a leak is defined by the function [isLeakyOutput].
  */
 context(TranslationResult)
-fun keyNotLeakedThroughOutput(dataLeavesComponent: Node.() -> Boolean): QueryTree<Boolean> {
+fun keyNotLeakedThroughOutput(isLeakyOutput: Node.() -> Boolean): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     // The result of a `GetSecret` operation must not have a data flow
@@ -34,7 +36,7 @@ fun keyNotLeakedThroughOutput(dataLeavesComponent: Node.() -> Boolean): QueryTre
                     // Consider all paths across functions.
                     scope = Interprocedural(),
                     // Use the function `dataLeavesComponent` above to represent a sink.
-                    predicate = { it.dataLeavesComponent() },
+                    predicate = { it.isLeakyOutput() },
                 ) // If this returns a QueryTree<Boolean> with value `true`, a dataflow may be
                 // present.
             ) // We want to negate this result because such a flow must not happen.
@@ -75,7 +77,7 @@ inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
                     // We want to consider all paths across functions, i.e., perform an
                     // interprocedural analysis.
                     scope = Interprocedural(),
-                    // The requirement is satisified if the key comes from a secure key provider.
+                    // The requirement is satisfied if the key comes from a secure key provider.
                     // We use the extension function `isSecureKeyProvider` defined above to perform
                     // this check.
                     predicate = { it is T && it.isSecureKeyProvider() },

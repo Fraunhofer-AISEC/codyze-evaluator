@@ -255,7 +255,7 @@ project {
                     fulfilledBy {
                         val notLeakedAndReachable =
                             keyNotLeakedThroughOutput(
-                                dataLeavesComponent = Node::dataLeavesOpenStackComponent
+                                isLeakyOutput = Node::dataLeavesOpenStackComponent
                             ) and
                                 keyOnlyReachableThroughSecureKeyProvider(
                                     isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
