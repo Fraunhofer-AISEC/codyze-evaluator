@@ -6,6 +6,7 @@ import de.fraunhofer.aisec.cpg.graph.Forward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.file.DeleteFile
+import de.fraunhofer.aisec.cpg.graph.concepts.file.FileTempFileStatus
 import de.fraunhofer.aisec.cpg.graph.concepts.file.OpenFile
 import de.fraunhofer.aisec.cpg.query.Must
 import de.fraunhofer.aisec.cpg.query.QueryTree
