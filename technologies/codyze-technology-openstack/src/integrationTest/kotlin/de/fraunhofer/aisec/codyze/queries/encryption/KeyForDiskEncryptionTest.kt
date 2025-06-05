@@ -11,6 +11,7 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.get
 import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
+import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.test.*
 
@@ -28,21 +29,10 @@ class KeyForDiskEncryptionTest {
             analyze(listOf(), topLevel, true) {
                 OpenStackProfile(it)
                 it.failOnError(false)
-                it.softwareComponents(
-                    mutableMapOf(
-                        "cinder" to
-                            listOf(
-                                topLevel.resolve("cinder/cinder/volume/flows").toFile(),
-                                topLevel.resolve("cinder/cinder/utils.py").toFile(),
-                            ),
-                        "barbican" to listOf(topLevel.resolve("barbican/barbican/api").toFile()),
-                    )
-                )
-                it.topLevels(
-                    mapOf(
-                        "cinder" to topLevel.resolve("cinder").toFile(),
-                        "barbican" to topLevel.resolve("barbican").toFile(),
-                    )
+                it.useComponents(
+                    topLevel,
+                    Barbican to listOf("barbican/api"),
+                    Cinder to listOf("cinder/volume/flows", "cinder/utils.py"),
                 )
             }
         assertNotNull(result)

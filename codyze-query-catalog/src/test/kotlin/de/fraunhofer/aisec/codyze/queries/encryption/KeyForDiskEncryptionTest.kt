@@ -1,10 +1,9 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.queries
+package de.fraunhofer.aisec.codyze.queries.encryption
 
 import de.fraunhofer.aisec.codyze.*
-import de.fraunhofer.aisec.codyze.queries.encryption.keyNotLeakedThroughOutput
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.*
@@ -15,8 +14,13 @@ import de.fraunhofer.aisec.cpg.passes.concepts.logging.python.PythonLoggingConce
 import kotlin.io.path.Path
 import kotlin.test.*
 
+/** This test suite contains tests for key management and disk encryption queries. */
 class KeyForDiskEncryptionTest {
 
+    /**
+     * Test case for [keyNotLeakedThroughOutput] using a Python file that encrypts a key and logs
+     * it. The test checks that the query detects that the key is leaked through output.
+     */
     @Test
     fun testKeyNotLeakedThroughOutput() {
         val topLevel = Path("src/test/resources/encryption")
@@ -31,14 +35,7 @@ class KeyForDiskEncryptionTest {
                 it.taggingProfiles {
                     each<CallExpression>("get_secret_from_keyserver").withMultiple {
                         val secret = Secret()
-                        listOf(
-                            secret,
-                            GetSecret(concept = secret).also {
-                                // TODO(oxisto): Remove once
-                                //  https://github.com/Fraunhofer-AISEC/cpg/issues/2345 is merged
-                                it.nextDFG += node
-                            },
-                        )
+                        listOf(secret, GetSecret(concept = secret))
                     }
                 }
             }
@@ -54,7 +51,7 @@ class KeyForDiskEncryptionTest {
         assertTrue(secrets.isNotEmpty(), "We expect Secret nodes to be present")
 
         with(result) {
-            val q = keyNotLeakedThroughOutput(dataLeavesComponent = { this.hasOverlay<LogWrite>() })
+            val q = keyNotLeakedThroughOutput(isLeakyOutput = { this.hasOverlay<LogWrite>() })
             assertFalse(q.value, "We expect that they key is leaked through output")
         }
     }

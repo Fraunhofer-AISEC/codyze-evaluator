@@ -14,10 +14,10 @@ import de.fraunhofer.aisec.cpg.query.*
  * This query enforces the following statement: Given a customer-managed (retrieved by a [GetSecret]
  * operation), it must not leave the component via any data flow that can is considered a leak.
  *
- * Which data flow is considered a leak is defined by the function [dataLeavesComponent].
+ * Which data flow is considered a leak is defined by the function [isLeakyOutput].
  */
 context(TranslationResult)
-fun keyNotLeakedThroughOutput(dataLeavesComponent: Node.() -> Boolean): QueryTree<Boolean> {
+fun keyNotLeakedThroughOutput(isLeakyOutput: Node.() -> Boolean): QueryTree<Boolean> {
     val tr = this@TranslationResult
 
     // The result of a `GetSecret` operation must not have a data flow
@@ -36,7 +36,7 @@ fun keyNotLeakedThroughOutput(dataLeavesComponent: Node.() -> Boolean): QueryTre
                     // Consider all paths across functions.
                     scope = Interprocedural(),
                     // Use the function `dataLeavesComponent` above to represent a sink.
-                    predicate = { it.dataLeavesComponent() },
+                    predicate = { it.isLeakyOutput() },
                 ) // If this returns a QueryTree<Boolean> with value `true`, a dataflow may be
                 // present.
             ) // We want to negate this result because such a flow must not happen.
