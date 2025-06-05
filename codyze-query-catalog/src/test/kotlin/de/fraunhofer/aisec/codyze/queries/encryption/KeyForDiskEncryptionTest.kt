@@ -14,12 +14,14 @@ import de.fraunhofer.aisec.cpg.passes.concepts.logging.python.PythonLoggingConce
 import kotlin.io.path.Path
 import kotlin.test.*
 
-/** This test suite contains tests for key management and disk encryption queries. */
+/**
+ * This test suite contains tests for key management and disk encryption queries.
+ */
 class KeyForDiskEncryptionTest {
 
     /**
-     * Test case for [keyNotLeakedThroughOutput] using a Python file that encrypts a key and logs
-     * it. The test checks that the query detects that the key is leaked through output.
+     * Test case for [keyNotLeakedThroughOutput] using a Python file that encrypts a key and
+     * logs it. The test checks that the query detects that the key is leaked through output.
      */
     @Test
     fun testKeyNotLeakedThroughOutput() {
@@ -35,7 +37,14 @@ class KeyForDiskEncryptionTest {
                 it.taggingProfiles {
                     each<CallExpression>("get_secret_from_keyserver").withMultiple {
                         val secret = Secret()
-                        listOf(secret, GetSecret(concept = secret))
+                        listOf(
+                            secret,
+                            GetSecret(concept = secret).also {
+                                // TODO(oxisto): Remove once
+                                //  https://github.com/Fraunhofer-AISEC/cpg/issues/2345 is merged
+                                it.nextDFG += node
+                            },
+                        )
                     }
                 }
             }
@@ -52,7 +61,7 @@ class KeyForDiskEncryptionTest {
 
         with(result) {
             val q = keyNotLeakedThroughOutput(isLeakyOutput = { this.hasOverlay<LogWrite>() })
-            assertFalse(q.value, "We expect that they key is leaked through output")
+            assertFalse(q.value, "We expect that the key is leaked through output")
         }
     }
 }

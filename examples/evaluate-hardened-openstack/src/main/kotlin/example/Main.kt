@@ -8,5 +8,4 @@ import de.fraunhofer.aisec.codyze.profiles.openstack.OpenStackProfile
 
 fun main() {
     val result = evaluateWithCodyze("project.codyze.kts", profile = OpenStackProfile)
-    println(result)
 }
