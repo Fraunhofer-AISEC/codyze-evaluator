@@ -5,6 +5,7 @@
  */
 
 plugins {
+    `java-test-fixtures`
     id("buildlogic.kotlin-application-conventions")
     id("org.jetbrains.kotlin.plugin.serialization") version "1.4.20"
 }
@@ -17,6 +18,8 @@ dependencies {
 
     implementation("com.charleskorn.kaml:kaml:0.67.0")
     // implementation("com.github.ajalt.clikt:clikt:5.0.2")
+
+    testFixturesApi(kotlin("test-junit5"))
 }
 
 application {

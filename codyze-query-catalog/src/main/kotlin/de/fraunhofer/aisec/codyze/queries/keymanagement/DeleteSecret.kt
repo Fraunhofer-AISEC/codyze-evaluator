@@ -18,15 +18,12 @@ import de.fraunhofer.aisec.cpg.query.alwaysFlowsTo
  * Secret data should be deleted after usage.
  *
  * This query has the following interpretation of this statement: If data is retrieved from a
- * [de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret] operation, it must be
- * deleted (using a [de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate] operation) on each
- * outgoing EOG path.
+ * [GetSecret] operation, it must be deleted (using a [DeAllocate] operation) on each outgoing EOG
+ * path.
  *
- * ## Prerequisites
- * - The [de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret] operation must be
- *   tagged
- * - A programming [de.fraunhofer.aisec.cpg.frontends.Language] that supports the
- *   [de.fraunhofer.aisec.cpg.graph.concepts.memory.DeAllocate] operation must be used
+ * ### Prerequisites
+ * - The [GetSecret] operation must be tagged
+ * - A programming [Language] that supports the [DeAllocate] operation must be used
  */
 context(TranslationResult)
 fun secretsAreDeletedAfterUsage(): QueryTree<Boolean> {

@@ -28,7 +28,7 @@ fun transportEncryptionForKeys(): QueryTree<Boolean> {
             // Since this function requires a QueryTree object as input,
             // we use manually create one using the QueryTree of the isTLS
             // property.
-            QueryTree(request.concept.isTLS) eq true
+            request.concept.isTLS eq true
         }
 
     return tree

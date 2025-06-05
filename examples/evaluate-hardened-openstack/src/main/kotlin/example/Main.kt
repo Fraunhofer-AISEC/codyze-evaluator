@@ -3,9 +3,9 @@
  */
 package example
 
-import de.fraunhofer.aisec.openstack.evaluateWithCodyze
+import de.fraunhofer.aisec.codyze.evaluateWithCodyze
+import de.fraunhofer.aisec.codyze.profiles.openstack.OpenStackProfile
 
 fun main() {
-    val result = evaluateWithCodyze("project.codyze.kts")
-    println(result)
+    val result = evaluateWithCodyze("project.codyze.kts", profile = OpenStackProfile)
 }

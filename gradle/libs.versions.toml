@@ -2,7 +2,7 @@
 # https://docs.gradle.org/current/userguide/platforms.html#sub::toml-dependencies-format
 
 [versions]
-kotlin-gradle-plugin = "2.0.20"
+kotlin-gradle-plugin = "2.1.20"
 cpg = "10.6.1"
 spotless = "7.0.1"
 

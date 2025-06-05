@@ -1,5 +1,16 @@
 # How do I write a query?
 
+A query is a piece of code which retrieves information from the CPG (or a part of it) to assess if a statement holds or not.
+
+The main sources for the implementation can be found in the files `Query.kt`, `FlowQueries.kt` and `QueryTree.kt` in the module `cpg-analysis`.
+
+## Where to add Queries
+
+Queries can be added everywhere in the [evaluation project](analyzing-project.md#project-structure).
+However, we recommend to add them to the `queries` folder to simplify finding them.
+They must be included in a kotlin file (file ending `.kt`) which is included in the sources of the project.
+Finally, you have to call the queries in the `requirements` block, or in a query called therein, of the [evaluation project script](analyzing-project.md#defining-an-analysis-project), or they won't be assessed.
+
 ## Starting point: Choosing between `allExtended` and `existsExtended`
 
 You would typically start writing a query by using one of the two functions `allExtended` or `existsExtended`.
@@ -27,8 +38,7 @@ Few notes on Kotlin:
 
 Currently, following four functions of the Query API can be used to reason about the flow of data or control in the program:
 `dataFlow`, `dataFlowWithValidator`, `executionPath` and `alwaysFlowsTo`.
-A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [./program-analysis-basics.md].
-The remaining parameters are explained in this section.
+A detailed explanation of the parameters `direction`, `type`, `sensitivities` and `scope` which configure these functions is provided in [program-analysis-basics.md](program-analysis-basics.md).
 
 ### `dataFlow`
 
@@ -60,6 +70,10 @@ The remaining parameters are explained in this section.
 === "Parameters"
 
     * `startNode`: The node from which the data flow should be followed.
+    * `direction`: See the [explanation of class `AnalysisDirection`](program-analysis-basics.md/#analysisdirection)
+    * `type`: See the [explanation of class `AnalysisType`](program-analysis-basics.md/#analysistype)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
     * `predicate`: This function marks the desired end of a dataflow path. If this function returns `true`, the analysis/traversal of this path will stop.
@@ -94,6 +108,10 @@ The remaining parameters are explained in this section.
 === "Parameters"
 
     * `startNode`: The node from which the execution path should be followed.
+    * `direction`: See the [explanation of class `AnalysisDirection`](program-analysis-basics.md/#analysisdirection)
+    * `type`: See the [explanation of class `AnalysisType`](program-analysis-basics.md/#analysistype)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
     * `predicate`: This function marks the desired end of an execution path. If this function returns `true`, the analysis/traversal of this path will stop.
@@ -121,7 +139,7 @@ The remaining parameters are explained in this section.
 
 === "Goal of the function"
 
-    Checks that the data originating from `this` are reach a sink (fulfilling `predicate`) on each execution path.
+    Checks that the data originating from `this` reach a sink (fulfilling `predicate`) on each execution path.
 
 === "Parameters"
 
@@ -133,6 +151,8 @@ The remaining parameters are explained in this section.
       In particular, it checks if any dataflow exists to any node which is in scope of a function containing the call-site of a function declaration, we stop iterating.
     * `earlyTermination`: If applying this function to a `Node` returns `true` before a node fulfilling `predicate`, the
       analysis/traversal of this path will stop and return `false`. If `null` is provided, the analysis will not stop.
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
     * `predicate`: This function marks the desired end of a combined dataflow and execution path.
       If this function returns `true`, the analysis/traversal of this path will stop.
 
@@ -167,6 +187,8 @@ The remaining parameters are explained in this section.
       analysis/traversal of this path will stop and return `true`.
     * `sinkPredicate`: This function marks a sink, where it is not permitted to reach the sink without always passing through a validator characterized by `validatorPredicate`.
       If this function returns `true`, the analysis/traversal of this path will stop and return `false`.
+    * `scope`: See the [explanation of class `AnalysisScope`](program-analysis-basics.md/#analysisscope)
+    * `sensitivities`: See the [explanation of Sensitivities](program-analysis-basics.md/#sensitivities)
 
 </div>
 
@@ -210,27 +232,4 @@ For numeric values:
 The top-level result of any query must be a `QueryTree<Boolean>`.
 However, it is sometimes necessary to aggregate the results of multiple sub-queries with methods of the kotlin standard library (such as `map` for collections), which does not return a `QueryTree<Boolean>` itself.
 In this case, you can simply create a `QueryTree<Boolean>` by calling the constructor.
-It may be handy to implement some helper functions for frequent purposes as part of the OpenStack-Checker and import these extensions in the query scripts.
-
-
-### Hints on writing queries
-
-**Handling of `null` values:**
-
-Kotlin differentiates between `null` and non-null values. To work with nullable values, use the `?` syntax/operator and
-implement checks using the `?.let` or `?:` operator rather than enforcing non-null values with `!!`. This ensures that
-all your queries will be evaluated even in the presence of null-values whereas using `!!` would immediately crash the
-execution. Keep in mind that the missing information in the check should likely result in a warning, which means you
-probably want to generate a failing result in this case (e.g. by creating a `QueryTree(false, ...)`).
-
-**Using variables:**
-
-Some data are likely to change frequently. Rather than hardcoding this information in the queries, you can use a
-variable. This makes it easier to update the information in subsequent usages of the same security statement or
-objectives.
-
-**Using extensions:**
-
-To keep the actual query small, we recommend getting familiar
-with [Kotlin Extensions](https://kotlinlang.org/docs/extensions.html) which can be used to extend existing classes with
-new functionality without having to inherit from the class. They can be used to add functions or properties.
+It may be handy to implement some helper functions for frequent purposes as part of the Codyze Evaluator and import these extensions in the query scripts.
