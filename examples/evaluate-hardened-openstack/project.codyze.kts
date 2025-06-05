@@ -1,15 +1,13 @@
 /*
  * This file is part of the OpenStack Checker
  */
-import de.fraunhofer.aisec.codyze.dsl.fulfilledBy
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import example.queries.keystoneAuthStrategyConfigured
 
 include {
@@ -38,12 +36,6 @@ project {
          */
         architecture {
             modules {
-                module("nova") {
-                    directory = "toe/modules/nova"
-                    include("nova")
-                    exclude("tests", "drivers")
-                }
-
                 /**
                  * [Cinder] is the OpenStack block storage service that provides persistent block
                  * storage to instances. It supports various backends and allows users to manage
@@ -245,7 +237,7 @@ project {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
                     fulfilledBy {
-                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) and
                             manualAssessmentOf("Careful-Crypto-Analysis")
                     }
                 }

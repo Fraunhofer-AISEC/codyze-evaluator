@@ -4,7 +4,8 @@
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
 import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.concepts.auth.*
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Policy
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.PolicyRule
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.conceptNodes

@@ -3,9 +3,9 @@
  */
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
-import de.fraunhofer.aisec.codyze.concepts.auth.Policy
-import de.fraunhofer.aisec.codyze.concepts.auth.newAuthorization
-import de.fraunhofer.aisec.codyze.concepts.auth.newAuthorize
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Policy
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newAuthorization
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newAuthorize
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Backward
 import de.fraunhofer.aisec.cpg.graph.Component

@@ -4,7 +4,7 @@
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
 import de.fraunhofer.aisec.codyze.analyze
-import de.fraunhofer.aisec.codyze.concepts.auth.Authorize
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Authorize
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.HttpWsgiPass
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage

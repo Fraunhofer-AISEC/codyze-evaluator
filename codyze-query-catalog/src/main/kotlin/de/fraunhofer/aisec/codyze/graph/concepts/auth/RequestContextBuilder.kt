@@ -1,7 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
-package de.fraunhofer.aisec.codyze.concepts.auth
+package de.fraunhofer.aisec.codyze.graph.concepts.auth
 
 import de.fraunhofer.aisec.cpg.graph.MetadataProvider
 import de.fraunhofer.aisec.cpg.graph.Node
@@ -63,8 +63,8 @@ fun MetadataProvider.newUserInfo(
  *
  * @param underlyingNode The underlying CPG node.
  * @param concept The [UserInfo] concept to associate the operation with.
- * @param connect If `true`, the created [de.fraunhofer.aisec.cpg.graph.concepts.Concept] will be
- *   connected to the underlying node by setting its `underlyingNode`.
+ * @param connect If `true`, the created [Concept] will be connected to the underlying node by
+ *   setting its `underlyingNode`.
  * @return The created [PopulateUserInfo] operation.
  */
 fun MetadataProvider.newPopulateUserInfo(

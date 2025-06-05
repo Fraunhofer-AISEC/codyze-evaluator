@@ -3,8 +3,12 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authorization
 
-import de.fraunhofer.aisec.codyze.concepts.auth.*
-import de.fraunhofer.aisec.codyze.concepts.database.*
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.AuthorizationWithPolicy
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Authorize
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.CheckDomainScope
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.database.DatabaseAccess
+import de.fraunhofer.aisec.codyze.graph.concepts.database.Filter
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.assumptions.assume
@@ -35,9 +39,9 @@ import de.fraunhofer.aisec.cpg.query.not
 import de.fraunhofer.aisec.cpg.query.toQueryTree
 
 /**
- * Retrieves all [Authorize] operations related to the
- * [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] and checks if there is a data
- * flow from each of these authorizations' authorization targets to one of the provided
+ * Retrieves all [de.fraunhofer.aisec.codyze.graph.concepts.auth.Authorize] operations related to
+ * the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] and checks if there is a
+ * data flow from each of these authorizations' authorization targets to one of the provided
  * [targetValues]. If there is no
  * [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint.authorization] present, it returns a
  * [de.fraunhofer.aisec.cpg.query.QueryTree] with value `false`.

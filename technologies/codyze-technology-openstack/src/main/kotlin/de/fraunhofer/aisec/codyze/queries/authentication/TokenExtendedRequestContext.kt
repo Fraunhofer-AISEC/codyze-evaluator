@@ -3,7 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authentication
 
-import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.*
