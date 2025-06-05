@@ -14,14 +14,12 @@ import de.fraunhofer.aisec.cpg.passes.concepts.logging.python.PythonLoggingConce
 import kotlin.io.path.Path
 import kotlin.test.*
 
-/**
- * This test suite contains tests for key management and disk encryption queries.
- */
+/** This test suite contains tests for key management and disk encryption queries. */
 class KeyForDiskEncryptionTest {
 
     /**
-     * Test case for [keyNotLeakedThroughOutput] using a Python file that encrypts a key and
-     * logs it. The test checks that the query detects that the key is leaked through output.
+     * Test case for [keyNotLeakedThroughOutput] using a Python file that encrypts a key and logs
+     * it. The test checks that the query detects that the key is leaked through output.
      */
     @Test
     fun testKeyNotLeakedThroughOutput() {
