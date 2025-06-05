@@ -11,7 +11,7 @@ As the overview of the workflow shows, the Codyze Evaluator consists of two majo
   In the case of OpenStack, it consists of various components of OpenStack at a specific software version, several third party libraries (i.e., python libraries), and a specific configuration of the whole system.
   The TOE implements the security claims by its *security features*.
 * The *Codyze Evaluator Configuration* is the configuration of the Codyze Evaluator.
-  It consists of a set of security goals, a set of concepts and operations, and a set of rules which define how to "tag" the code base with these concepts and operations.
+  It consists of a set of security goals, a set of concepts and operations, and a set of rules which define how to tag the code base with these concepts and operations.
 
 !!! note "Relation to Common Criteria Evaluation"
 

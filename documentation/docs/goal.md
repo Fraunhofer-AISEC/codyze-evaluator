@@ -14,12 +14,12 @@ Core of this project is a tool which supports an analyst with a semi-automated c
 It receives as an input:
 
 * A set of rules which define the security claims to be evaluated,
-* A set of relevant behavioral properties (in the form of so-called concepts and operations) and logic on how to "tag" the code base with them, and
+* A set of relevant behavioral properties (in the form of so-called concepts and operations) and logic on how to tag the code base with them, and
 * The TOE's code base, python interface (.pyi) files of libraries, and a specific configuration of the TOE's instance.
 
 The tool then performs a static analysis of the code base and configuration and generates a report which indicates whether the security claims are met or not.
 
-The following figure provides a high-level overview of the workflow:
+The following figure provides a high-level overview of the workflow on the example of OpenStack:
 
 ![Workflow](assets/img/highlevel-overview.png)
 
