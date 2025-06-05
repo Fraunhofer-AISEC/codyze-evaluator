@@ -3,11 +3,11 @@
  */
 package de.fraunhofer.aisec.codyze.profiles.openstack
 
-import de.fraunhofer.aisec.codyze.concepts.auth.CheckDomainScope
-import de.fraunhofer.aisec.codyze.concepts.auth.ExtendedRequestContext
-import de.fraunhofer.aisec.codyze.concepts.auth.UserInfo
-import de.fraunhofer.aisec.codyze.concepts.database.DatabaseAccess
-import de.fraunhofer.aisec.codyze.concepts.database.Filter
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.CheckDomainScope
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.UserInfo
+import de.fraunhofer.aisec.codyze.graph.concepts.database.DatabaseAccess
+import de.fraunhofer.aisec.codyze.graph.concepts.database.Filter
 import de.fraunhofer.aisec.codyze.openstack.passes.*
 import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthenticationPass
 import de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack.AuthorizationPass

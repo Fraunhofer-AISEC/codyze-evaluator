@@ -3,11 +3,11 @@
  */
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
-import de.fraunhofer.aisec.codyze.concepts.auth.Policy
-import de.fraunhofer.aisec.codyze.concepts.auth.PolicyRule
-import de.fraunhofer.aisec.codyze.concepts.auth.Role
-import de.fraunhofer.aisec.codyze.concepts.auth.newPolicy
-import de.fraunhofer.aisec.codyze.concepts.auth.newPolicyRule
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Policy
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.PolicyRule
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.Role
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newPolicy
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newPolicyRule
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.TranslationContext
 import de.fraunhofer.aisec.cpg.graph.Backward

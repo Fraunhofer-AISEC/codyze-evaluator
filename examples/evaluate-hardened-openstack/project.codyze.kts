@@ -7,8 +7,7 @@ import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import example.queries.keystoneAuthStrategyConfigured
 
 include {
@@ -37,12 +36,6 @@ project {
          */
         architecture {
             modules {
-                module("nova") {
-                    directory = "toe/modules/nova"
-                    include("nova")
-                    exclude("tests", "drivers")
-                }
-
                 /**
                  * [Cinder] is the OpenStack block storage service that provides persistent block
                  * storage to instances. It supports various backends and allows users to manage
@@ -243,7 +236,10 @@ project {
                 requirement {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
-                    fulfilledBy { stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced() }
+                    fulfilledBy {
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) and
+                            manualAssessmentOf("Careful-Crypto-Analysis")
+                    }
                 }
 
                 /**
@@ -257,13 +253,15 @@ project {
                     name = "Key for Disk Encryption is Kept Secure"
 
                     fulfilledBy {
-                        keyNotLeakedThroughOutput(
-                            dataLeavesComponent = Node::dataLeavesOpenStackComponent
-                        ) and
-                            keyOnlyReachableThroughSecureKeyProvider(
-                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                        val notLeakedAndReachable =
+                            keyNotLeakedThroughOutput(
+                                dataLeavesComponent = Node::dataLeavesOpenStackComponent
                             ) and
-                            keyIsDeletedFromMemoryAfterUse()
+                                keyOnlyReachableThroughSecureKeyProvider(
+                                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                                )
+
+                        notLeakedAndReachable and keyIsDeletedFromMemoryAfterUse()
                     }
                 }
 

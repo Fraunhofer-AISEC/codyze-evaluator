@@ -3,7 +3,9 @@
  */
 package de.fraunhofer.aisec.codyze.passes.concepts.auth.openstack
 
-import de.fraunhofer.aisec.codyze.concepts.auth.*
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.newUserInfo
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.*
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
