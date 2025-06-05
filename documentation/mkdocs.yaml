@@ -1,14 +1,14 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
 # Project information
-site_name: OpenStack Checker
-site_url: https://fraunhofer-aisec.github.io/openstack-checker/
+site_name: Codyze Evaluator
+site_url: https://github.com/Fraunhofer-AISEC/codyze-evaluator
 site_author: Fraunhofer AISEC
-site_description: OpenStack Checker
+site_description: Codyze Evaluator
 
 # Repository
-repo_name: Fraunhofer-AISEC/openstack-checker
-repo_url: https://github.com/Fraunhofer-AISEC/openstack-checker
+repo_name: Fraunhofer-AISEC/codyze-evaluator
+repo_url: https://github.com/Fraunhofer-AISEC/codyze-evaluator
 edit_uri: edit/main/documentation/
 
 # Copyright
@@ -91,7 +91,7 @@ extra:
       name: Visit us on GitHub to get involved.
     - icon: fontawesome/solid/envelope
       link: mailto:codyze@aisec.fraunhofer.de
-      name: Email us about the OpenStack Checker project.
+      name: Email us about the Codyze Evaluator project.
     - icon: fontawesome/brands/twitter
       link: https://twitter.com/FraunhoferAISEC
       name: Follow Fraunhofer AISEC on Twitter.

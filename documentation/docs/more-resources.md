@@ -31,7 +31,7 @@ Extensive documentation on the Code Property Graph (CPG) can be found online:
 ## `Concept`s and `Operation`s?
 
 We provide a list of current concepts and operations [here](list-concepts-and-operations.md).
-To generate/update this list, you can run the program `de.fraunhofer.aisec.openstack.ConceptListerCommand` which is part of the `openstack-checker`.
+To generate/update this list, you can run the program `de.fraunhofer.aisec.openstack.ConceptListerCommand` which is part of the `codyze-evaluator`.
 
 The concepts provided by the CPG are included in the module `cpg-concepts`.
 

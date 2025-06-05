@@ -1,24 +1,24 @@
 # How to analyze your project
 
-The OpenStack Checker is a tool that helps you identify security issues in your OpenStack project by analyzing the code
+The Codyze Evaluator is a tool that helps you identify security issues in your TOE by analyzing the code
 and checking it against a set of predefined queries.
-This document describes how to use the OpenStack Checker to analyze your project, how to structure an analysis project
+This document describes how to use the Codyze Evaluator to analyze your project, how to structure an analysis project
 and how to write those queries.
 
 ## Project Structure
 
 
-An evaluation project for the OpenStack Checker requires few files to be included in the project directory and allows to add further custom files:
+An evaluation project for the Codyze Evaluator requires few files to be included in the project directory and allows to add further custom files:
 
     .                                   # Project root
     ├── build.gradle.kts                # The build file of your project.
-    ├── project.codyze.kts              # The project file which defines the evaluation project. It is used to configure the OpenStack Checker for the specific evaluation.
+    ├── project.codyze.kts              # The project file which defines the evaluation project. It is used to configure the Codyze Evaluator for the specific evaluation.
     ├── tagging.codyze.kts              # This file includes specific tagging logic for the evaluation project. It has to be written specifically for the TOE but may reuse existing concepts and operations and logic for tagging library functions.
-    └── src/main/kotlin/...             # This directory contains the concrete instance of the OpenStack checker which is built using the gradle file. It also contains custom logic.
+    └── src/main/kotlin/...             # This directory contains the concrete instance of the Codyze Evaluator which is built using the gradle file. It also contains custom logic.
         ├── queries                     # This directory contains custom queries.
             ├── query1.kt               # This file contains one or multiple custom queries which are used in the requirements of the evaluation project. The filename can be aritrary but must end with `.kt`.
             └── query2.kt               # This file contains one or multiple custom queries which are used in the requirements of the evaluation project. The filename can be aritrary but must end with `.kt`.
-        └── Main.kt                     # The main file of the evaluation project. It calls the script `project.codyze.kts` to run the OpenStack Checker.
+        └── Main.kt                     # The main file of the evaluation project. It calls the script `project.codyze.kts` to run the Codyze Evaluator.
 
 Most importantly, the project requires the build file, the project definition, and the main file.
 The other files could be omitted and the contents could be integrated in the project file, but we recommend to keep them separate for better maintainability.
@@ -30,12 +30,12 @@ This DSL is used to specify the components of the TOE (Target of Evaluation) and
 It further allows to integrate the logic for tagging the code with concepts and operations, and to accept or reject assumptions.
 In the following, we describe how to configure the analysis project using the DSL.
 
-The project is defined in a file called `project.codyze.kts` which is then passed to the OpenStack Checker.
+The project is defined in a file called `project.codyze.kts` which is then passed to the Codyze Evaluator.
 
 The outer element is the `project` element which has a `name` and can contain the declarative blocks `tool`, `toe`, `requirements`, and `assumptions`.
 ```kotlin title="project.codyze.kts"
 project {
-    name = "This is the evaluation of OpenStack"
+    name = "This is the evaluation of some TOE"
 
     tool { ... }
   
@@ -47,7 +47,7 @@ project {
 }
 ```
 
-The `tool` block can be used to fine-tune the configuration of the OpenStack Checker by registering additional passes or external libraries, among others.
+The `tool` block can be used to fine-tune the configuration of the Codyze Evaluator by registering additional passes or external libraries, among others.
 The full list of options can be found in the documentation of the `TranslationConfiguration.Builder`.
 An instance of this class can be accessed within this block.
 An example of a `tool` block is:

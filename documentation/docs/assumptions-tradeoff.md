@@ -1,7 +1,7 @@
 # Assumptions Tradeoff
 
-Since OpenStack is a highly complex system, several assumptions need to be made in order to avoid a complexity overload.
-The following example will illustrate the tradeoffs assumptions present between a more precise analysis and a more usable analysis experience for the evaluator.
+Modern TOEs can be highly complex systems, so that several assumptions need to be made in order to avoid a complexity overload.
+The following examples will illustrate the tradeoffs assumptions present between a more precise analysis and a more usable analysis experience for the evaluator on the example TOE OpenStack.
 
 ## Scenario: Retrieving Encryption Key from Barbican
 

@@ -1,9 +1,9 @@
-# Analysis of TOE's Security Posture
+# Analysis of TOE's Security Posture on the example of OpenStack
 
-As described in the Chapter [Methodology](./methodology.md), the OpenStack Checker receives two inputs which are compared against each other:
+As described in the Chapter [Methodology](./methodology.md), the Codyze Evaluator receives two inputs which are compared against each other:
 
 * The *Concrete OpenStack Instance* representing the implementation of the Target of Evaluation (TOE).
-* The *OpenStack Checker Configuration* containing the security goals, Concepts and Operations and tagging logic.
+* The *Codyze Evaluator Configuration* containing the security goals, Concepts and Operations and tagging logic.
 
 This Section describes how we model the Concrete OpenStack Instance in more detail and argues why it is suitable to provide an adequate and extensible model of the TOE's security posture implementing the TOE's security features.
 
@@ -21,7 +21,7 @@ To make this visible to the user, the affected nodes and edges receive an assump
 
 ## Extensions for OpenStack
 
-OpenStack's implementation provides several challenges for static analysis, which have been addressed by the OpenStack Checker:
+OpenStack's implementation provides several challenges for static analysis, which have been addressed by the Codyze Evaluator:
 
 ### Modularization of the Code
 
@@ -31,24 +31,24 @@ To address this issue, the CPG loads various modules of OpenStack at the same ti
 In order to keep the architectural structure visible, the CPG holds one `Component` for each module.
 
 The different modules interact with each other through HTTP APIs and calls.
-To represent this, the OpenStack Checker aims to automatically detect the respective endpoints and the calls thereof.
-The OpenStack Checker connects the calls with the endpoints across module boundaries and also includes dataflow edges across these boundaries.
+To represent this, the Codyze Evaluator aims to automatically detect the respective endpoints and the calls thereof.
+The Codyze Evaluator connects the calls with the endpoints across module boundaries and also includes dataflow edges across these boundaries.
 This happens in custom passes which are implemented for the frameworks WSGI and Pecan, which are used in the OpenStack code base.
 
 ### Dynamic Loading of Modules
 
 OpenStack dynamically loads modules at runtime based on the configuration of the instance, e.g. to load different drivers for different backends on the client side.
 This results in code which is not statically known by only analyzing the source code but requires analysis of the configuration, and the loaded modules.
-OpenStack provides these mechanisms in their own framework `stevedore` for which the OpenStack Checker implements another custom pass.
+OpenStack provides these mechanisms in their own framework `stevedore` for which the Codyze Evaluator implements another custom pass.
 This pass analyzes the configuration of the OpenStack instance and loads the respective modules into the CPG and replaces function calls and variables with those loaded on runtime.
 This is essential to ensure that the analysis is conducted on the code which resembles the actual OpenStack instance.
 Failure to integrate the dynamically loaded modules would result in incomplete analysis and disconnecting the different modules from each other.
-This would prevent the OpenStack Checker from analyzing the OpenStack instance as a whole and miss the implementation of security features of the instance which are spread across different modules.
+This would prevent the Codyze Evaluator from analyzing the OpenStack instance as a whole and miss the implementation of security features of the instance which are spread across different modules.
 
 ## Representation of Assumptions in the Analysis
 
 As each static analysis tool makes certain assumptions about the code, it is important to express them for the user to enable verifying and understanding the results.
-The OpenStack Checker requires the user to verify and accept these assumptions to retrieve a valid analysis result.
+The Codyze Evaluator requires the user to verify and accept these assumptions to retrieve a valid analysis result.
 Each of the assumptions should contain a description of the assumption, together with a description of how to assess it.
 
 This is crucial to improve the transparency of the analysis' limitations and trade-offs, thus making the results more understandable and trustworthy to the expert user.

@@ -1,15 +1,15 @@
 # Analysis of Security Claims
 
-As described in the Chapter [Methodology](./methodology.md), the OpenStack Checker receives two inputs which are compared against each other:
+As described in the Chapter [Methodology](./methodology.md), the Codyze Evaluator receives two inputs which are compared against each other:
 
-* The *Concrete OpenStack Instance* representing the implementation of the Target of Evaluation (TOE).
-* The *OpenStack Checker Configuration* containing the security claims, Concepts and Operations and tagging logic.
+* The *TOE* representing the implementation of the Target of Evaluation (TOE).
+* The *Codyze Evaluator Configuration* containing the security claims, Concepts and Operations and tagging logic.
 
-This Section describes the OpenStack Checker Configuration in more detail and argues why it is suitable to provide an adequate and extensible description of the security claims.
+This Section describes the Codyze Evaluator Configuration in more detail and argues why it is suitable to provide an adequate and extensible description of the security claims.
 
 ## Description of Security Claims
 
-The security claims are described by queries which are run against the CPG of the Concrete OpenStack Instance.
+The security claims are described by queries which are run against the CPG of the TOE.
 These queries include elements which require manual assessment, have the ability to express assumptions, and can be extended by the user.
 The underlying Query API allows the user to evaluate simple values, but its main strength is the ability to track data and control flow across the TOE in a highly configurable way.
 This can be leveraged to express several security claims and verify that no violating paths exist in the code.
@@ -18,7 +18,7 @@ For all security claims which cannot be expressed by the Query API, the user can
 ## Reproducibility
 
 With this approach, the definition of the security claims is highly versatile and can be adapted to the specific needs of the user.
-By allowing the user to precisely document right within the requirement how a manual assessment should be performed, the OpenStack Checker can provide reproducible steps even for manual assessment.
+By allowing the user to precisely document right within the requirement how a manual assessment should be performed, the Codyze Evaluator can provide reproducible steps even for manual assessment.
 The exact phrasing of these steps is crucial for the reproducibility of the assessment.
 
 

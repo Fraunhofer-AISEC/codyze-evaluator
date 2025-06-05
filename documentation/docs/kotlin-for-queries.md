@@ -23,7 +23,7 @@ While this is mainly syntactic sugar for passing multiple parameters, it allows 
 
 To keep the actual query small, we recommend getting familiar with [Kotlin Extensions](https://kotlinlang.org/docs/extensions.html) which can be used to extend existing classes with new functionality without having to inherit from the class.
 They can be used to add functions or properties.
-This can be used to add project-specific functionality to the OpenStack Checker and simply calling this function in the queries.
+This can be used to add project-specific functionality to the Codyze Evaluator and simply calling this function in the queries.
 An example for an extension function could look like this:
 ```kotlin
 fun CallExpression.isSecureEncryptionCall(): Boolean {

@@ -2,7 +2,7 @@
 
 ## Target Audience
 
-This guideline targets the roles of the OpenStack Checker expert, evaluator or product expert, and any other person who aims to write custom rules for the OpenStack Checker or "tag" a program with concepts and operations.
+This guideline targets the roles of the Codyze Evaluator expert, evaluator or product expert, and any other person who aims to write custom rules for the Codyze Evaluator or tag a program with concepts and operations.
 
 We expect the target audience to have average programming skills and extensive security knowledge.
 Depending on the [Role of the User](methodology.md#user-roles-and-skills), the qualifications may vary:
