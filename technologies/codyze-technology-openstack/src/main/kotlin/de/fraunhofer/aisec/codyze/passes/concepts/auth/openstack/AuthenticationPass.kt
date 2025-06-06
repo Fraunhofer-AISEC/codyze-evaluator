@@ -16,6 +16,7 @@ import de.fraunhofer.aisec.cpg.graph.declarations.*
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
 import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
+import de.fraunhofer.aisec.cpg.helpers.identitySetOf
 import de.fraunhofer.aisec.cpg.passes.TranslationResultPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
@@ -136,36 +137,41 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
             fromEnvironCall?.followPrevDFG { it is RecordDeclaration }?.nodes?.lastOrNull()
                 as? RecordDeclaration
         if (requestContext != null) {
-            // Here we normally should follow the data flow of the token through the middleware and
-            // keystone. For now we assume that
-            // the validation is done and we can access the user data of the RequestContext
-            // base class from oslo.context
-            val baseRequestContext =
-                requestContext.superTypeDeclarations.firstOrNull() as? RecordDeclaration
-            if (baseRequestContext != null) {
-                val token =
-                    baseRequestContext.fields.singleOrNull { it.name.localName == "auth_token" }
-                        ?: return null
-                val reqContext =
-                    newRequestContext(
-                        underlyingNode = requestContext,
-                        token = token,
-                        connect = true,
-                    )
-                registerUserInfo(record = baseRequestContext, requestContext = reqContext)
-                return reqContext
-            }
+            // Here, we should normally follow the data flow of the token through the middleware and
+            // keystone. For now, we assume that the validation is done, and we can access the user
+            // data of the RequestContext base class from oslo.context
+            val token = getFieldOfRecordOrSupertype(requestContext, "auth_token") ?: return null
+            val reqContext =
+                newRequestContext(underlyingNode = requestContext, token = token, connect = true)
+            registerUserInfo(record = requestContext, requestContext = reqContext)
+            return reqContext
+        }
+        return null
+    }
+
+    private fun getFieldOfRecordOrSupertype(
+        recordDeclaration: RecordDeclaration,
+        fieldName: String,
+    ): FieldDeclaration? {
+        val alreadySeen = identitySetOf<RecordDeclaration>()
+        alreadySeen.add(recordDeclaration)
+        val worklist = mutableListOf(recordDeclaration)
+        while (worklist.isNotEmpty()) {
+            val currentRecord = worklist.removeFirst()
+            val field = currentRecord.fields.firstOrNull { it.name.localName == fieldName }
+            if (field != null) return field
+            worklist += currentRecord.superTypeDeclarations.filter { alreadySeen.add(it) }
         }
         return null
     }
 
     /** Registers user information into the provided request context. */
     fun registerUserInfo(record: RecordDeclaration, requestContext: ExtendedRequestContext) {
-        val userId = record.fields["user_id"] ?: return
-        val projectId = record.fields["project_id"] ?: return
-        val roles = record.fields["roles"] ?: return
-        val systemScope = record.fields["system_scope"] ?: return
-        val domainId = record.fields["domain_id"] ?: return
+        val userId = getFieldOfRecordOrSupertype(record, "user_id")
+        val projectId = getFieldOfRecordOrSupertype(record, "project_id")
+        val roles = getFieldOfRecordOrSupertype(record, "roles")
+        val systemScope = getFieldOfRecordOrSupertype(record, "system_scope")
+        val domainId = getFieldOfRecordOrSupertype(record, "domain_id")
         newUserInfo(
             underlyingNode = record,
             concept = requestContext,

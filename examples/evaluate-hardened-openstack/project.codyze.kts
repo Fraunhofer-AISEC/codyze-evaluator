@@ -219,9 +219,7 @@ project {
                     name = "Delete Secrets after Usage"
 
                     // We can use method references when we do not need to pass any parameters.
-                    fulfilledBy({
-                        secretsAreDeletedAfterUsage()
-                    })
+                    fulfilledBy(::secretsAreDeletedAfterUsage)
                 }
 
                 /**
@@ -307,14 +305,14 @@ project {
                 requirement {
                     name = "Use Keystone for authentication"
 
-                    fulfilledBy { keystoneAuthStrategyConfigured() }
+                    fulfilledBy(::keystoneAuthStrategyConfigured)
                 }
 
                 /** All private endpoints must only be accessible after authentication. */
                 requirement {
                     name = "All Endpoints Must Have Authentication Enabled"
 
-                    fulfilledBy { endpointsAreAuthenticated() }
+                    fulfilledBy(::endpointsAreAuthenticated)
                 }
 
                 /** All endpoints have token-based authentication. */
@@ -324,10 +322,11 @@ project {
                     // Checks if all access tokens used for authentication are validated by the
                     // token-based authentication and if they come from the request context.
                     fulfilledBy {
-                        tokenBasedAuthenticationWhenRequired() and
-                            usesSameTokenAsCredential() and
-                            hasDataFlowToToken() and
-                            useKeystoneForAuthentication()
+                        val q1 = tokenBasedAuthenticationWhenRequired()
+                        val q2 = usesSameTokenAsCredential()
+                        val q3 = hasDataFlowToToken()
+                        val q4 = useKeystoneForAuthentication()
+                        q1 and q2 and q3 and q4
                     }
                 }
 
@@ -377,7 +376,7 @@ project {
                      * is known to find a violation if the secret is returned by two known endpoints
                      * in the file "secret.py" at lines 129 and 212.
                      */
-                    queryTree(
+                    /*queryTree(
                         { qt: QueryTree<Boolean> ->
                             val returnStmtLocation =
                                 ((qt.children.singleOrNull()?.value as? List<*>)?.lastOrNull()
@@ -394,7 +393,7 @@ project {
                                 (returnStmtLocation.region.startLine == 129 ||
                                     returnStmtLocation.region.startLine == 212)
                         } to true
-                    )
+                    )*/
                 }
             }
         }
