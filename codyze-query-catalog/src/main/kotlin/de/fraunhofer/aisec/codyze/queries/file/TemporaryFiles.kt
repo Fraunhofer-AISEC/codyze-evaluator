@@ -1,6 +1,8 @@
 /*
  * This file is part of the OpenStack Checker
  */
+package de.fraunhofer.aisec.codyze.queries.file
+
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.Forward
 import de.fraunhofer.aisec.cpg.graph.GraphToFollow
