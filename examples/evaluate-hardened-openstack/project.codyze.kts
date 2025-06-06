@@ -203,6 +203,18 @@ project {
                     }
                 }
 
+                /**
+                 * Ensure that temporary files are always deleted after use. This reduces the
+                 * timeframe where data may be accessible to other parties.
+                 */
+                requirement {
+                    name = "Delete Temporary Files After Use"
+
+                    // This query checks if restrictive file permissions are applied when writing
+                    // files. But only if the file is written from a secret.
+                    fulfilledBy { temporaryFilesAreAlwaysDeleted() }
+                }
+
                 /** Secret data should be deleted from memory, ideally right after usage. */
                 requirement {
                     name = "Delete Secrets after Usage"
