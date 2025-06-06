@@ -210,8 +210,7 @@ project {
                 requirement {
                     name = "Delete Temporary Files After Use"
 
-                    // This query checks if restrictive file permissions are applied when writing
-                    // files. But only if the file is written from a secret.
+                    // This query checks that temporary files are always deleted after use (i.e.m.
                     fulfilledBy { temporaryFilesAreAlwaysDeleted() }
                 }
 
@@ -220,7 +219,9 @@ project {
                     name = "Delete Secrets after Usage"
 
                     // We can use method references when we do not need to pass any parameters.
-                    fulfilledBy(::secretsAreDeletedAfterUsage)
+                    fulfilledBy({
+                        secretsAreDeletedAfterUsage()
+                    })
                 }
 
                 /**
@@ -368,6 +369,32 @@ project {
                             policy = UnauthorizedResponsePolicy()
                         )
                     }
+                }
+
+                suppressions {
+                    /**
+                     * This is a suppression for a query that checks for the deletion of secrets. It
+                     * is known to find a violation if the secret is returned by two known endpoints
+                     * in the file "secret.py" at lines 129 and 212.
+                     */
+                    queryTree(
+                        { qt: QueryTree<Boolean> ->
+                            val returnStmtLocation =
+                                ((qt.children.singleOrNull()?.value as? List<*>)?.lastOrNull()
+                                        as?
+                                        de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement)
+                                    ?.location
+                            returnStmtLocation
+                                ?.artifactLocation
+                                ?.uri
+                                ?.path
+                                ?.endsWith(
+                                    "/examples/evaluate-hardened-openstack/toe/modules/barbican/barbican/api/controllers/secrets.py"
+                                ) == true &&
+                                (returnStmtLocation.region.startLine == 129 ||
+                                    returnStmtLocation.region.startLine == 212)
+                        } to true
+                    )
                 }
             }
         }
