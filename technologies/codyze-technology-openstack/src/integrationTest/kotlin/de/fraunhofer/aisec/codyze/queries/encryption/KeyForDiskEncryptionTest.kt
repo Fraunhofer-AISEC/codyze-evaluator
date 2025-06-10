@@ -71,8 +71,7 @@ class KeyForDiskEncryptionTest {
             assertEquals(1, treeFunctions.size)
 
             val validDataflows = treeFunctions.first().children.filter { it.value == true }
-            // TODO(oxisto): It seems that the two paths are actually the same
-            assertEquals(2, validDataflows.size)
+            assertEquals(1, validDataflows.size)
 
             // It seems its sometimes 26 and sometimes 27
             val longestValid =
