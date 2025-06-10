@@ -256,7 +256,7 @@ project {
 
                 /**
                  * Given a disk encryption operation, the key used in the operation must be provided
-                 * by a secure key provider, leaked through other output and deleted after use.
+                 * by a secure key provider, not leaked through other output and deleted after use.
                  *
                  * This is a more complex requirement that checks multiple aspects of key
                  * management.
