@@ -9,6 +9,7 @@ import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import example.queries.keystoneAuthStrategyConfigured
 
 include {
@@ -266,9 +267,8 @@ project {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
                     fulfilledBy {
-                        val q1 = stateOfTheArtEncryptionIsUsed()
-                        val q2 = minimalKeyLengthIsEnforced()
-                        (q1 and q2) and manualAssessmentOf("Careful-Crypto-Analysis")
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
+                            manualAssessmentOf("Careful-Crypto-Analysis")
                     }
                 }
 
@@ -300,10 +300,7 @@ project {
                 requirement {
                     name = "Transport Encryption of Key"
 
-                    fulfilledBy {
-                        val q = transportEncryptionForKeys()
-                        q
-                    }
+                    fulfilledBy(::transportEncryptionForKeys)
                 }
 
                 /**
@@ -313,10 +310,7 @@ project {
                 requirement {
                     name = "Key Accessible Only By Valid User"
 
-                    fulfilledBy {
-                        val q = keyOnyAccessibleByAuthenticatedEndpoint()
-                        q
-                    }
+                    fulfilledBy(::keyOnyAccessibleByAuthenticatedEndpoint)
                 }
             }
 
@@ -421,26 +415,43 @@ project {
                         } to true
                     )
 
+                    queryTree(
+                        { qt: QueryTree<Boolean> ->
+                            val lastNode =
+                                (qt.children.singleOrNull()?.value as? List<*>)?.lastOrNull()
+                            lastNode is MemberCallExpression &&
+                                lastNode.name.localName == "execute" &&
+                                ((lastNode.location
+                                    ?.artifactLocation
+                                    ?.uri
+                                    ?.toString()
+                                    ?.endsWith("cinder/volume/flows/manager/create_volume.py") ==
+                                    true &&
+                                    (lastNode.location?.region?.startLine == 605 ||
+                                        lastNode.location?.region?.startLine == 585)) ||
+                                    (lastNode.location
+                                        ?.artifactLocation
+                                        ?.uri
+                                        ?.toString()
+                                        ?.endsWith("cinder/utils.py") == true &&
+                                        lastNode.location?.region?.startLine == 172) ||
+                                    (lastNode.location
+                                        ?.artifactLocation
+                                        ?.uri
+                                        ?.toString()
+                                        ?.endsWith(
+                                            "magnum/conductor/handlers/common/cert_manager.py"
+                                        ) == true &&
+                                        (lastNode.location?.region?.startLine == 197 ||
+                                            lastNode.location?.region?.startLine == 169)))
+                        } to false
+                    )
+
                     /**
                      * This access to the DB explicitly allows to read the default volume type of
                      * all projects.
                      */
                     queryTreeById("00000000-297e-6d16-0000-0000000004f4" to true)
-
-                    /**
-                     * Suppression for the query that checks if a secret never flows into a call to
-                     * "execute". This occurrence is the key which is used during the disk
-                     * encryption which is an exception to the rule.
-                     */
-                    queryTreeById("ffffffff-ea38-da44-ffff-ffffd1b39b44" to false)
-                    queryTreeById("00000000-0000-0000-ffff-ffff86b6fde8" to false)
-                    queryTreeById("00000000-62d4-061f-ffff-ffff86b702d6" to false)
-                    queryTreeById("00000000-62d4-061f-ffff-ffff9e3cef5e" to false)
-                    queryTreeById("00000000-616b-9943-ffff-ffff9af85420" to false)
-                    queryTreeById("00000000-60f4-24da-0000-0000521436f1" to false)
-                    queryTreeById("ffffffff-95b8-4643-0000-00004dce0482" to false)
-                    queryTreeById("ffffffff-95b8-4643-ffff-ffff820fa70a" to false)
-                    queryTreeById("ffffffff-9cc2-59ba-0000-00003f5259f7" to false)
                 }
             }
         }
