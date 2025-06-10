@@ -110,6 +110,16 @@ project {
                     include("keystonemiddleware")
                     exclude("tests", "migrations")
                 }
+
+                /**
+                 * [KeystoneAuth] is a library that provides authentication handling for OpenStack
+                 * Keystone, the identity service.
+                 */
+                module("keystoneauth") {
+                    directory = "toe/libraries/keystoneauth"
+                    include("keystoneauth1")
+                    exclude("tests")
+                }
             }
         }
 
@@ -338,11 +348,10 @@ project {
                     // Checks if all access tokens used for authentication are validated by the
                     // token-based authentication and if they come from the request context.
                     fulfilledBy {
-                        val q1 = tokenBasedAuthenticationWhenRequired()
-                        val q2 = usesSameTokenAsCredential()
-                        val q3 = hasDataFlowToToken()
-                        val q4 = useKeystoneForAuthentication()
-                        q1 and q2 and q3 and q4
+                        tokenBasedAuthenticationWhenRequired() and
+                            usesSameTokenAsCredential() and
+                            hasDataFlowToToken() and
+                            useKeystoneForAuthentication()
                     }
                 }
 
