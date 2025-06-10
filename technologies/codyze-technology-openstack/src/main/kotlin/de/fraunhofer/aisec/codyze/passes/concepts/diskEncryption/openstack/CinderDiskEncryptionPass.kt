@@ -5,6 +5,8 @@ package de.fraunhofer.aisec.codyze.passes.concepts.diskEncryption.openstack
 
 import de.fraunhofer.aisec.codyze.passes.concepts.crypto.encryption.openstack.CinderKeyManagerSecretPass
 import de.fraunhofer.aisec.cpg.TranslationContext
+import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
+import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.*
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.*
@@ -75,7 +77,23 @@ class CinderDiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 }
                 ?.firstOrNull()
 
-        val cipher = cipherArg?.let { newCipher(underlyingNode = it, connect = true) }
+        val cipher =
+            cipherArg?.let {
+                val cipher = newCipher(underlyingNode = it, connect = true)
+                cipher.blockSize = 256
+                cipher.assume(
+                    AssumptionType.InputAssumptions,
+                    "We assume that the cipher is AES-256.\n\n" +
+                        "To validate this assumption, please check the configuration of the OpenStack Cinder service.",
+                )
+                cipher.cipherName = "aes-xts-plain64"
+                cipher.assume(
+                    AssumptionType.InputAssumptions,
+                    "We assume that the cipher is configured with \"AES-XTS-Plain64\".\n\n" +
+                        "To validate this assumption, please check the configuration of the OpenStack Cinder service.",
+                )
+                cipher
+            }
         newDiskEncryption(
                 underlyingNode = call,
                 cipher = cipher,
