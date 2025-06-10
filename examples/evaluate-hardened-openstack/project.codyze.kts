@@ -249,7 +249,7 @@ project {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
                     fulfilledBy {
-                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) and
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
                             manualAssessmentOf("Careful-Crypto-Analysis")
                     }
                 }
