@@ -28,7 +28,6 @@ open class AsymmetricSharedSecret(un: Node?) : Concept(underlyingNode = un)
 
 open class AsymmetricCiphertext(underlyingNode: Node?) : Concept(underlyingNode = underlyingNode)
 
-
 open class AsymmetricScheme_generateKey(un: Node?) : Operation(un, AsymmetricScheme(un)) {
     fun generate(rand: Randomness): Pair<PublicKey, PrivateKey> {
         return TODO()
@@ -46,20 +45,22 @@ open class AsymmetricDecrypt(un: Node?) : Operation(un, AsymmetricScheme(un)) {
     }
 }
 
-
-
 // Symmetric Cryptography
 
 open class SymmetricScheme(un: Node?) : Concept(un)
+
 // shall return a "KeyMaterial" Concept
 open class KeyGenerator(un: Node?) : Concept(un)
-open class SymmetricScheme_generateKey(un: Node?, rand: Randomness): Operation(un, KeyGenerator(un))
+
+open class SymmetricScheme_generateKey(un: Node?, rand: Randomness) :
+    Operation(un, KeyGenerator(un))
 
 open class Blockcipherkey(un: Node?) : Concept(un)
 
 // Can we tag a function such that it has to return a specific type and accept (at least) some
 // specific types?
-open class SymmetricEncrypt(un: Node?, plaintext: Any, key: Blockcipherkey) : Operation(un, SymmetricScheme(un)) {
+open class SymmetricEncrypt(un: Node?, plaintext: Any, key: Blockcipherkey) :
+    Operation(un, SymmetricScheme(un)) {
     var key: Blockcipherkey = key
     var plaintext: Any = plaintext
 }
@@ -72,13 +73,13 @@ open class SymmetricDecrypt(un: Node?) : Operation(un, SymmetricScheme(un)) {
     }
 }
 
-
 open class MessageAuthenticationCode(un: Node?) : Concept(un)
 
 // No-key-cryptography
 open class Randomness(un: Node?) : Concept(un)
 
 open class RandomnessSource(un: Node?) : Concept(un)
+
 open class Randomness_sample(un: Node?) : Operation(un, RandomnessSource(un))
 
 open class Hashfunction(un: Node?) : Concept(un)
@@ -86,8 +87,10 @@ open class Hashfunction(un: Node?) : Concept(un)
 open class EntropyPreservingFunction(un: Node?) : Concept(un)
 
 // meta-security
-/** Makes sure, that a key is not used in a way conflicting with a security policy.
- This includes checking the number of invocations using a key, or its lifetime*/
+/**
+ * Makes sure, that a key is not used in a way conflicting with a security policy. This includes
+ * checking the number of invocations using a key, or its lifetime
+ */
 open class UsageRestrictingModule(un: Node?) : Concept(un)
 
 /*
@@ -112,5 +115,3 @@ class HMAC(un: Node?) : EntropyPreservingFunction(un)
 open class Wireguard_CryptoKeyRoutingTable(un: Node?) : Concept(un)
 
 open class Wireguard_KeyStore
-
-

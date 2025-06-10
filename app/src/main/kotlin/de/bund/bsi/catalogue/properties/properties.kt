@@ -12,7 +12,6 @@ open class ImmutableObject(un: Node?) : Concept(un)
 
 open class InjectiveFunction(un: Node?) : Concept(un)
 
-
 /**
  * Is a function that removes the information contained in all concepts in "annihilatedNodes" from
  * cleanedNodes, i.e. even if there is technically an information flow from one node in aN to a node
@@ -37,7 +36,9 @@ open class Asset_Integrity(un: Node?) : Concept(un)
 open class Asset_Availability(un: Node?) : Concept(un)
 
 /**
- * Input to the TOE the user has (some) control over, like the content of text fields,
- * names of resources, etc. See [architecture.query.kts] for usage examples.
+ * Input to the TOE the user has (some) control over, like the content of text fields, names of
+ * resources, etc. See [architecture.query.kts] for usage examples.
  */
 open class UserInput(un: Node?) : Concept(un)
+
+open class UserInputDependentControlflow(un: Node?) : Concept(un)

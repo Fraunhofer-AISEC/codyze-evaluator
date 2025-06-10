@@ -17,6 +17,7 @@ import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
 import de.fraunhofer.aisec.cpg.passes.concepts.each
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import de.fraunhofer.aisec.cpg.passes.concepts.with
+import javax.management.Query
 
 
 fun checkInformationAnnihilatorsAreCorrectlyUsed(tr: TranslationResult) : QueryTree<Boolean> {
@@ -25,7 +26,11 @@ fun checkInformationAnnihilatorsAreCorrectlyUsed(tr: TranslationResult) : QueryT
 }
 
 
+fun objectsAreImmutableExceptByListOfFunctions(tr: TranslationResult, listAllowed : List<FunctionDeclaration>) : QueryTree<Boolean> {
 
+    TODO()
+
+}
 
 tag {
 

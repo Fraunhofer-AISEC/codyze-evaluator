@@ -45,7 +45,6 @@ open class PlaintextBackupEndpoint(
         requestContext,
     )
 
-
 // Avoid injection attacks
 
 /**
@@ -53,4 +52,3 @@ open class PlaintextBackupEndpoint(
  * or HTML-encoding if something based on the input is part of a website).
  */
 open class UserInputTransformator(un: Node?) : Concept(un)
-
