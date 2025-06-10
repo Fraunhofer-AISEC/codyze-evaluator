@@ -1,6 +1,7 @@
 /*
  * This file is part of the OpenStack Checker
  */
+import de.fraunhofer.aisec.codyze.dsl.fulfilledBy
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
@@ -90,6 +91,13 @@ project {
                 module("oslo.config") {
                     directory = "toe/libraries/oslo.config"
                     include("oslo_config")
+                    exclude("tests")
+                }
+
+                /** [OsloContext] is a library for managing contexts in OpenStack. */
+                module("oslo.context") {
+                    directory = "toe/libraries/oslo.context"
+                    include("oslo_context")
                     exclude("tests")
                 }
 
@@ -271,8 +279,9 @@ project {
                                 keyOnlyReachableThroughSecureKeyProvider(
                                     isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
                                 )
+                        val q2 = keyIsDeletedFromMemoryAfterUse()
 
-                        notLeakedAndReachable and keyIsDeletedFromMemoryAfterUse()
+                        notLeakedAndReachable and q2
                     }
                 }
 
