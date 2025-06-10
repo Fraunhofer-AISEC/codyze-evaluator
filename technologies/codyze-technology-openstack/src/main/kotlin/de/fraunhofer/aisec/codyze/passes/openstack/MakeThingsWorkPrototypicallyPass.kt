@@ -40,9 +40,9 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                     it.base?.name?.localName == "magnum_cert"
             })) {
             val secret = newSecret(underlyingNode = getSecretCall, connect = true)
-            val getSecret =
-                newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true)
-                    .apply { this.nextDFG += getSecretCall }
+            newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true).apply {
+                this.nextDFG += getSecretCall
+            }
         }
     }
 
@@ -56,9 +56,9 @@ class MakeThingsWorkPrototypicallyPass(ctx: TranslationContext) : TranslationRes
                 it.name.localName == "get_secret" && it.base?.name?.localName == "retrieve_plugin"
             })) {
             val secret = newSecret(underlyingNode = getSecretCall, connect = true)
-            val getSecret =
-                newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true)
-                    .apply { this.nextDFG += getSecretCall }
+            newGetSecret(underlyingNode = getSecretCall, concept = secret, connect = true).apply {
+                this.nextDFG += getSecretCall
+            }
         }
     }
 }
