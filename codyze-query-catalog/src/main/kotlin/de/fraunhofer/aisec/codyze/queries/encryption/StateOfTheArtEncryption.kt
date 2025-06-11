@@ -4,7 +4,9 @@
 package de.fraunhofer.aisec.codyze.queries.encryption
 
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.assumptions.AssumptionType
 import de.fraunhofer.aisec.cpg.assumptions.addAssumptionDependence
+import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.IN
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -44,7 +46,15 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
         // We use the Query-API's infix function `IN` for the check.
         // Since this function requires a QueryTree object as input,
         // we use manually create one based on the cipher's name.
-        QueryTree(it.cipher?.cipherName).addAssumptionDependence(it.cipher) IN allowedCiphers
+        it.cipher?.cipherName?.let { cipherName ->
+            (QueryTree(cipherName, node = it).addAssumptionDependence(it.cipher) IN allowedCiphers)
+        }
+            ?: QueryTree(false, node = it)
+                .assume(
+                    AssumptionType.InputAssumptions,
+                    "We assume that the cipher may not have been configured in a good way by the user.\n\n" +
+                        "To validate this assumption, it is necessary to check all possible options but we do not have access to the information.",
+                )
     }
 }
 
@@ -67,7 +77,15 @@ fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
             // It has to be greater or equal (infix function `ge` of the Query-API).
             // Since this function requires a QueryTree object as input,
             // we use create with the Query-API's `const` function.
-            QueryTree(value = it.key?.keySize ?: 0).addAssumptionDependence(it.key) ge SYM_KEYLENGTH
+            it.key?.keySize?.let { keySize ->
+                QueryTree(value = keySize).addAssumptionDependence(it.key) ge SYM_KEYLENGTH
+            }
+                ?: QueryTree(false, node = it)
+                    .assume(
+                        AssumptionType.InputAssumptions,
+                        "We assume that the key size may not have been configured in a good way by the user.\n\n" +
+                            "To validate this assumption, it is necessary to check all possible options but we do not have access to the information.",
+                    )
         }
 
     return tree
