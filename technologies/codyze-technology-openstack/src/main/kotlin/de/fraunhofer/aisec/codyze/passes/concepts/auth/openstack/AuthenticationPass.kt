@@ -159,7 +159,9 @@ class AuthenticationPass(ctx: TranslationContext) : TranslationResultPass(ctx) {
         while (worklist.isNotEmpty()) {
             val currentRecord = worklist.removeFirst()
             val field = currentRecord.fields.singleOrNull { it.name.localName == fieldName }
-            if (field != null) return field
+            if (field != null) {
+                return field
+            }
             worklist += currentRecord.superTypeDeclarations.filter { alreadySeen.add(it) }
         }
         return null
