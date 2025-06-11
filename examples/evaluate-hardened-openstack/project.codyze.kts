@@ -321,18 +321,25 @@ project {
             category("Multi-Tenancy") {
                 name = "Multi-Tenancy"
 
-                /** All authentication operations must use Keystone as the identity service. */
+                /** All services need to use Keystone as their authentication strategy. */
                 requirement {
-                    name = "Use Keystone for authentication"
+                    name = "Use Keystone for Authentication"
 
                     fulfilledBy(::keystoneAuthStrategyConfigured)
                 }
 
-                /** All private endpoints must only be accessible after authentication. */
+                /**
+                 * All endpoints for [Cinder] and [Barbican] must only be accessible after
+                 * authentication.
+                 */
                 requirement {
                     name = "All Endpoints Must Have Authentication Enabled"
 
-                    fulfilledBy(::endpointsAreAuthenticated)
+                    fulfilledBy {
+                        endpointsAreAuthenticated(
+                            shouldHaveAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                        )
+                    }
                 }
 
                 /** All endpoints have token-based authentication. */
@@ -342,7 +349,9 @@ project {
                     // Checks if all access tokens used for authentication are validated by the
                     // token-based authentication and if they come from the request context.
                     fulfilledBy {
-                        tokenBasedAuthenticationWhenRequired() and
+                        tokenBasedAuthenticationWhenRequired(
+                            requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                        ) and
                             usesSameTokenAsCredential() and
                             hasDataFlowToToken() and
                             useKeystoneForAuthentication()
@@ -370,7 +379,7 @@ project {
                  * answered.
                  */
                 requirement {
-                    name = "No Data Flows to Globals"
+                    name = "No Data Flows to Globals in User-Scoped Requests"
 
                     fulfilledBy { noDataFlowsToGlobals<HttpRequest>() }
                 }
@@ -381,7 +390,7 @@ project {
                  * found” or “already exists” happen.
                  */
                 requirement {
-                    name = "Not Unauthorized Access for Other Domains"
+                    name = "Respond with Unauthorized Access for Other Domains"
 
                     fulfilledBy {
                         unauthorizedResponseFromAnotherDomainQuery(

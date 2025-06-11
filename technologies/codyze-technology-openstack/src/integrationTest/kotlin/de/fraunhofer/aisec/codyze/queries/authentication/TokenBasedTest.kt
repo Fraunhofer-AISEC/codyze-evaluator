@@ -7,6 +7,7 @@ import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.taggingProfiles
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.query.and
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -54,7 +55,10 @@ class TokenBasedTest {
 
         with(result) {
             // Is a valid token provider configured?
-            val r = tokenBasedAuthenticationWhenRequired()
+            val r =
+                tokenBasedAuthenticationWhenRequired(
+                    requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                )
             assertTrue(r.value)
             println(r.printNicely())
         }
