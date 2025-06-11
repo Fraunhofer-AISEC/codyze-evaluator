@@ -20,8 +20,6 @@ import de.fraunhofer.aisec.cpg.graph.Implicit
 import de.fraunhofer.aisec.cpg.graph.Intraprocedural
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.graph.declarations.ParameterDeclaration
-import de.fraunhofer.aisec.cpg.graph.edges.flows.ContextSensitiveDataflow
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.followNextFullDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement
@@ -142,33 +140,27 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
                         stringRepresentation = "No policy found for the endpoint",
                         node = this,
                     )
-
-            // TODO(oxisto): Find a better way to get the start node of the data flow. We need to
-            // keep this inside the current end-point's call of policy.authorize.
-            val start =
-                (actionArgument.prevDFG.first() as ParameterDeclaration)
-                    .prevDFGEdges
-                    .firstOrNull {
-                        (it as ContextSensitiveDataflow).callingContext.call ==
-                            authorize.concept.underlyingNode
-                    }
-                    ?.start
-
-            dataFlow(
-                // We start at the `action` argument of the policy.authorize call.
-                startNode = start ?: TODO(),
-                // We traverse the data flow graph in the backward direction to find out if it comes
-                // from the policy reference.
-                direction = Backward(GraphToFollow.DFG),
-                scope = Intraprocedural(),
-                // The criterion must hold on every path, so we use `Must` analysis.
-                type = Must,
-                // The predicate checks if the node is the policy reference of the authorization
-                // belonging to the given HttpEndpoint.
-                predicate = { it == policyRef },
-            )
+            // authorize.concept.underlyingNode
+            val flow =
+                dataFlow(
+                    // We start at the `action` argument of the policy.authorize call.
+                    startNode = actionArgument,
+                    // We traverse the data flow graph in the backward direction to find out if it
+                    // comes from the policy reference.
+                    direction = Backward(GraphToFollow.DFG),
+                    // Provide a call stack context to ensure that we are checking only the path
+                    // from the end-point to the respective policy.authorize call that can be traced
+                    // back to the endpoint.
+                    ctx = Context.ofCallStack(authorize.concept.underlyingNode as CallExpression),
+                    // The criterion must hold on every path, so we use `Must` analysis.
+                    type = Must,
+                    // The predicate checks if the node is the policy reference of the authorization
+                    // belonging to the given HttpEndpoint.
+                    predicate = { it == policyRef },
+                )
+            flow
         }
-        .mergeWithAll()
+        .mergeWithAll(node = this)
 }
 
 /**
