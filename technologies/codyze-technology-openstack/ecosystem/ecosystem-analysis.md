@@ -540,24 +540,23 @@ However, the signatures are not visible on https://releases.openstack.org/dalmat
 
 As described above, the guidelines were executed for OpenStack and, where applicable, for the Nova component (in the 2024.2 release). The following table summarizes the analysis results.
 
-| Guideline / KPI                                 | Result                                              |
-|--------------------------------------------|---------------------------------------------------------------------------|
-| G1: Checking Known Vulnerabilities                 | Result: *Fulfilled for Nova 2024.2.* A search for OpenStack vulnerabilities in the github.com/openstack/nova package results in various potential vulnerabilities. One listed vulnerability, for example, is CVE-2022-47951 which shows that the vulnerability has been fixed. Also, the vulnerability does not affect the 2024.2 release. One OSSA (2024-002 has been released which affects Nova in the 2024.2 release; [a patch, however, has been released](https://security.openstack.org/ossa/OSSA-2024-002.html).) |
-| G2: Checking Continuous Maintenance: Dependency update tool                | *Fulfilled.* The OpenStack proposal bot is in active use. |
-| G2: Checking Continuous Maintenance: Security policy                | *Fulfilled.* The OpenStack projects have a common security policy, including information on vulnerability management, defined. |
-| G2: Checking Continuous Maintenance: License                | *Fulfilled.* All OpenStack projects have a license defined. |
-| G3: Checking CII Best Practices                    | *Fulfilled for the basic level.* OpenStack has the *passing* batch. However, looking at the gold level, some security-related criteria are not fulfilled. These refer to the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options which are not used in the OpenStack ecosystem. |
-| G4: Checking Continuous Testing: CI tests                    | *Fulfilled.* The individual checks for the opendev repository, repository template, zuul.yaml, zuul job definitions, check and gate pipelines, tox.ini file, the test directory, and gerrit 'verified' and 'workflow' parts were successful. |
-| G4: Checking Continuous Testing: Fuzzing                    | ***Not Fulfilled.*** CI files (such as the Nova CI file) do not indicate a usage of fuzzing tools in the pipeline. Also, the security guide does not mention fuzzing tools |
-| G4: Checking Continuous Testing: SAST                    | ***Not Fulfilled.*** The OpenStack documentation or CI does not stipulate SAST usage. |
-| G5: Checking CI/CD Security: Gerrit settings                        | *Fulfilled.* Project is listed, config exists, access rights are correct, and review and workflow configs are proper. |
-| G5: Checking CI/CD Security: Branch protection                      | *Partly Fulfilled.* Code must be approved by at least one core-reviewer and code must pass automated gate tests and automated testcases. These protections account to tier 4 (of 5) [of OSSF criteria](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection).
- |
-| G5: Checking CI/CD Security: Dangerous workflows                        | *Fulfilled.* Project is listed correctly and pipeline definition has not submit: true field. |
-| G5: Checking CI/CD Security: Token permissions                        | *Fulfilled.* See dangerous workflows results. |
-| G6: Checking Code Contributions and Reviews: Code review         | *Fulfilled.* Code changes are reviewed by humans with +2 votes. |
-| G6: Checking Code Contributions and Reviews: Contributors        | *Partially fulfilled.* 12 contributors, 6 companies in commits, 6 do not merge votings, 2.6:1 Filed-to-Resolved-Bugs ratio , 5 abandoned change requests, 45 reviewers, 18 companies in reviews, most top contributors have been active in the last 12 months, all contributions undergo peer review. |
-| G7: Checking Build Risks: Binary artifacts                           | *Fulfilled.* No binary artifacts found. |
-| G7: Checking Build Risks: Pinned dependencies                           | *Partly fulfilled.* Only minimum version numbers are defined for each dependency. |
-| G7: Checking Build Risks: Packaging                           | *Fulfilled.* Project can be found on PyPi. |
-| G7: Checking Build Risks: Signed releases                           | *Partly fulfilled.* Releases are signed but the signatures do not seem to be visible on the releases page. |
+| Guideline / KPI                                 | Result                                              | Status |
+|--------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| G1: Checking Known Vulnerabilities                 | A search for OpenStack vulnerabilities in the github.com/openstack/nova package results in various potential vulnerabilities. One listed vulnerability, for example, is CVE-2022-47951 which shows that the vulnerability has been fixed. Also, the vulnerability does not affect the 2024.2 release. One OSSA (2024-002 has been released which affects Nova in the 2024.2 release; [a patch, however, has been released](https://security.openstack.org/ossa/OSSA-2024-002.html).) | *Fulfilled for Nova 2024.2* | 
+| G2: Checking Continuous Maintenance: Dependency update tool                | The OpenStack proposal bot is in active use. | *Fulfilled* |
+| G2: Checking Continuous Maintenance: Security policy                | The OpenStack projects have a common security policy, including information on vulnerability management, defined. | *Fulfilled* |
+| G2: Checking Continuous Maintenance: License                | All OpenStack projects have a license defined. | *Fulfilled*  |
+| G3: Checking CII Best Practices                    | OpenStack has the *passing* batch. However, looking at the gold level, some security-related criteria are not fulfilled. These refer to the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options which are not used in the OpenStack ecosystem. | *Fulfilled for the basic level* |
+| G4: Checking Continuous Testing: CI tests                    | The individual checks for the opendev repository, repository template, zuul.yaml, zuul job definitions, check and gate pipelines, tox.ini file, the test directory, and gerrit 'verified' and 'workflow' parts were successful. | *Fulfilled* |
+| G4: Checking Continuous Testing: Fuzzing                    | CI files (such as the Nova CI file) do not indicate a usage of fuzzing tools in the pipeline. Also, the security guide does not mention fuzzing tools | ***Not Fulfilled*** |
+| G4: Checking Continuous Testing: SAST                    | The OpenStack documentation or CI does not stipulate SAST usage. | ***Not Fulfilled*** |
+| G5: Checking CI/CD Security: Gerrit settings                        | Project is listed, config exists, access rights are correct, and review and workflow configs are proper. | *Fulfilled* |
+| G5: Checking CI/CD Security: Branch protection                      | Code must be approved by at least one core-reviewer and code must pass automated gate tests and automated testcases. These protections account to tier 4 (of 5) [of OSSF criteria](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection). | *Partly Fulfilled*  |
+| G5: Checking CI/CD Security: Dangerous workflows                        | Project is listed correctly and pipeline definition has not submit: true field. | *Fulfilled* |
+| G5: Checking CI/CD Security: Token permissions                        | See dangerous workflows results. | *Fulfilled* |
+| G6: Checking Code Contributions and Reviews: Code review         | Code changes are reviewed by humans with +2 votes. | *Fulfilled* |
+| G6: Checking Code Contributions and Reviews: Contributors        | 12 contributors, 6 companies in commits, 6 do not merge votings, 2.6:1 Filed-to-Resolved-Bugs ratio , 5 abandoned change requests, 45 reviewers, 18 companies in reviews, most top contributors have been active in the last 12 months, all contributions undergo peer review. | *Partially fulfilled* |
+| G7: Checking Build Risks: Binary artifacts                           | No binary artifacts found. | *Fulfilled* |
+| G7: Checking Build Risks: Pinned dependencies                           | Only minimum version numbers are defined for each dependency. | *Partly fulfilled* |
+| G7: Checking Build Risks: Packaging                           | Project can be found on PyPi. | *Fulfilled* |
+| G7: Checking Build Risks: Signed releases                           | Releases are signed but the signatures do not seem to be visible on the releases page. | *Partly fulfilled*  |
