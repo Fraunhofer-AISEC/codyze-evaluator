@@ -126,7 +126,9 @@ project {
                 requirement {
                     name = "No Known Vulnerabilities"
 
-                    fulfilledBy { manualAssessmentOf("Dependencies") }
+                    fulfilledBy {
+                        manualAssessmentOf("Ecosystem-G1-Checking-Known-Vulnerabilities")
+                    }
                 }
 
                 /**
@@ -134,21 +136,51 @@ project {
                  * tools like proposal bots. Verify active development and maintenance activities,
                  * ensuring adherence to security policies and having proper licenses.
                  */
-                requirement { name = "Continuous Maintenance" }
+                requirement {
+                    name = "Continuous Maintenance"
+
+                    fulfilledBy {
+                        manualAssessmentOf(
+                            "Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Dependency-Update-Tool"
+                        ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Security-Policy"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G2-Checking-Continuous-Maintenance-KPI-License"
+                            )
+                    }
+                }
 
                 /**
                  * Review adherence to best practices for open-source projects, including
                  * key-hardening headers and dynamic analysis tools for major releases. Check the
                  * project's OSSF best practices badge.
                  */
-                requirement { name = "CI/CD Best Practices" }
+                requirement {
+                    name = "CI/CD Best Practices"
+
+                    fulfilledBy { manualAssessmentOf("Ecosystem-G3-Checking-CII-Best-Practices") }
+                }
 
                 /**
                  * Verify the execution of CI tests and mandatory and correct integration of tools
                  * like Zuul before code merges. Also look into the usage of fuzzing, SAST tools,
                  * and evaluate the testing interface consistency across projects.
                  */
-                requirement { name = "Continuous Testing" }
+                requirement {
+                    name = "Continuous Testing"
+
+                    fulfilledBy {
+                        manualAssessmentOf(
+                            "Ecosystem-G4-Checking-Continuous-Testing-KPI-CI-Tests"
+                        ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G4-Checking-Continuous-Testing-KPI-Fuzzing"
+                            ) and
+                            manualAssessmentOf("Ecosystem-G4-Checking-Continuous-Testing-KPI-SAST")
+                    }
+                }
 
                 /**
                  * Ensure that CI/CD security settings are properly configured, including Gerrit
@@ -158,7 +190,20 @@ project {
                 requirement {
                     name = "CI/CD Security"
 
-                    fulfilledBy { manualAssessmentOf("Branch-Protection") }
+                    fulfilledBy {
+                        manualAssessmentOf(
+                            "Ecosystem-G5-Checking-CI/CD-Security-KPI-Gerrit-Settings"
+                        ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G5-Checking-CI/CD-Security-KPI-Branch-Protection"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G5-Checking-CI/CD-Security-KPI-Dangerous-Workflows"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G5-Checking-CI/CD-Security-KPI-Token-Permissions"
+                            )
+                    }
                 }
 
                 /**
@@ -170,8 +215,36 @@ project {
                     name = "Code Contributions and Reviews"
 
                     fulfilledBy {
-                        manualAssessmentOf("Release-Reviewers-Nova") and
-                            manualAssessmentOf("Contributor-Diversity-Nova")
+                        manualAssessmentOf(
+                            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Code-Review"
+                        ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributors"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-not-merge-votings"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Filed-To-Resolved-Bugs-Ratio"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewers"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewer-Diversity"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Review-Activity"
+                            )
                     }
                 }
 
@@ -180,7 +253,24 @@ project {
                  * packaging and signed releases to mitigate build risks, ensuring reproducibility
                  * and security of artifacts.
                  */
-                requirement { name = "Build Risks" }
+                requirement {
+                    name = "Build Risks"
+
+                    fulfilledBy {
+                        manualAssessmentOf(
+                            "Ecosystem-G7-Checking-Build-Risks-KPI-Binary-Artifacts"
+                        ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G7-Checking-Build-Risks-KPI-Pinned-Dependencies"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G7-Checking-Build-Risks-KPI-Packaging"
+                            ) and
+                            manualAssessmentOf(
+                                "Ecosystem-G7-Checking-Build-Risks-KPI-Signed-Releases"
+                            )
+                    }
+                }
             }
 
             /** This describes generic security requirements for all OpenStack components. */
