@@ -103,6 +103,13 @@ project {
                     exclude("tests")
                 }
 
+                /** [OsloPolicy] is a library for managing contexts in OpenStack. */
+                module("oslo.policy") {
+                    directory = "toe/libraries/oslo.policy"
+                    include("oslo_policy")
+                    exclude("tests")
+                }
+
                 /**
                  * [KeystoneMiddleware] is a library that provides middleware components for
                  * OpenStack Keystone, the identity service.
