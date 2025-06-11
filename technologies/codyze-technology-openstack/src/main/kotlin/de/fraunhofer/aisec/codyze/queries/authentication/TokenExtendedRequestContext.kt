@@ -3,19 +3,17 @@
  */
 package de.fraunhofer.aisec.codyze.queries.authentication
 
-import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.AuthAccessContext
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.graph.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.*
 import de.fraunhofer.aisec.cpg.query.*
 
-/**
- * Checks if there is a data flow from the [ExtendedRequestContext.token] into the [TokenBasedAuth].
- */
+/** Checks if there is a data flow from the [AuthAccessContext.token] into the [TokenBasedAuth]. */
 context(TranslationResult)
 fun hasDataFlowToToken(): QueryTree<Boolean> {
     val tr = this@TranslationResult
-    return tr.allExtended<ExtendedRequestContext>(
+    return tr.allExtended<AuthAccessContext>(
         mustSatisfy = { ctx ->
             val token = ctx.token
             if (

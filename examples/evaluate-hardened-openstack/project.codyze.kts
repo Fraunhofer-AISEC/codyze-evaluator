@@ -103,6 +103,13 @@ project {
                     exclude("tests")
                 }
 
+                /** [OsloPolicy] is a library for managing contexts in OpenStack. */
+                module("oslo.policy") {
+                    directory = "toe/libraries/oslo.policy"
+                    include("oslo_policy")
+                    exclude("tests")
+                }
+
                 /**
                  * [KeystoneMiddleware] is a library that provides middleware components for
                  * OpenStack Keystone, the identity service.
@@ -268,7 +275,8 @@ project {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
                     fulfilledBy {
-                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or manualAssessmentOf("Careful-Crypto-Analysis")
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
+                            manualAssessmentOf("Careful-Crypto-Analysis")
                     }
                 }
 
@@ -344,12 +352,15 @@ project {
                     }
                 }
 
-                /** All endpoints have token-based authentication. */
+                /**
+                 * All endpoints must use access tokens from a valid [tokenProvider]. The access
+                 * tokens used for authentication are validated by the token-based authentication,
+                 * and they must come from the request context. Finally, the user/domain/project
+                 * information in the token must be used in the authentication process.
+                 */
                 requirement {
                     name = "Token-based Authentication"
 
-                    // Checks if all access tokens used for authentication are validated by the
-                    // token-based authentication and if they come from the request context.
                     fulfilledBy {
                         tokenBasedAuthenticationWhenRequired(
                             requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI,
