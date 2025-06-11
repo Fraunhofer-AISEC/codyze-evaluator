@@ -4,6 +4,7 @@
 package de.fraunhofer.aisec.codyze.queries.encryption
 
 import de.fraunhofer.aisec.cpg.TranslationResult
+import de.fraunhofer.aisec.cpg.assumptions.addAssumptionDependence
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.IN
 import de.fraunhofer.aisec.cpg.query.QueryTree
@@ -43,7 +44,7 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
         // We use the Query-API's infix function `IN` for the check.
         // Since this function requires a QueryTree object as input,
         // we use manually create one based on the cipher's name.
-        QueryTree(it.cipher?.cipherName) IN allowedCiphers
+        QueryTree(it.cipher?.cipherName).addAssumptionDependence(it.cipher) IN allowedCiphers
     }
 }
 
@@ -66,7 +67,7 @@ fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
             // It has to be greater or equal (infix function `ge` of the Query-API).
             // Since this function requires a QueryTree object as input,
             // we use create with the Query-API's `const` function.
-            (it.key?.keySize ?: 0) ge SYM_KEYLENGTH
+            QueryTree(value = it.key?.keySize ?: 0).addAssumptionDependence(it.key) ge SYM_KEYLENGTH
         }
 
     return tree
