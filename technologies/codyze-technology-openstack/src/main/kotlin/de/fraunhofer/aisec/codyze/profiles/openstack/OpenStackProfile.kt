@@ -3,8 +3,8 @@
  */
 package de.fraunhofer.aisec.codyze.profiles.openstack
 
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.AuthAccessContext
 import de.fraunhofer.aisec.codyze.graph.concepts.auth.CheckDomainScope
-import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.codyze.graph.concepts.auth.UserInfo
 import de.fraunhofer.aisec.codyze.graph.concepts.database.DatabaseAccess
 import de.fraunhofer.aisec.codyze.graph.concepts.database.Filter
@@ -73,7 +73,7 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
  * Tags appropriate nodes inside [KeystoneMiddleware] with authentication concepts.
  * - [TokenBasedAuth] for `user_token` member expressions.
  * - [Authenticate] for calls to `_do_fetch_token` that use the `user_token`.
- * - [ExtendedRequestContext] for constructors of `AccessInfoV3` that use the `user_token`.
+ * - [AuthAccessContext] for constructors of `AccessInfoV3` that use the `user_token`.
  *
  * This allows the analysis to track authentication flows and user information within OpenStack
  * components that use [Keystone].
@@ -92,7 +92,7 @@ fun TaggingContext.tagKeystoneMiddlewareAuthentication() {
         .withMultiple {
             val overlays = mutableListOf<OverlayNode>()
             val token = node.parameters[1]
-            val reqContext = ExtendedRequestContext(underlyingNode = node, token = token)
+            val reqContext = AuthAccessContext(underlyingNode = node, token = token)
             val accessInfo = node.recordDeclaration
             val userInfo =
                 UserInfo(
