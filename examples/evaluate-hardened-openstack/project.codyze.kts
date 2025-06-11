@@ -15,6 +15,7 @@ import example.queries.keystoneAuthStrategyConfigured
 include {
     Tagging from "tagging.codyze.kts"
     ManualAssessment from "assessment.codyze.kts"
+    AssumptionDecisions from "assumptions.codyze.kts"
 }
 
 project {
@@ -267,8 +268,7 @@ project {
                     name = "State-of-the-Art Disk Encryption Algorithm"
 
                     fulfilledBy {
-                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or
-                            manualAssessmentOf("Careful-Crypto-Analysis")
+                        (stateOfTheArtEncryptionIsUsed() and minimalKeyLengthIsEnforced()) or manualAssessmentOf("Careful-Crypto-Analysis")
                     }
                 }
 
