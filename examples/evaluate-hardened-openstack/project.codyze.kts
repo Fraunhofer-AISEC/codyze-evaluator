@@ -283,13 +283,15 @@ project {
                     name = "Key for Disk Encryption is Kept Secure"
 
                     fulfilledBy {
-                        val notLeakedAndReachable =
+                        val notLeaked =
                             keyNotLeakedThroughOutput(
                                 isLeakyOutput = Node::dataLeavesOpenStackComponent
-                            ) and
-                                keyOnlyReachableThroughSecureKeyProvider(
-                                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
-                                )
+                            )
+                        val keyReachable =
+                            encryptionKeyOriginatesFromSecureKeyProvider(
+                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                            )
+                        val notLeakedAndReachable = notLeaked and keyReachable
                         val q2 = keyIsDeletedFromMemoryAfterUse()
 
                         notLeakedAndReachable and q2
@@ -462,6 +464,26 @@ project {
                      * all projects.
                      */
                     queryTreeById("00000000-297e-6d16-0000-0000000004f4" to true)
+
+                    /**
+                     * We suppress `keymgr.get` calls because the other paths would need to be invalidated by the `HttpRequest`. The graph models this as a alternative path, which is not what we want here.
+                     */
+                    queryTree(
+                        { qt: QueryTree<Boolean> ->
+                            ((qt.children.singleOrNull()?.value as? List<*>)?.any {
+                                it is Node &&
+                                    it !is HttpRequest &&
+                                    it.location
+                                        ?.artifactLocation
+                                        ?.uri
+                                        ?.path
+                                        ?.endsWith(
+                                            "/examples/evaluate-hardened-openstack/toe/modules/cinder/cinder/volume/flows/manager/create_volume.py"
+                                        ) == true &&
+                                    (it.location?.region?.startLine == 515)
+                            } == true)
+                        } to true
+                    )
                 }
             }
         }

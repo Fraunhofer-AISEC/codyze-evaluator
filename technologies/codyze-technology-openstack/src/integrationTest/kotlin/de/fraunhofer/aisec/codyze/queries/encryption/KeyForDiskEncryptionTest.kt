@@ -11,7 +11,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.get
 import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
-import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.test.*
 
@@ -19,8 +18,9 @@ import kotlin.test.*
 class KeyForDiskEncryptionTest {
 
     /**
-     * Test case for [keyOnlyReachableThroughSecureKeyProvider] using [isSecureOpenStackKeyProvider]
-     * with [OpenStackProfile]. The analyzed components are [Cinder] and [Barbican].
+     * Test case for [encryptionKeyOriginatesFromSecureKeyProvider] using
+     * [isSecureOpenStackKeyProvider] with [OpenStackProfile]. The analyzed components are [Cinder]
+     * and [Barbican].
      */
     @Test
     fun testKeyOnlyReachableThroughSecureKeyProvider() {

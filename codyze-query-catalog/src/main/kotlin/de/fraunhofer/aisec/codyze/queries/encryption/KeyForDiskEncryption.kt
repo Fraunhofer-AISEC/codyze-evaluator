@@ -47,10 +47,10 @@ fun keyNotLeakedThroughOutput(isLeakyOutput: Node.() -> Boolean): QueryTree<Bool
 
 /**
  * This query enforces the following statement: "Given a customer-managed key K used for disk
- * encryption, K must only be accessible via the Barbican API endpoint."
+ * encryption, K must only be retrieved from the Barbican API endpoint."
  */
 context(TranslationResult)
-inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
+inline fun <reified T : Node> encryptionKeyOriginatesFromSecureKeyProvider(
     crossinline isSecureKeyProvider: T.() -> Boolean
 ): QueryTree<Boolean> {
     val tr = this@TranslationResult
@@ -63,8 +63,8 @@ inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
                 // Barbican API endpoint.
                 // We perform this check with a backward data flow analysis.
                 dataFlow(
-                    // We start our data flow analysis at the encryption operation.
-                    startNode = encryption,
+                    // We start our data flow analysis at the encryption key.
+                    startNode = key,
                     // We want to make sure that each DFG-path leads us to the Barbican API
                     // endpoint, so we use a Must analysis.
                     type = Must,
