@@ -7,6 +7,7 @@ import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
+import de.fraunhofer.aisec.codyze.queries.isolation.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -382,7 +383,10 @@ project {
 
                     fulfilledBy {
                         val q1 = endpointAuthorizationBasedOnDomainOrProject()
-                        val q2 = databaseAccessBasedOnDomainOrProject()
+                        val q2 =
+                            databaseAccessBasedOnDomainOrProject(
+                                hasCheckForDomain = Node::hasCheckForDomain
+                            )
                         q1 and q2
                     }
                 }

@@ -192,7 +192,9 @@ fun endpointAuthorizationBasedOnDomainOrProject(): QueryTree<Boolean> {
  * used as a filter in the database query.
  */
 context(TranslationResult)
-fun databaseAccessBasedOnDomainOrProject(): QueryTree<Boolean> {
+fun databaseAccessBasedOnDomainOrProject(
+    hasCheckForDomain: Node.() -> Boolean
+): QueryTree<Boolean> {
     val tr = this@TranslationResult
     return tr.allExtended<DatabaseAccess>(
             mustSatisfy = {
@@ -203,7 +205,8 @@ fun databaseAccessBasedOnDomainOrProject(): QueryTree<Boolean> {
                         stringRepresentation = "No context provided",
                     )
                 }
-                it.ops.any { it is Filter }.toQueryTree()
+                // TODO: check again if this works as intended
+                it.ops.any { it is Filter && it.by.hasCheckForDomain() }.toQueryTree()
             }
         )
         .assume(

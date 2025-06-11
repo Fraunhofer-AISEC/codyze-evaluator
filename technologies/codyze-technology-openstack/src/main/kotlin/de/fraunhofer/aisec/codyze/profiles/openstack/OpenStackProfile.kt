@@ -117,17 +117,17 @@ fun TaggingContext.tagDatabaseAccess() {
 
         val paths =
             node.followDFGEdgesUntilHit {
-                (it is MemberCallExpression || it is MemberExpression) &&
+                (it is MemberCallExpression) &&
                     // It can be `filter` or `filter_by`
                     it.name.localName.startsWith("filter") ||
                     it.name.localName.startsWith("with_entities")
             }
 
         val filterCalls = paths.fulfilled.map { path -> path.nodes.last() }
-        val by = node.arguments.getOrNull(1)
 
-        if (by != null) {
-            filterCalls.forEach { filterCall ->
+        filterCalls.forEach { filterCall ->
+            val by = node.arguments.getOrNull(0)
+            if (by != null) {
                 overlays += Filter(underlyingNode = filterCall, concept = dbAccess, by = by)
             }
         }

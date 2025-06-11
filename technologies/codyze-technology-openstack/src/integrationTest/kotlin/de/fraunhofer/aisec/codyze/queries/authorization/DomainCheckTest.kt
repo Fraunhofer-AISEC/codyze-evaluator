@@ -5,6 +5,8 @@ package de.fraunhofer.aisec.codyze.queries.authorization
 
 import de.fraunhofer.aisec.codyze.*
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
+import de.fraunhofer.aisec.codyze.queries.isolation.hasCheckForDomain
+import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -39,7 +41,7 @@ class DomainCheckTest {
 
         assertNotNull(result)
         with(result) {
-            val q = databaseAccessBasedOnDomainOrProject()
+            val q = databaseAccessBasedOnDomainOrProject(Node::hasCheckForDomain)
             assertFalse(q.value)
         }
     }
