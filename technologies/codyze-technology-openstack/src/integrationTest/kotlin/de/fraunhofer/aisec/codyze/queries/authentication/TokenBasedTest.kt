@@ -57,7 +57,8 @@ class TokenBasedTest {
             // Is a valid token provider configured?
             val r =
                 tokenBasedAuthenticationWhenRequired(
-                    requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                    requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI,
+                    validTokenProvider = tokenProvider,
                 )
             assertTrue(r.value)
             println(r.printNicely())

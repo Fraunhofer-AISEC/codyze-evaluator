@@ -350,7 +350,8 @@ project {
                     // token-based authentication and if they come from the request context.
                     fulfilledBy {
                         tokenBasedAuthenticationWhenRequired(
-                            requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                            requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI,
+                            validTokenProvider = tokenProvider,
                         ) and
                             usesSameTokenAsCredential() and
                             hasDataFlowToToken() and
