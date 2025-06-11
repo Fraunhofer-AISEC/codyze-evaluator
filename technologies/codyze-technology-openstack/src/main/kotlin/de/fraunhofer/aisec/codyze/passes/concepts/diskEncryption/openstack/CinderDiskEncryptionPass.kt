@@ -80,10 +80,10 @@ class CinderDiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
         val cipher =
             cipherArg?.let {
                 val cipher = newCipher(underlyingNode = it, connect = true)
-                cipher.blockSize = 256
+                cipher.keySize = 256
                 cipher.assume(
                     AssumptionType.InputAssumptions,
-                    "We assume that the cipher is AES-256.\n\n" +
+                    "We assume that the size of the cipher's key is 256 bit.\n\n" +
                         "To validate this assumption, please check the configuration of the OpenStack Cinder service.",
                 )
                 cipher.cipherName = "aes-xts-plain64"
@@ -94,12 +94,16 @@ class CinderDiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 )
                 cipher
             }
-        newDiskEncryption(
-                underlyingNode = call,
-                cipher = cipher,
-                key = (key as? GetSecret)?.concept,
-                connect = true,
+        val secretKey = (key as? GetSecret)?.concept
+        if (secretKey != null && secretKey.keySize == null) {
+            secretKey.keySize = 256
+            secretKey.assume(
+                AssumptionType.InputAssumptions,
+                "We assume that the size of the key is 256 bit.\n\n" +
+                    "To validate this assumption, please check the configuration of the OpenStack Cinder service.",
             )
+        }
+        newDiskEncryption(underlyingNode = call, cipher = cipher, key = secretKey, connect = true)
             .apply { this.prevDFG += call }
     }
 
