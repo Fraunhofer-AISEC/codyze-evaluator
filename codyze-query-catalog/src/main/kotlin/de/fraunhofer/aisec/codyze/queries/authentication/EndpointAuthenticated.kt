@@ -4,34 +4,23 @@
 package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
-import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 
 /**
- * This [Kotlin extension function](https://kotlinlang.org/docs/extensions.html#extension-functions)
- * checks if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] it is invoked on either
- * has cinder as underlyingNode with the path "/v3" or barbican with the path "/v1".
- *
- * @return `true` if this [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] should have
- *   authentication.
+ * This queries checks whether all [HttpEndpoint]s that [shouldHaveAuthentication] have
+ * [HttpEndpoint.authentication] enabled.
  */
-fun HttpEndpoint.shouldHaveAuthentication(): Boolean {
-    return (this.underlyingNode?.component?.name?.localName == "cinder" &&
-        this.path.startsWith("/v3/")) ||
-        (this.underlyingNode?.component?.name?.localName == "barbican" &&
-            this.path.startsWith("/v1/"))
-}
-
-/** All [HttpEndpoint]s that are private should have authentication methods */
 context(TranslationResult)
-fun endpointsAreAuthenticated(): QueryTree<Boolean> {
+fun endpointsAreAuthenticated(
+    shouldHaveAuthentication: HttpEndpoint.() -> Boolean
+): QueryTree<Boolean> {
     val tr = this@TranslationResult
     return tr.allExtended<HttpEndpoint>(
         sel = { endpoint ->
             // Only endpoints that are private and therefore should have authentication
-            endpoint.shouldHaveAuthentication()
+            shouldHaveAuthentication(endpoint)
         },
         // See if we find one that does not have authentication
         mustSatisfy = { endpoint ->

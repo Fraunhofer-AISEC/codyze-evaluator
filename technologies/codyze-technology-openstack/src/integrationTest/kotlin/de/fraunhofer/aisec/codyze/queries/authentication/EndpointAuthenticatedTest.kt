@@ -5,6 +5,7 @@ package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
+import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import kotlin.io.path.Path
 import kotlin.test.Test
 import kotlin.test.assertNotNull
@@ -51,7 +52,10 @@ class EndpointAuthenticatedTest {
         assertNotNull(result)
 
         with(result) {
-            val r = endpointsAreAuthenticated()
+            val r =
+                endpointsAreAuthenticated(
+                    shouldHaveAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                )
             assertTrue(r.value)
             println(r.printNicely())
         }

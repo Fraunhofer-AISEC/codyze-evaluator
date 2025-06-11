@@ -5,7 +5,6 @@ package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.*
-import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
@@ -21,24 +20,16 @@ import de.fraunhofer.aisec.cpg.query.*
 val tokenProvider = setOf("fernet", "jws")
 
 /**
- * Currently, we assume that only the endpoints under "/v3" (for cinder) and "/v1" (for barbican)
- * need authentication.
- */
-val requireAuthentication = setOf(Pair("cinder", "/v3/"), Pair("barbican", "/v1/"))
-
-/**
  * Determines if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] does not
  * require authentication.
  *
  * Note: This whitelist has to be customized for each project.
  */
-fun HttpEndpoint.doesNotNeedAuthentication(): QueryTree<Boolean> {
+fun HttpEndpoint.doesNotNeedAuthentication(
+    requiresAuthentication: HttpEndpoint.() -> Boolean
+): QueryTree<Boolean> {
     // Checks if the endpoint is in the list of endpoints that do not require authentication.
-    val doesNotNeedAuth =
-        requireAuthentication.none {
-            it.first == this.underlyingNode?.component?.name?.localName &&
-                this.path.startsWith(it.second)
-        }
+    val doesNotNeedAuth = !requiresAuthentication(this)
 
     // Creates the QueryTree with the result of the assessment.
     return QueryTree(
@@ -108,12 +99,14 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
 /**
  * Todo: Add documentation on which security statement is enforced
  *
- * Checks if all [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint]s in the
- * [de.fraunhofer.aisec.cpg.TranslationResult] are either in the list of endpoints that do not
- * require authentication or have a valid (in terms of secure) token-based authentication in-place.
+ * Checks if all [HttpEndpoint]s in the [TranslationResult] are either in the list of endpoints that
+ * do not require authentication (i.e. not in the list of [requiresAuthentication]) or have a valid
+ * (in terms of secure) token-based authentication in-place.
  */
 context(TranslationResult)
-fun tokenBasedAuthenticationWhenRequired(): QueryTree<Boolean> {
+fun tokenBasedAuthenticationWhenRequired(
+    requiresAuthentication: HttpEndpoint.() -> Boolean
+): QueryTree<Boolean> {
     val tr = this@TranslationResult
     // Is a valid token provider configured?
     val tokenProviderConfigured = tr.isTokenProviderConfigured()
@@ -124,7 +117,7 @@ fun tokenBasedAuthenticationWhenRequired(): QueryTree<Boolean> {
             // and a valid token provider is configured or if the endpoint does not need
             // authentication.
             (tokenProviderConfigured and endpoint.hasTokenBasedAuth()) or
-                endpoint.doesNotNeedAuthentication()
+                endpoint.doesNotNeedAuthentication(requiresAuthentication)
         }
     )
 }
