@@ -47,7 +47,8 @@ fun keyNotLeakedThroughOutput(isLeakyOutput: Node.() -> Boolean): QueryTree<Bool
 
 /**
  * This query enforces the following statement: "Given a customer-managed key K used for disk
- * encryption, K must only be retrieved from the Barbican API endpoint."
+ * encryption, K must only be retrieved from a secure key provider." If a [Node] of type [T] is a
+ * secure key provider as required by the query is decided by [isSecureKeyProvider].
  */
 context(TranslationResult)
 inline fun <reified T : Node> encryptionKeyOriginatesFromSecureKeyProvider(

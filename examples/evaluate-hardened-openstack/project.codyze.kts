@@ -477,7 +477,20 @@ project {
                     queryTreeById("00000000-297e-6d16-0000-0000000004f4" to true)
 
                     /**
-                     * We suppress `keymgr.get` calls because the other paths would need to be invalidated by the `HttpRequest`. The graph models this as a alternative path, which is not what we want here.
+                     * This line is the following assignment `new_key = keymgr.get(context,
+                     * new_key_id)`. The `CallExpression` is tagged with a `GetSecret` and a
+                     * `HttpRequest`. With this, we have several DFG paths reaching new_key,
+                     * including the `MemberCallExpression`, its base (`keymgr`), the reference
+                     * `context? and the reference `new_key_id`, too. However, we're only interested
+                     * in the path across the `HttpRequest` which should supersede the other data
+                     * flows. As the pass does not replace existing DFG edges but only adds new
+                     * ones, this is not accurately modeled (to not lose the connections of the
+                     * "real code").
+                     *
+                     * We suppress every dataflow path containing a node which is not the
+                     * `HttpRequest` since this one invalidates all the rest. The CPG models the
+                     * rest as alternative paths, which is not what we want here as it is not
+                     * correct.
                      */
                     queryTree(
                         { qt: QueryTree<Boolean> ->
