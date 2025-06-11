@@ -86,7 +86,6 @@ class DomainCheckTest {
         with(result) {
             val q = endpointAuthorizationBasedOnDomainOrProject()
             assertFalse(q.value)
-            println(q.printNicely())
         }
     }
 

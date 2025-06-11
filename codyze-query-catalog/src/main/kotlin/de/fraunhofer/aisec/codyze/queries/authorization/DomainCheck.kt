@@ -19,8 +19,9 @@ import de.fraunhofer.aisec.cpg.graph.GraphToFollow
 import de.fraunhofer.aisec.cpg.graph.Implicit
 import de.fraunhofer.aisec.cpg.graph.Intraprocedural
 import de.fraunhofer.aisec.cpg.graph.Node
-import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
+import de.fraunhofer.aisec.cpg.graph.declarations.ParameterDeclaration
+import de.fraunhofer.aisec.cpg.graph.edges.flows.ContextSensitiveDataflow
 import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.graph.followNextFullDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement
@@ -88,17 +89,15 @@ fun HttpEndpoint.targetValuesForUserOrProject(): Set<Node> {
 }
 
 /**
- * Checks if the `action` argument of the call to `policy.authorize` always comes from the policy
- * ref belonging to [currentEndpoint].
+ * Checks if the `action` argument of the call to `policy.authorize` in the call stack belonging to
+ * this [HttpEndpoint] always comes from the policy ref defined by the [HttpEndpoint].
  *
  * Note: This function is specific to the OpenStack authorization model and the call to
  * `policy.authorize`.
  */
-fun Authorization?.authorizeActionComesFromPolicyRef(
-    currentEndpoint: HttpEndpoint
-): QueryTree<Boolean> {
+fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
     val authorizeCalls =
-        this?.ops?.filterIsInstance<Authorize>()
+        this.authorization?.ops?.filterIsInstance<Authorize>()
             ?: return QueryTree(
                 value = false,
                 stringRepresentation = "No authorization was specified",
@@ -137,19 +136,31 @@ fun Authorization?.authorizeActionComesFromPolicyRef(
             // If there is no policy, return a QueryTree with value false, indicating that no policy
             // was found.
             val policyRef =
-                (currentEndpoint.authorization as? AuthorizationWithPolicy)?.policy?.policyRef
+                (authorization as? AuthorizationWithPolicy)?.policy?.policyRef
                     ?: return@map QueryTree(
                         value = false,
                         stringRepresentation = "No policy found for the endpoint",
-                        node = currentEndpoint,
+                        node = this,
                     )
 
+            // TODO(oxisto): Find a better way to get the start node of the data flow. We need to
+            // keep this inside the current end-point's call of policy.authorize.
+            val start =
+                (actionArgument.prevDFG.first() as ParameterDeclaration)
+                    .prevDFGEdges
+                    .firstOrNull {
+                        (it as ContextSensitiveDataflow).callingContext.call ==
+                            authorize.concept.underlyingNode
+                    }
+                    ?.start
+
             dataFlow(
-                // We start at the `action` argument of the authorize call.
-                startNode = actionArgument,
+                // We start at the `action` argument of the policy.authorize call.
+                startNode = start ?: TODO(),
                 // We traverse the data flow graph in the backward direction to find out if it comes
                 // from the policy reference.
                 direction = Backward(GraphToFollow.DFG),
+                scope = Intraprocedural(),
                 // The criterion must hold on every path, so we use `Must` analysis.
                 type = Must,
                 // The predicate checks if the node is the policy reference of the authorization
@@ -162,14 +173,15 @@ fun Authorization?.authorizeActionComesFromPolicyRef(
 
 /**
  * When authorizing a request, the caller’s domain/project is used in the authorization check. This
- * function checks if all [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint]s with an
- * authorization fulfill the following requirements:
+ * function checks if all [HttpEndpoint]s with an authorization fulfill the following requirements:
  * 1. The "target" of the authorization is always given by the authorization targets (e.g., user ID,
  *    project ID) of the [ExtendedRequestContext] handled by this [HttpEndpoint].
  * 2. The `action` argument of the `policy.authorize` call is always derived from the policy
  *    reference of the authorization used by this [HttpEndpoint].
  */
-fun endpointsAreAuthenticated(tr: TranslationResult): QueryTree<Boolean> {
+context(TranslationResult)
+fun endpointAuthorizationBasedOnDomainOrProject(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
     return tr.allExtended<HttpEndpoint>(
         sel = { it.authorization != null },
         mustSatisfy = { endpoint ->
@@ -177,34 +189,8 @@ fun endpointsAreAuthenticated(tr: TranslationResult): QueryTree<Boolean> {
             if (targetValues.isEmpty()) {
                 QueryTree(false, stringRepresentation = "No target values found")
             } else {
-                endpoint
-                    .hasDataFlowToDomain(targetValues)
-                    .and(endpoint.authorization.authorizeActionComesFromPolicyRef(endpoint))
-            }
-        },
-    )
-}
-
-/**
- * This function checks if the authorization of the
- * [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [result] is based on the project or
- * domain of the user. It retrieves all [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint]s
- * with an authorization and checks if the target values (e.g., user ID, project ID) are used in the
- * authorization check.
- */
-context(TranslationResult)
-fun endpointAuthorizationBasedOnDomainOrProject(): QueryTree<Boolean> {
-    var tr = this@TranslationResult
-    return allExtended<HttpEndpoint>(
-        sel = { it.authorization != null },
-        mustSatisfy = { endpoint ->
-            val targetValues = endpoint.targetValuesForUserOrProject()
-            if (targetValues.isEmpty()) {
-                QueryTree(false, stringRepresentation = "No target values found")
-            } else {
-                endpoint
-                    .hasDataFlowToDomain(targetValues)
-                    .and(endpoint.authorization.authorizeActionComesFromPolicyRef(endpoint))
+                endpoint.hasDataFlowToDomain(targetValues) and
+                    endpoint.authorizeActionComesFromPolicyRef()
             }
         },
     )
@@ -216,7 +202,7 @@ fun endpointAuthorizationBasedOnDomainOrProject(): QueryTree<Boolean> {
  */
 context(TranslationResult)
 fun databaseAccessBasedOnDomainOrProject(): QueryTree<Boolean> {
-    var tr = this@TranslationResult
+    val tr = this@TranslationResult
     return tr.allExtended<DatabaseAccess>(
             mustSatisfy = {
                 if (it.context == null) {
