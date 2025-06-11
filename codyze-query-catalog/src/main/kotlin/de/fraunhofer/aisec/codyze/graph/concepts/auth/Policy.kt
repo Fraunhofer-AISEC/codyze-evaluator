@@ -13,7 +13,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.Concept
  */
 open class Policy(underlyingNode: Node? = null) : Concept(underlyingNode = underlyingNode) {
     var rule: PolicyRule? = null
-    var policyRef: Node? = null
 }
 
 /**

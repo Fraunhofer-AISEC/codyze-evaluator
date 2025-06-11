@@ -90,9 +90,12 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 ?: policyAuthorize.argumentEdges.singleOrNull { it.name == "exc" }?.end
                 ?: return
         val authorization =
-            newAuthorization(underlyingNode = call, policy = policy, connect = true).also {
-                policy.policyRef = policyRef
-            }
+            newAuthorization(
+                underlyingNode = call,
+                policy = policy,
+                policyRef = policyRef,
+                connect = true,
+            )
         newAuthorize(
             underlyingNode = policyAuthorize,
             concept = authorization,

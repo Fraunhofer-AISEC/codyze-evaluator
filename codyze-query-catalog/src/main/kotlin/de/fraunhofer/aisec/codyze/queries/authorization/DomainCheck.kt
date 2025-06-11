@@ -134,13 +134,12 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
             // If there is no policy, return a QueryTree with value false, indicating that no policy
             // was found.
             val policyRef =
-                (authorization as? AuthorizationWithPolicy)?.policy?.policyRef
+                (authorization as? AuthorizationWithPolicy)?.policyRef
                     ?: return@map QueryTree(
                         value = false,
                         stringRepresentation = "No policy found for the endpoint",
                         node = this,
                     )
-            // authorize.concept.underlyingNode
             val flow =
                 dataFlow(
                     // We start at the `action` argument of the policy.authorize call.

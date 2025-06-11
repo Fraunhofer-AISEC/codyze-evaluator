@@ -85,7 +85,7 @@ class DomainCheckTest {
 
         with(result) {
             val q = endpointAuthorizationBasedOnDomainOrProject()
-            assertFalse(q.value)
+            assertTrue(q.value)
             assertEquals(
                 62,
                 q.children.size,
@@ -100,9 +100,9 @@ class DomainCheckTest {
             val failingPolicyEndpoints =
                 q.children.map { it.children[1] }.filter { it.value == false }
             assertEquals(
-                8,
+                0,
                 failingPolicyEndpoints.size,
-                "Expected 8 endpoints to fail domain-based policy authorization checks",
+                "Expected 0 endpoints to fail domain-based policy authorization checks",
             )
         }
     }
