@@ -198,7 +198,9 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity") {
+        ofBoolean(
+            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity"
+        ) {
             /** The expected fulfillment for the contributor diversity in the Nova project. */
             val expectedValue = 2
 
@@ -242,7 +244,9 @@ project {
             actualValue < expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests") {
+        ofBoolean(
+            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests"
+        ) {
             /** The expected fulfillment for abandoned change requests in the Nova project. */
             val expectedValue = 10
 
@@ -278,7 +282,9 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency") {
+        ofBoolean(
+            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency"
+        ) {
             /** The expected fulfillment for contribution frequency in the Nova project. */
             val expectedValue = true
 
