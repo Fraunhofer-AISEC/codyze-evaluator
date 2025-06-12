@@ -7,6 +7,7 @@ import de.fraunhofer.aisec.codyze.profiles.openstack.Keystone
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationOptionSource
 import de.fraunhofer.aisec.cpg.graph.evaluate
+import de.fraunhofer.aisec.cpg.query.QueryOperators
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 
@@ -23,6 +24,7 @@ fun useKeystoneForAuthentication(): QueryTree<Boolean> {
             QueryTree(
                 value = it.evaluate().toString() == Keystone.name,
                 stringRepresentation = "Component config: ${it.location?.artifactLocation}",
+                operator = QueryOperators.EVALUATE,
             )
         },
     )
