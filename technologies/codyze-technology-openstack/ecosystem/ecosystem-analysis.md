@@ -471,7 +471,7 @@ Note that the example values for the review metrics above should be adapted acco
 
 The project repository should be free of executable binary artifacts (e.g. for Python `.pyc` files). Binary artifacts can not be easily reviewed, especially if the corresponding source code is not available.
 
-The repository of Openstack nova contains no binary artifacts. (OSSF tool applied on GitHub mirror of nova).
+The repository of Openstack nova contains no binary artifacts. (OSSF tool applied on GitHub mirror of nova). Note that while there are executable distributions of OpenStack packages, e.g. distributed via Linux, binaries are generally not created for Python applications. Thus, the applicability of this criterion is limited in the context of OpenStack. It is still included in the guideline to highlight the importance of considering the source from which the code is retrieved: Is a finished executable used (whose provenance may be harder to verify) or is the code retrieved from a trusted repository?
 
 ##### HowTo:
 
