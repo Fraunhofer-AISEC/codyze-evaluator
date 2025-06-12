@@ -117,7 +117,7 @@ project {
             }
 
             /** This category contains requirements related to the ecosystem of OpenStack. */
-            category("Eco-System") {
+            category("Ecosystem") {
                 /**
                  * Identify and assess open and unresolved vulnerabilities in the project's codebase
                  * or dependencies, using services like OSV, to ensure important fixes are
