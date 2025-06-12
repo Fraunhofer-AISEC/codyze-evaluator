@@ -31,7 +31,7 @@ fun evaluateWithCodyze(
     println("# Analysis Results")
 
     for (requirement in result.requirementsResults) {
-        println("## Requirement ${requirement.key}: ${requirement.value}")
+        println("## Requirement ${requirement.key}: ${requirement.value.value} with confidence ${requirement.value.confidence}")
     }
 
     return result

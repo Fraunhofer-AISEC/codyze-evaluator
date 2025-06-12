@@ -23,7 +23,12 @@ fun hasDataFlowToToken(): QueryTree<Boolean> {
                     ctx.userInfo?.projectId == null
             ) {
                 // If information is missing, we cannot determine the data flows and want to fail
-                QueryTree(false, node = ctx, stringRepresentation = "Invalid Request context")
+                QueryTree(
+                    false,
+                    node = ctx,
+                    stringRepresentation = "Invalid Request context",
+                    operator = QueryOperators.EVALUATE,
+                )
             } else {
                 dataFlow(
                     // We start from the token in the request context

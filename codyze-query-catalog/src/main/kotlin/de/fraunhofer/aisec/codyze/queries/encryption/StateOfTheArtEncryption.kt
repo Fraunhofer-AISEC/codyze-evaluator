@@ -9,6 +9,7 @@ import de.fraunhofer.aisec.cpg.assumptions.addAssumptionDependence
 import de.fraunhofer.aisec.cpg.assumptions.assume
 import de.fraunhofer.aisec.cpg.graph.concepts.diskEncryption.DiskEncryption
 import de.fraunhofer.aisec.cpg.query.IN
+import de.fraunhofer.aisec.cpg.query.QueryOperators
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.ge
@@ -47,9 +48,10 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
         // Since this function requires a QueryTree object as input,
         // we use manually create one based on the cipher's name.
         it.cipher?.cipherName?.let { cipherName ->
-            (QueryTree(cipherName, node = it).addAssumptionDependence(it.cipher) IN allowedCiphers)
+            (QueryTree(value = cipherName, node = it, operator = QueryOperators.EVALUATE)
+                .addAssumptionDependence(it.cipher) IN allowedCiphers)
         }
-            ?: QueryTree(false, node = it)
+            ?: QueryTree(value = false, node = it, operator = QueryOperators.EVALUATE)
                 .assume(
                     AssumptionType.InputAssumptions,
                     "We assume that the cipher may not have been configured in a good way by the user.\n\n" +
@@ -78,9 +80,10 @@ fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
             // Since this function requires a QueryTree object as input,
             // we use create with the Query-API's `const` function.
             it.key?.keySize?.let { keySize ->
-                QueryTree(value = keySize).addAssumptionDependence(it.key) ge SYM_KEYLENGTH
+                QueryTree(value = keySize, operator = QueryOperators.EVALUATE)
+                    .addAssumptionDependence(it.key) ge SYM_KEYLENGTH
             }
-                ?: QueryTree(false, node = it)
+                ?: QueryTree(value = false, node = it, operator = QueryOperators.EVALUATE)
                     .assume(
                         AssumptionType.InputAssumptions,
                         "We assume that the key size may not have been configured in a good way by the user.\n\n" +

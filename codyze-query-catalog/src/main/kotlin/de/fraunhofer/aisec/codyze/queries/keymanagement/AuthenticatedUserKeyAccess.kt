@@ -10,6 +10,7 @@ import de.fraunhofer.aisec.cpg.graph.Interprocedural
 import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.query.May
+import de.fraunhofer.aisec.cpg.query.QueryOperators
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.dataFlow
@@ -38,11 +39,13 @@ fun keyOnyAccessibleByAuthenticatedEndpoint(): QueryTree<Boolean> {
             QueryTree(
                 value = endpoint.authentication != null,
                 children =
-                    endpoint.authentication?.let { mutableListOf(QueryTree(value = it)) }
-                        ?: mutableListOf(),
+                    endpoint.authentication?.let {
+                        mutableListOf(QueryTree(value = it, operator = QueryOperators.EVALUATE))
+                    } ?: mutableListOf(),
                 stringRepresentation =
                     "The endpoint $endpoint requires authentication by ${endpoint.authentication}",
                 node = endpoint,
+                operator = QueryOperators.EVALUATE,
             )
         },
     )

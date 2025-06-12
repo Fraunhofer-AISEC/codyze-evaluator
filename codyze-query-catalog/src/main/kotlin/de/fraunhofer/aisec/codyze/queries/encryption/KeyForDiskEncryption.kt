@@ -88,9 +88,11 @@ inline fun <reified T : Node> encryptionKeyOriginatesFromSecureKeyProvider(
                 // In this case, we create a QueryTree with value `false` manually.
                 ?: QueryTree(
                     value = false,
-                    children = mutableListOf(QueryTree(encryption)),
+                    children =
+                        mutableListOf(QueryTree(encryption, operator = QueryOperators.EVALUATE)),
                     stringRepresentation = "encryptionOp.concept.key is null",
                     node = encryption,
+                    operator = QueryOperators.EVALUATE,
                 )
         }
 
@@ -135,9 +137,13 @@ fun keyIsDeletedFromMemoryAfterUse(): QueryTree<Boolean> {
             QueryTree(
                 value = subQueries?.all { it.value } ?: false,
                 // Store the sub-queries into the list of children.
-                children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
+                children =
+                    subQueries
+                        ?.map { QueryTree(it, operator = QueryOperators.EVALUATE) }
+                        ?.toMutableList() ?: mutableListOf(),
                 stringRepresentation = "All keys must be deleted",
                 node = diskEncryption,
+                operator = QueryOperators.EVALUATE,
             )
         }
     return tree

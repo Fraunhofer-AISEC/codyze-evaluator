@@ -30,6 +30,7 @@ import de.fraunhofer.aisec.cpg.graph.types.Type
 import de.fraunhofer.aisec.cpg.graph.types.recordDeclaration
 import de.fraunhofer.aisec.cpg.query.*
 import de.fraunhofer.aisec.cpg.query.Must
+import de.fraunhofer.aisec.cpg.query.QueryOperators
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
@@ -72,6 +73,7 @@ fun HttpEndpoint.hasDataFlowToDomain(targetValues: Set<Node>): QueryTree<Boolean
             false, // If there is no authorization, we cannot have a data flow to the domain and
             // return false.
             stringRepresentation = "No data flow to domain due to missing authorization",
+            operator = QueryOperators.EVALUATE,
         )
 }
 
@@ -99,11 +101,13 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
             ?: return QueryTree(
                 value = false,
                 stringRepresentation = "No authorization was specified",
+                operator = QueryOperators.EVALUATE,
             )
     if (authorizeCalls.isEmpty()) {
         return QueryTree(
             value = false,
             stringRepresentation = "No authorize calls found in the authorization operations.",
+            operator = QueryOperators.EVALUATE,
         )
     }
 
@@ -118,6 +122,7 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
                         stringRepresentation =
                             "No underlyingNode of the authorize operation is found. This is unexpected.",
                         node = authorize,
+                        operator = QueryOperators.EVALUATE,
                     )
 
             // The second argument of the authorize call is expected to be the `action` argument.
@@ -128,6 +133,7 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
                         stringRepresentation =
                             "No action argument found in the authorize call. This is invalid.",
                         node = authorize,
+                        operator = QueryOperators.EVALUATE,
                     )
             // Retrieve the policy reference which should be used when authorizing the request
             // handled by the currentEndpoint.
@@ -139,6 +145,7 @@ fun HttpEndpoint.authorizeActionComesFromPolicyRef(): QueryTree<Boolean> {
                         value = false,
                         stringRepresentation = "No policy found for the endpoint",
                         node = this,
+                        operator = QueryOperators.EVALUATE,
                     )
             val flow =
                 dataFlow(
@@ -178,7 +185,11 @@ fun endpointAuthorizationBasedOnDomainOrProject(): QueryTree<Boolean> {
         mustSatisfy = { endpoint ->
             val targetValues = endpoint.targetValuesForUserOrProject()
             if (targetValues.isEmpty()) {
-                QueryTree(false, stringRepresentation = "No target values found")
+                QueryTree(
+                    false,
+                    stringRepresentation = "No target values found",
+                    operator = QueryOperators.EVALUATE,
+                )
             } else {
                 endpoint.hasDataFlowToDomain(targetValues) and
                     endpoint.authorizeActionComesFromPolicyRef()
@@ -203,6 +214,7 @@ fun databaseAccessBasedOnDomainOrProject(
                         value = false,
                         node = it,
                         stringRepresentation = "No context provided",
+                        operator = QueryOperators.EVALUATE,
                     )
                 }
                 // TODO: check again if this works as intended
@@ -271,16 +283,18 @@ fun HttpEndpoint.onlyThrowsNotAuthorized(policy: UnauthorizedResponsePolicy): Qu
                         QueryTree(
                             // Check if either its class name or the name of a parent class
                             // matches the expected one
-                            exceptionType.isOrInherits(policy.allowedExceptionParentClass) &&
-                                policy.notAllowedThrowMessages.none {
-                                    // Checks if the message does not contain any of the
-                                    // forbidden words.
-                                    message.contains(it, ignoreCase = true)
-                                }
+                            value =
+                                exceptionType.isOrInherits(policy.allowedExceptionParentClass) &&
+                                    policy.notAllowedThrowMessages.none {
+                                        // Checks if the message does not contain any of the
+                                        // forbidden words.
+                                        message.contains(it, ignoreCase = true)
+                                    },
+                            operator = QueryOperators.EVALUATE,
                         )
-                    } ?: QueryTree(false)
+                    } ?: QueryTree(value = false, operator = QueryOperators.EVALUATE)
                 }
-                ?.mergeWithAll() ?: QueryTree(false)
+                ?.mergeWithAll() ?: QueryTree(value = false, operator = QueryOperators.EVALUATE)
         },
     )
 }
@@ -357,7 +371,7 @@ fun HttpEndpoint.throwsNotAuthorizedWhenDomainCheckFails(
                         .mergeWithAll() // It has to be fulfilled for all domain scope checks
                 }
                 ?.mergeWithAll() // It has to be fulfilled for all Authorize operations
-            ?: QueryTree(false)
+            ?: QueryTree(value = false, operator = QueryOperators.EVALUATE)
         },
     )
 }

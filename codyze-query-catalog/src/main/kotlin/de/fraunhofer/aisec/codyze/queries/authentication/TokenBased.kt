@@ -40,8 +40,9 @@ fun HttpEndpoint.doesNotNeedAuthentication(
             stringRepresentation =
                 if (doesNotNeedAuth) "The endpoint $this does not need authentication"
                 else "The endpoint $this does not need authentication",
-            children = mutableListOf(QueryTree(this)),
+            children = mutableListOf(QueryTree(this, operator = QueryOperators.EVALUATE)),
             node = this,
+            operator = QueryOperators.EVALUATE,
         )
         .assume(
             AssumptionType.ExhaustiveEnumerationAssumption,
@@ -79,7 +80,12 @@ fun isTokenProviderConfigured(
                 stringRepresentation =
                     if (configuresTokenAuth) "The config configures token-based authentication"
                     else "The config does not configure token-based authentication",
-                children = mutableListOf(QueryTree(config), QueryTree(providerGroups)),
+                children =
+                    mutableListOf(
+                        QueryTree(config, operator = QueryOperators.EVALUATE),
+                        QueryTree(providerGroups, operator = QueryOperators.EVALUATE),
+                    ),
+                operator = QueryOperators.EVALUATE,
             )
         },
     )
@@ -99,8 +105,10 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
             } else {
                 "The endpoint $this does not require token-based authentication"
             },
-        children = mutableListOf(QueryTree(this.authentication)),
+        children =
+            mutableListOf(QueryTree(this.authentication, operator = QueryOperators.EVALUATE)),
         node = this,
+        operator = QueryOperators.EVALUATE,
     )
 }
 
@@ -140,7 +148,7 @@ fun usesSameTokenAsCredential(): QueryTree<Boolean> {
         mustSatisfy = { token ->
             val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
             val isSameToken = tokens.all { it.token == token.credential }
-            QueryTree(value = isSameToken, node = token)
+            QueryTree(value = isSameToken, node = token, operator = QueryOperators.EVALUATE)
         }
     )
 }
