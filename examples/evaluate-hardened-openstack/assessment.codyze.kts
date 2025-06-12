@@ -5,7 +5,6 @@ package example
 
 project {
     manualAssessment {
-        // scheme: Ecosystem-G1-name-kpi-name
         of("Ecosystem-G1-Checking-Known-Vulnerabilities") {
             /** The expected fulfillment for known vulnerabilities in the Nova project. */
             val expectedValue = true
@@ -211,7 +210,7 @@ project {
             actualValue >= expectedValue
         }
 
-        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-not-merge-votings") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-Not-Merge-Votings") {
             /** The expected fulfillment for Do-not-merge votings in the Nova project. */
             val expectedValue = 5
 
