@@ -60,8 +60,11 @@ class KeyForDiskEncryptionTest {
                     }
                         ?: QueryTree(
                             false,
-                            mutableListOf(QueryTree(encryption)),
+                            mutableListOf(
+                                QueryTree(encryption, operator = QueryOperators.EVALUATE)
+                            ),
                             "encryptionOp.concept.key is null",
+                            operator = QueryOperators.EVALUATE,
                         )
                 }
             println(q.printNicely())

@@ -80,7 +80,11 @@ project {
                  * encrypt disk images. [Nova] is not used in this context. Therefore, we only
                  * include [Nova] in the Ecosystem analysis, but not in the source code analysis.
                  */
-                module("nova") {}
+                module("nova") {
+                    directory = "toe/modules/nova"
+                    include("nova")
+                    exclude("tests")
+                }
 
                 /**
                  * [Castellan] is a library for managing secrets in OpenStack, providing abstraction
