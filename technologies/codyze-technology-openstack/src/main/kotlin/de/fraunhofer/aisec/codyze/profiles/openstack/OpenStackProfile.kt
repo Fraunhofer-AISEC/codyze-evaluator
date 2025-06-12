@@ -126,7 +126,7 @@ fun TaggingContext.tagDatabaseAccess() {
         val filterCalls = paths.fulfilled.map { path -> path.nodes.last() }
 
         filterCalls.forEach { filterCall ->
-            val by = node.arguments.getOrNull(0)
+            val by = (filterCall as? MemberCallExpression)?.arguments?.getOrNull(0)
             if (by != null) {
                 overlays += Filter(underlyingNode = filterCall, concept = dbAccess, by = by)
             }

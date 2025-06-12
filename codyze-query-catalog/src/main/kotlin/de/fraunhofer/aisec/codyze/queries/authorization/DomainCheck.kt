@@ -35,7 +35,6 @@ import de.fraunhofer.aisec.cpg.query.and
 import de.fraunhofer.aisec.cpg.query.dataFlow
 import de.fraunhofer.aisec.cpg.query.mergeWithAll
 import de.fraunhofer.aisec.cpg.query.not
-import de.fraunhofer.aisec.cpg.query.toQueryTree
 
 /**
  * Retrieves all [de.fraunhofer.aisec.codyze.graph.concepts.auth.Authorize] operations related to
@@ -197,16 +196,18 @@ fun databaseAccessBasedOnDomainOrProject(
 ): QueryTree<Boolean> {
     val tr = this@TranslationResult
     return tr.allExtended<DatabaseAccess>(
-            mustSatisfy = {
-                if (it.context == null) {
+            mustSatisfy = { db ->
+                if (db.context == null) {
                     QueryTree(
                         value = false,
-                        node = it,
+                        node = db,
                         stringRepresentation = "No context provided",
                     )
                 }
-                // TODO: check again if this works as intended
-                it.ops.any { it is Filter && it.by.hasCheckForDomain() }.toQueryTree()
+                db.ops
+                    .filterIsInstance<Filter>()
+                    .map { QueryTree(value = it.by.hasCheckForDomain()) }
+                    .mergeWithAll()
             }
         )
         .assume(
