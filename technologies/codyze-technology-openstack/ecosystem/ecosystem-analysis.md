@@ -393,10 +393,8 @@ performing only automated tests on the repository code just requires read-only a
 Therefore, even if an attacker is able to compromise the pipeline-code, he is still not able to alter the 
 repository content.
 
-OSSF scorecard currently is not capable of analysing Zuul related configuration files. Further investigation of the Zuul framework and its integration in opendev is necessary for understanding necessary access privileges. This is necessary in order to allow assessing whether pipeline scripts of an openstack component follow the principle of least privilege.
-
-See information in dangerous workflows above. Zuul pipeline should only have the privileges to merge code **after** 
-human review and approval. Therefore, the same checks apply. 
+OSSF scorecard currently is not capable of analysing Zuul-related configuration files. An in-depth investigation of the Zuul framework and its integration in opendev would be necessary for understanding necessary access privileges. This is necessary in order to allow assessing whether pipeline scripts of an OpenStack component follow the principle of least privilege. 
+See also the information in dangerous workflows above. The Zuul pipeline should only have the privileges to merge code **after** human review and approval. Therefore, the same checks apply. 
 
 ### G6: Checking Code Contributions and Reviews
         
@@ -441,7 +439,7 @@ KPI Checks:
 - Contributors in the Current Release: Total number of contributors involved in the current release (e.g. >2)
 - Contributor Diversity: Diversity of contributors based on affiliation (e.g. >=2 companies)
 - “Do not merge” votings in the current release: Number of votings with the worst assessment of a contribution, i.e. “Do not merge” (e.g. <5)
-- Filed-to-resolved-bugs ratio: How many bugs were filed vs how many were resolved (e.g. >33%)
+- Filed-to-resolved-bugs ratio: How many bugs were filed vs how many were resolved (e.g. >3:1)
 - Abandoned change requests in the current release: Number of change requests that were contributed but abandoned (e.g. <10)
 - Number of Reviewers: Total number of reviewers involved in the current release (e.g. >10)
 - Review Diversity: Diversity of reviewers based on affiliation (e.g. >=2 companies)
@@ -494,7 +492,7 @@ mitigates the risk that new vulnerabilities are introduced by automatic updates 
 repositories. 
 
 Applying OSSF scorecards on the GitHub mirror of openstack nova, no pinned dependencies have been found.
-A `requirements.txt` exits ([link](https://github.com/openstack/nova/blob/master/requirements.txt)), but only a minimum 
+A `requirements.txt` exists ([link](https://github.com/openstack/nova/blob/master/requirements.txt)), but only a minimum 
 version number is defined for each dependency. Furthermore, it is stated in a comment that these lower bounds are only 
 kept up to date on a best effort basis. For passing the check, explicit hashes of the used versions would be necessary (see [PIP doc on secure installs](https://pip.pypa.io/en/stable/topics/secure-installs/#secure-installs)).
 Openstack manages requirements globally for all projects, but also allows projects to define custom lower bounds (see [documentation](https://docs.openstack.org/project-team-guide/dependency-management.html)).
@@ -537,3 +535,28 @@ into such artifacts.
 Note that [releases seem to be signed](https://tarballs.opendev.org/openstack/nova/). Furthermore, OpenStack documents [processes for cryptographic signatures](https://releases.openstack.org/#cryptographic-signatures)
 and maintains a [signing system](https://docs.opendev.org/opendev/system-config/latest/signing.html). 
 However, the signatures are not visible on https://releases.openstack.org/dalmatian/index.html#nova as well as on [PyPI](https://pypi.org/project/nova/). 
+
+## Summary of the Sample Analysis Results
+
+As described above, the guidelines were executed for OpenStack and, where applicable, for the Nova component (in the 2024.2 release). The following table summarizes the analysis results.
+
+| Guideline / KPI                                 | Result                                              | Status |
+|--------------------------------------------|---------------------------------------------------------------------------|---------------------------------------------------------------------------|
+| G1: Checking Known Vulnerabilities                 | A search for OpenStack vulnerabilities in the github.com/openstack/nova package results in various potential vulnerabilities. One listed vulnerability, for example, is CVE-2022-47951 which shows that the vulnerability has been fixed. Also, the vulnerability does not affect the 2024.2 release. One OSSA (2024-002 has been released which affects Nova in the 2024.2 release; [a patch, however, has been released](https://security.openstack.org/ossa/OSSA-2024-002.html).) | *Fulfilled for Nova 2024.2* | 
+| G2: Checking Continuous Maintenance: Dependency update tool                | The OpenStack proposal bot is in active use. | *Fulfilled* |
+| G2: Checking Continuous Maintenance: Security policy                | The OpenStack projects have a common security policy, including information on vulnerability management, defined. | *Fulfilled* |
+| G2: Checking Continuous Maintenance: License                | All OpenStack projects have a license defined. | *Fulfilled*  |
+| G3: Checking CII Best Practices                    | OpenStack has the *passing* batch. However, looking at the gold level, some security-related criteria are not fulfilled. These refer to the key hardening headers Content Security Policy (CSP), HTTP Strict Transport Security (HSTS), X-Content-Type-Options, and X-Frame-Options which are not used in the OpenStack ecosystem. | *Fulfilled for the basic level* |
+| G4: Checking Continuous Testing: CI tests                    | The individual checks for the opendev repository, repository template, zuul.yaml, zuul job definitions, check and gate pipelines, tox.ini file, the test directory, and gerrit 'verified' and 'workflow' parts were successful. | *Fulfilled* |
+| G4: Checking Continuous Testing: Fuzzing                    | CI files (such as the Nova CI file) do not indicate a usage of fuzzing tools in the pipeline. Also, the security guide does not mention fuzzing tools | ***Not Fulfilled*** |
+| G4: Checking Continuous Testing: SAST                    | The OpenStack documentation or CI does not stipulate SAST usage. | ***Not Fulfilled*** |
+| G5: Checking CI/CD Security: Gerrit settings                        | Project is listed, config exists, access rights are correct, and review and workflow configs are proper. | *Fulfilled* |
+| G5: Checking CI/CD Security: Branch protection                      | Code must be approved by at least one core-reviewer and code must pass automated gate tests and automated testcases. These protections account to tier 4 (of 5) [of OSSF criteria](https://github.com/ossf/scorecard/blob/main/docs/checks.md#branch-protection). | *Partly Fulfilled*  |
+| G5: Checking CI/CD Security: Dangerous workflows                        | Project is listed correctly and pipeline definition has not submit: true field. | *Fulfilled* |
+| G5: Checking CI/CD Security: Token permissions                        | See dangerous workflows results. | *Fulfilled* |
+| G6: Checking Code Contributions and Reviews: Code review         | Code changes are reviewed by humans with +2 votes. | *Fulfilled* |
+| G6: Checking Code Contributions and Reviews: Contributors        | 12 contributors, 6 companies in commits, 6 do not merge votings, 2.6:1 Filed-to-Resolved-Bugs ratio , 5 abandoned change requests, 45 reviewers, 18 companies in reviews, most top contributors have been active in the last 12 months, all contributions undergo peer review. | *Partially fulfilled* |
+| G7: Checking Build Risks: Binary artifacts                           | No binary artifacts found. | *Fulfilled* |
+| G7: Checking Build Risks: Pinned dependencies                           | Only minimum version numbers are defined for each dependency. | *Partly fulfilled* |
+| G7: Checking Build Risks: Packaging                           | Project can be found on PyPi. | *Fulfilled* |
+| G7: Checking Build Risks: Signed releases                           | Releases are signed but the signatures do not seem to be visible on the releases page. | *Partly fulfilled*  |
