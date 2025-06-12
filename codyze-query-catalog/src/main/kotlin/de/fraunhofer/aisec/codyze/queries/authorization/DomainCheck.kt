@@ -218,7 +218,12 @@ fun databaseAccessBasedOnDomainOrProject(
                 }
                 db.ops
                     .filterIsInstance<Filter>()
-                    .map { QueryTree(value = it.by.hasCheckForDomain()) }
+                    .map {
+                        QueryTree(
+                            value = it.by.hasCheckForDomain(),
+                            operator = QueryOperators.EVALUATE,
+                        )
+                    }
                     .mergeWithAll()
             }
         )
