@@ -11,7 +11,6 @@ import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
 import de.fraunhofer.aisec.cpg.graph.get
 import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
-import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlin.test.*
 
@@ -19,8 +18,9 @@ import kotlin.test.*
 class KeyForDiskEncryptionTest {
 
     /**
-     * Test case for [keyOnlyReachableThroughSecureKeyProvider] using [isSecureOpenStackKeyProvider]
-     * with [OpenStackProfile]. The analyzed components are [Cinder] and [Barbican].
+     * Test case for [encryptionKeyOriginatesFromSecureKeyProvider] using
+     * [isSecureOpenStackKeyProvider] with [OpenStackProfile]. The analyzed components are [Cinder]
+     * and [Barbican].
      */
     @Test
     fun testKeyOnlyReachableThroughSecureKeyProvider() {
@@ -60,8 +60,11 @@ class KeyForDiskEncryptionTest {
                     }
                         ?: QueryTree(
                             false,
-                            mutableListOf(QueryTree(encryption)),
+                            mutableListOf(
+                                QueryTree(encryption, operator = GenericQueryOperators.EVALUATE)
+                            ),
                             "encryptionOp.concept.key is null",
+                            operator = GenericQueryOperators.EVALUATE,
                         )
                 }
             println(q.printNicely())
@@ -71,8 +74,7 @@ class KeyForDiskEncryptionTest {
             assertEquals(1, treeFunctions.size)
 
             val validDataflows = treeFunctions.first().children.filter { it.value == true }
-            // TODO(oxisto): It seems that the two paths are actually the same
-            assertEquals(2, validDataflows.size)
+            assertEquals(1, validDataflows.size)
 
             // It seems its sometimes 26 and sometimes 27
             val longestValid =

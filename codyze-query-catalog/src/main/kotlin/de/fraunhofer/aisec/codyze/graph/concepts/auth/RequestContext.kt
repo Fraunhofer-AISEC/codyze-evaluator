@@ -19,6 +19,17 @@ open class ExtendedRequestContext(underlyingNode: Node? = null, val token: Node?
 }
 
 /**
+ * Represents authentication access context. It is an inheritance of [RequestContext].
+ *
+ * @param underlyingNode The underlying CPG node.
+ * @param token The token.
+ */
+open class AuthAccessContext(underlyingNode: Node? = null, val token: Node? = null) :
+    RequestContext(underlyingNode = underlyingNode) {
+    var userInfo: UserInfo? = null
+}
+
+/**
  * Represents user information in a request context.
  *
  * @param underlyingNode The underlying CPG node.

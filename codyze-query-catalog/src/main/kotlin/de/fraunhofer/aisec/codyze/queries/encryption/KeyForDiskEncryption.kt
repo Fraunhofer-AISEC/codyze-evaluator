@@ -47,10 +47,11 @@ fun keyNotLeakedThroughOutput(isLeakyOutput: Node.() -> Boolean): QueryTree<Bool
 
 /**
  * This query enforces the following statement: "Given a customer-managed key K used for disk
- * encryption, K must only be accessible via the Barbican API endpoint."
+ * encryption, K must only be retrieved from a secure key provider." If a [Node] of type [T] is a
+ * secure key provider as required by the query is decided by [isSecureKeyProvider].
  */
 context(TranslationResult)
-inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
+inline fun <reified T : Node> encryptionKeyOriginatesFromSecureKeyProvider(
     crossinline isSecureKeyProvider: T.() -> Boolean
 ): QueryTree<Boolean> {
     val tr = this@TranslationResult
@@ -63,8 +64,8 @@ inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
                 // Barbican API endpoint.
                 // We perform this check with a backward data flow analysis.
                 dataFlow(
-                    // We start our data flow analysis at the encryption operation.
-                    startNode = encryption,
+                    // We start our data flow analysis at the encryption key.
+                    startNode = key,
                     // We want to make sure that each DFG-path leads us to the Barbican API
                     // endpoint, so we use a Must analysis.
                     type = Must,
@@ -87,9 +88,13 @@ inline fun <reified T : Node> keyOnlyReachableThroughSecureKeyProvider(
                 // In this case, we create a QueryTree with value `false` manually.
                 ?: QueryTree(
                     value = false,
-                    children = mutableListOf(QueryTree(encryption)),
+                    children =
+                        mutableListOf(
+                            QueryTree(encryption, operator = GenericQueryOperators.EVALUATE)
+                        ),
                     stringRepresentation = "encryptionOp.concept.key is null",
                     node = encryption,
+                    operator = GenericQueryOperators.EVALUATE,
                 )
         }
 
@@ -134,9 +139,13 @@ fun keyIsDeletedFromMemoryAfterUse(): QueryTree<Boolean> {
             QueryTree(
                 value = subQueries?.all { it.value } ?: false,
                 // Store the sub-queries into the list of children.
-                children = subQueries?.map { QueryTree(it) }?.toMutableList() ?: mutableListOf(),
+                children =
+                    subQueries
+                        ?.map { QueryTree(it, operator = GenericQueryOperators.EVALUATE) }
+                        ?.toMutableList() ?: mutableListOf(),
                 stringRepresentation = "All keys must be deleted",
                 node = diskEncryption,
+                operator = GenericQueryOperators.EVALUATE,
             )
         }
     return tree

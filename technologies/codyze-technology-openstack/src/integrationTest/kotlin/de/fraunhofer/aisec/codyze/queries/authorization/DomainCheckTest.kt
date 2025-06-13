@@ -5,6 +5,8 @@ package de.fraunhofer.aisec.codyze.queries.authorization
 
 import de.fraunhofer.aisec.codyze.*
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
+import de.fraunhofer.aisec.codyze.queries.isolation.hasCheckForDomain
+import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import kotlin.io.path.Path
 import kotlin.test.*
@@ -39,7 +41,7 @@ class DomainCheckTest {
 
         assertNotNull(result)
         with(result) {
-            val q = databaseAccessBasedOnDomainOrProject()
+            val q = databaseAccessBasedOnDomainOrProject(Node::hasCheckForDomain)
             assertFalse(q.value)
         }
     }
@@ -85,8 +87,25 @@ class DomainCheckTest {
 
         with(result) {
             val q = endpointAuthorizationBasedOnDomainOrProject()
-            assertFalse(q.value)
-            println(q.printNicely())
+            assertTrue(q.value)
+            assertEquals(
+                62,
+                q.children.size,
+                "Expected 62 endpoints with domain-based authorization",
+            )
+            assertEquals(
+                62,
+                q.children.map { it.children[0] }.filter { it.value == true }.size,
+                "Expected all 62 endpoints to pass target-value checks",
+            )
+
+            val failingPolicyEndpoints =
+                q.children.map { it.children[1] }.filter { it.value == false }
+            assertEquals(
+                0,
+                failingPolicyEndpoints.size,
+                "Expected 0 endpoints to fail domain-based policy authorization checks",
+            )
         }
     }
 

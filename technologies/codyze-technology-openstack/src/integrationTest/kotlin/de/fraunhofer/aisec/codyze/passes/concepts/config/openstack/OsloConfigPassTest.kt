@@ -263,7 +263,10 @@ class OsloConfigPassTest {
 
         assertNotNull(result)
 
-        val request = result.allExtended<HttpRequest> { QueryTree(it.concept.isTLS) eq true }
+        val request =
+            result.allExtended<HttpRequest> {
+                QueryTree(it.concept.isTLS, operator = GenericQueryOperators.EVALUATE) eq true
+            }
         assertNotNull(request)
 
         assertEquals(true, request.value)

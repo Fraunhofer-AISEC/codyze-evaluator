@@ -3,8 +3,8 @@
  */
 package de.fraunhofer.aisec.codyze.profiles.openstack
 
+import de.fraunhofer.aisec.codyze.graph.concepts.auth.AuthAccessContext
 import de.fraunhofer.aisec.codyze.graph.concepts.auth.CheckDomainScope
-import de.fraunhofer.aisec.codyze.graph.concepts.auth.ExtendedRequestContext
 import de.fraunhofer.aisec.codyze.graph.concepts.auth.UserInfo
 import de.fraunhofer.aisec.codyze.graph.concepts.database.DatabaseAccess
 import de.fraunhofer.aisec.codyze.graph.concepts.database.Filter
@@ -73,7 +73,7 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
  * Tags appropriate nodes inside [KeystoneMiddleware] with authentication concepts.
  * - [TokenBasedAuth] for `user_token` member expressions.
  * - [Authenticate] for calls to `_do_fetch_token` that use the `user_token`.
- * - [ExtendedRequestContext] for constructors of `AccessInfoV3` that use the `user_token`.
+ * - [AuthAccessContext] for constructors of `AccessInfoV3` that use the `user_token`.
  *
  * This allows the analysis to track authentication flows and user information within OpenStack
  * components that use [Keystone].
@@ -92,7 +92,7 @@ fun TaggingContext.tagKeystoneMiddlewareAuthentication() {
         .withMultiple {
             val overlays = mutableListOf<OverlayNode>()
             val token = node.parameters[1]
-            val reqContext = ExtendedRequestContext(underlyingNode = node, token = token)
+            val reqContext = AuthAccessContext(underlyingNode = node, token = token)
             val accessInfo = node.recordDeclaration
             val userInfo =
                 UserInfo(
@@ -117,17 +117,17 @@ fun TaggingContext.tagDatabaseAccess() {
 
         val paths =
             node.followDFGEdgesUntilHit {
-                (it is MemberCallExpression || it is MemberExpression) &&
+                (it is MemberCallExpression) &&
                     // It can be `filter` or `filter_by`
                     it.name.localName.startsWith("filter") ||
                     it.name.localName.startsWith("with_entities")
             }
 
         val filterCalls = paths.fulfilled.map { path -> path.nodes.last() }
-        val by = node.arguments.getOrNull(1)
 
-        if (by != null) {
-            filterCalls.forEach { filterCall ->
+        filterCalls.forEach { filterCall ->
+            val by = (filterCall as? MemberCallExpression)?.arguments?.getOrNull(0)
+            if (by != null) {
                 overlays += Filter(underlyingNode = filterCall, concept = dbAccess, by = by)
             }
         }

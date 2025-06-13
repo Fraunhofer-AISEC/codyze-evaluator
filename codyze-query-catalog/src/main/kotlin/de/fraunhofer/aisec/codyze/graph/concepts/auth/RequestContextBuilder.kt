@@ -44,11 +44,11 @@ fun MetadataProvider.newRequestContext(
 fun MetadataProvider.newUserInfo(
     underlyingNode: Node,
     concept: ExtendedRequestContext,
-    userId: Node,
-    projectId: Node,
-    roles: Node,
-    systemScope: Node,
-    domainId: Node,
+    userId: Node?,
+    projectId: Node?,
+    roles: Node?,
+    systemScope: Node?,
+    domainId: Node?,
     connect: Boolean,
 ) =
     newConcept(

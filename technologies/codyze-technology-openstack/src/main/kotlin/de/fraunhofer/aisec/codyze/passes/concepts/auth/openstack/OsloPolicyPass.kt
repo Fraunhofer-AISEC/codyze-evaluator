@@ -23,12 +23,14 @@ import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.Reference
 import de.fraunhofer.aisec.cpg.helpers.Util.warnWithFileLocation
 import de.fraunhofer.aisec.cpg.passes.ComponentPass
+import de.fraunhofer.aisec.cpg.passes.ControlFlowSensitiveDFGPass
 import de.fraunhofer.aisec.cpg.passes.SymbolResolver
 import de.fraunhofer.aisec.cpg.passes.configuration.DependsOn
 import de.fraunhofer.aisec.cpg.passes.configuration.ExecuteBefore
 
 /** A pass to register policies for OpenStack components using the [OsloPolicy] library. */
 @DependsOn(SymbolResolver::class)
+@DependsOn(ControlFlowSensitiveDFGPass::class)
 @DependsOn(SetOsloPolicyEnforcerTypePass::class)
 @ExecuteBefore(AuthorizationPass::class)
 class OsloPolicyPass(ctx: TranslationContext) : ComponentPass(ctx) {

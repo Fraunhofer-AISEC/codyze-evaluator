@@ -6,9 +6,13 @@ package de.fraunhofer.aisec.codyze.graph.concepts.auth
 import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.*
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.*
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.Expression
 
-class AuthorizationWithPolicy(underlyingNode: Node? = null, val policy: Policy) :
-    Authorization(underlyingNode = underlyingNode)
+class AuthorizationWithPolicy(
+    underlyingNode: Node? = null,
+    val policy: Policy,
+    val policyRef: Expression,
+) : Authorization(underlyingNode = underlyingNode)
 
 /** Represents a common abstract class for authorization operations. */
 abstract class AuthorizationOperation(underlyingNode: Node? = null, concept: Concept) :

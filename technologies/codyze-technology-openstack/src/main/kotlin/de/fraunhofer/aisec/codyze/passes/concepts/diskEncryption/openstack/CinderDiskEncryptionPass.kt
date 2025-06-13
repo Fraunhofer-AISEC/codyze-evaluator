@@ -76,12 +76,8 @@ class CinderDiskEncryptionPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 ?.firstOrNull()
 
         val cipher = cipherArg?.let { newCipher(underlyingNode = it, connect = true) }
-        newDiskEncryption(
-                underlyingNode = call,
-                cipher = cipher,
-                key = (key as? GetSecret)?.concept,
-                connect = true,
-            )
+        val secretKey = (key as? GetSecret)?.concept
+        newDiskEncryption(underlyingNode = call, cipher = cipher, key = secretKey, connect = true)
             .apply { this.prevDFG += call }
     }
 

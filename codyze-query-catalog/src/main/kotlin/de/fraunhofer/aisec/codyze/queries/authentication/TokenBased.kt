@@ -5,7 +5,6 @@ package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.assumptions.*
-import de.fraunhofer.aisec.cpg.graph.component
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
 import de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource
@@ -14,17 +13,14 @@ import de.fraunhofer.aisec.cpg.graph.evaluate
 import de.fraunhofer.aisec.cpg.query.*
 
 /**
- * The list of valid token providers that are valid for the project.
+ * The list of valid token providers that are considered to be valid for all project. It is the
+ * default parameter used in [isTokenProviderConfigured].
  *
- * Note: This set may change depending on the project or state-of-the-art.
+ * Note: Projects might have different valid token providers, so a customized list should be
+ * provided to [isTokenProviderConfigured] and [tokenBasedAuthenticationWhenRequired] when
+ * necessary.
  */
-val tokenProvider = setOf("fernet", "jws")
-
-/**
- * Currently, we assume that only the endpoints under "/v3" (for cinder) and "/v1" (for barbican)
- * need authentication.
- */
-val requireAuthentication = setOf(Pair("cinder", "/v3/"), Pair("barbican", "/v1/"))
+val defaultValidTokenProvider = setOf("jws", "jwt")
 
 /**
  * Determines if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] does not
@@ -32,13 +28,11 @@ val requireAuthentication = setOf(Pair("cinder", "/v3/"), Pair("barbican", "/v1/
  *
  * Note: This whitelist has to be customized for each project.
  */
-fun HttpEndpoint.doesNotNeedAuthentication(): QueryTree<Boolean> {
+fun HttpEndpoint.doesNotNeedAuthentication(
+    requiresAuthentication: HttpEndpoint.() -> Boolean
+): QueryTree<Boolean> {
     // Checks if the endpoint is in the list of endpoints that do not require authentication.
-    val doesNotNeedAuth =
-        requireAuthentication.none {
-            it.first == this.underlyingNode?.component?.name?.localName &&
-                this.path.startsWith(it.second)
-        }
+    val doesNotNeedAuth = !requiresAuthentication(this)
 
     // Creates the QueryTree with the result of the assessment.
     return QueryTree(
@@ -46,8 +40,9 @@ fun HttpEndpoint.doesNotNeedAuthentication(): QueryTree<Boolean> {
             stringRepresentation =
                 if (doesNotNeedAuth) "The endpoint $this does not need authentication"
                 else "The endpoint $this does not need authentication",
-            children = mutableListOf(QueryTree(this)),
+            children = mutableListOf(QueryTree(this, operator = GenericQueryOperators.EVALUATE)),
             node = this,
+            operator = GenericQueryOperators.EVALUATE,
         )
         .assume(
             AssumptionType.ExhaustiveEnumerationAssumption,
@@ -57,12 +52,18 @@ fun HttpEndpoint.doesNotNeedAuthentication(): QueryTree<Boolean> {
 }
 
 /**
- * Checks if the [de.fraunhofer.aisec.cpg.TranslationResult] [this] contains a
- * [de.fraunhofer.aisec.cpg.graph.concepts.config.ConfigurationSource] that configures that the
- * provider is a valid token provider.
+ * Checks if the [TranslationResult] contains a [ConfigurationSource] that configures that the
+ * provider is considered to be a [validTokenProvider].
+ *
+ * @param validTokenProvider The list of valid token providers that are considered to be valid for
+ *   the project.
  */
-fun TranslationResult.isTokenProviderConfigured(): QueryTree<Boolean> {
-    return this.existsExtended<ConfigurationSource>(
+context(TranslationResult)
+fun isTokenProviderConfigured(
+    validTokenProvider: Set<String> = defaultValidTokenProvider
+): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+    return tr.existsExtended<ConfigurationSource>(
         sel = { config -> config.name.toString() == "keystone.conf" },
         mustSatisfy = { config ->
             val providerGroups =
@@ -71,24 +72,28 @@ fun TranslationResult.isTokenProviderConfigured(): QueryTree<Boolean> {
                 }
 
             val configuresTokenAuth =
-                providerGroups.singleOrNull { it.evaluate().toString() in tokenProvider } != null
+                providerGroups.singleOrNull { it.evaluate().toString() in validTokenProvider } !=
+                    null
 
             QueryTree(
                 value = configuresTokenAuth,
                 stringRepresentation =
                     if (configuresTokenAuth) "The config configures token-based authentication"
                     else "The config does not configure token-based authentication",
-                children = mutableListOf(QueryTree(config), QueryTree(providerGroups)),
+                children =
+                    mutableListOf(
+                        QueryTree(config, operator = GenericQueryOperators.EVALUATE),
+                        QueryTree(providerGroups, operator = GenericQueryOperators.EVALUATE),
+                    ),
+                operator = GenericQueryOperators.EVALUATE,
             )
         },
     )
 }
 
 /**
- * Checks if the [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint] [this] requires
- * token-based authentication. The attribute
- * [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint.authentication] is set by the pass only
- * if a token provider has been configured.
+ * Checks if the [HttpEndpoint] [this] requires token-based authentication. The attribute
+ * [HttpEndpoint.authentication] is set by the pass only if a token provider has been configured.
  */
 fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
     val isTokedBasedAuth = this.authentication is TokenBasedAuth
@@ -100,23 +105,28 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
             } else {
                 "The endpoint $this does not require token-based authentication"
             },
-        children = mutableListOf(QueryTree(this.authentication)),
+        children =
+            mutableListOf(
+                QueryTree(this.authentication, operator = GenericQueryOperators.EVALUATE)
+            ),
         node = this,
+        operator = GenericQueryOperators.EVALUATE,
     )
 }
 
 /**
- * Todo: Add documentation on which security statement is enforced
- *
- * Checks if all [de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint]s in the
- * [de.fraunhofer.aisec.cpg.TranslationResult] are either in the list of endpoints that do not
- * require authentication or have a valid (in terms of secure) token-based authentication in-place.
+ * Checks if all [HttpEndpoint]s in the [TranslationResult] are either in the list of endpoints that
+ * do not require authentication (i.e. not in the list of [requiresAuthentication]) or have a valid
+ * (in terms of secure) token-based authentication in-place.
  */
 context(TranslationResult)
-fun tokenBasedAuthenticationWhenRequired(): QueryTree<Boolean> {
+fun tokenBasedAuthenticationWhenRequired(
+    requiresAuthentication: HttpEndpoint.() -> Boolean,
+    validTokenProvider: Set<String> = defaultValidTokenProvider,
+): QueryTree<Boolean> {
     val tr = this@TranslationResult
     // Is a valid token provider configured?
-    val tokenProviderConfigured = tr.isTokenProviderConfigured()
+    val tokenProviderConfigured = isTokenProviderConfigured(validTokenProvider)
 
     return tr.allExtended<HttpEndpoint>(
         mustSatisfy = { endpoint ->
@@ -124,22 +134,23 @@ fun tokenBasedAuthenticationWhenRequired(): QueryTree<Boolean> {
             // and a valid token provider is configured or if the endpoint does not need
             // authentication.
             (tokenProviderConfigured and endpoint.hasTokenBasedAuth()) or
-                endpoint.doesNotNeedAuthentication()
+                endpoint.doesNotNeedAuthentication(requiresAuthentication)
         }
     )
 }
 
 /**
- * Checks if any [de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate] uses a
- * [de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth] where the token is equal to the
- * credential of that [de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate].
+ * Checks if any [Authenticate] uses a [TokenBasedAuth] where the token is equal to the credential
+ * of that [Authenticate].
  */
-fun TranslationResult.usesSameTokenAsCredential(): QueryTree<Boolean> {
-    return this.allExtended<Authenticate>(
+context(TranslationResult)
+fun usesSameTokenAsCredential(): QueryTree<Boolean> {
+    val tr = this@TranslationResult
+    return tr.allExtended<Authenticate>(
         mustSatisfy = { token ->
             val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
             val isSameToken = tokens.all { it.token == token.credential }
-            QueryTree(value = isSameToken, node = token)
+            QueryTree(value = isSameToken, node = token, operator = GenericQueryOperators.EVALUATE)
         }
     )
 }

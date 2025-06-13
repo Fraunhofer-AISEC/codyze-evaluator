@@ -3,6 +3,8 @@
  */
 package example
 
+import de.fraunhofer.aisec.cpg.query.NotYetEvaluated
+
 project {
     manualAssessment {
         of("Ecosystem-G1-Checking-Known-Vulnerabilities") {
@@ -353,7 +355,7 @@ project {
 
         of("Sec-Targets-Defined") {
             // I had an initial look but am not really sure yet.
-            Undecided
+            NotYetEvaluated
         }
 
         of("Other-KPIs") { (2 gt 1).assume(AssumptionType.SoundnessAssumption, "Math is sound") }

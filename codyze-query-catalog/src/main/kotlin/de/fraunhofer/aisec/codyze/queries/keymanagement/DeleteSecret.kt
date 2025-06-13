@@ -42,7 +42,7 @@ fun secretsAreDeletedAfterUsage(): QueryTree<Boolean> {
             // supported operations are defined by `Node.generatesNewData()`.
             secret.alwaysFlowsTo(
                 // We perform an interprocedural analysis.
-                scope = Interprocedural(maxSteps = 100),
+                scope = Interprocedural(),
                 // We do not want to track unreachable EOG paths, and we perform a
                 // context- and field-sensitive analysis.
                 // It would be possible to add `Implicit` to consider implicit dataflows.

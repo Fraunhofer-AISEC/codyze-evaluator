@@ -40,7 +40,7 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
     override fun accept(t: Component) {
         val policies = t.conceptNodes.filterIsInstance<Policy>()
         if (policies.isEmpty()) {
-            log.warn("Could not find any policy concept")
+            log.info("Ignoring component {} as it has no policies", t.name)
             return
         }
         handlePolicies(policies = policies, component = t)
@@ -90,9 +90,12 @@ class AuthorizationPass(ctx: TranslationContext) : ComponentPass(ctx) {
                 ?: policyAuthorize.argumentEdges.singleOrNull { it.name == "exc" }?.end
                 ?: return
         val authorization =
-            newAuthorization(underlyingNode = call, policy = policy, connect = true).also {
-                policy.policyRef = policyRef
-            }
+            newAuthorization(
+                underlyingNode = call,
+                policy = policy,
+                policyRef = policyRef,
+                connect = true,
+            )
         newAuthorize(
             underlyingNode = policyAuthorize,
             concept = authorization,

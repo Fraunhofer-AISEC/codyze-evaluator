@@ -8,6 +8,7 @@ import de.fraunhofer.aisec.cpg.graph.Node
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.newConcept
 import de.fraunhofer.aisec.cpg.graph.concepts.newOperation
+import de.fraunhofer.aisec.cpg.graph.statements.expressions.Expression
 
 /**
  * Creates a new [Authorization] concept.
@@ -17,9 +18,14 @@ import de.fraunhofer.aisec.cpg.graph.concepts.newOperation
  *   connected to the underlying node by setting its `underlyingNode`.
  * @return The created [Authorization] concept.
  */
-fun MetadataProvider.newAuthorization(underlyingNode: Node, policy: Policy, connect: Boolean) =
+fun MetadataProvider.newAuthorization(
+    underlyingNode: Node,
+    policy: Policy,
+    policyRef: Expression,
+    connect: Boolean,
+) =
     newConcept(
-        { AuthorizationWithPolicy(policy = policy) },
+        { AuthorizationWithPolicy(policy = policy, policyRef = policyRef) },
         underlyingNode = underlyingNode,
         connect = connect,
     )

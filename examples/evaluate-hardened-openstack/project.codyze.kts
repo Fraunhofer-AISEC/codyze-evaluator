@@ -1,18 +1,25 @@
 /*
  * This file is part of the OpenStack Checker
  */
+@file:OptIn(ExperimentalUuidApi::class)
+
+import de.fraunhofer.aisec.codyze.dsl.fulfilledBy
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.codyze.queries.authentication.*
 import de.fraunhofer.aisec.codyze.queries.authorization.*
 import de.fraunhofer.aisec.codyze.queries.encryption.*
 import de.fraunhofer.aisec.codyze.queries.file.*
+import de.fraunhofer.aisec.codyze.queries.isolation.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
 import example.queries.keystoneAuthStrategyConfigured
+import kotlin.uuid.ExperimentalUuidApi
 
 include {
     Tagging from "tagging.codyze.kts"
     ManualAssessment from "assessment.codyze.kts"
+    AssumptionDecisions from "assumptions.codyze.kts"
+    Suppressions from "suppressions.codyze.kts"
 }
 
 project {
@@ -71,12 +78,18 @@ project {
                  * [Nova] is the OpenStack compute service that provides virtual machines and
                  * manages compute resources. It is responsible for launching and managing
                  * instances.
-                 *
-                 * However, in our scenario, [Cinder] is directly interacting with "libvirt" to
-                 * encrypt disk images. [Nova] is not used in this context. Therefore, we only
-                 * include [Nova] in the Ecosystem analysis, but not in the source code analysis.
                  */
-                module("nova") {}
+                module("nova") {
+                    directory = "toe/modules/nova"
+
+                    /**
+                     * However, in our scenario, [Cinder] is directly interacting with "libvirt" to
+                     * encrypt disk images. [Nova] is not used in this context. Therefore, we only
+                     * include [Nova] in the Ecosystem analysis, but not in the source code
+                     * analysis.
+                     */
+                    exclude("nova")
+                }
 
                 /**
                  * [Castellan] is a library for managing secrets in OpenStack, providing abstraction
@@ -104,6 +117,20 @@ project {
                     exclude("tests")
                 }
 
+                /** [OsloContext] is a library for managing contexts in OpenStack. */
+                module("oslo.context") {
+                    directory = "toe/libraries/oslo.context"
+                    include("oslo_context")
+                    exclude("tests")
+                }
+
+                /** [OsloPolicy] is a library for managing contexts in OpenStack. */
+                module("oslo.policy") {
+                    directory = "toe/libraries/oslo.policy"
+                    include("oslo_policy")
+                    exclude("tests")
+                }
+
                 /**
                  * [KeystoneMiddleware] is a library that provides middleware components for
                  * OpenStack Keystone, the identity service.
@@ -112,6 +139,16 @@ project {
                     directory = "toe/libraries/keystonemiddleware"
                     include("keystonemiddleware")
                     exclude("tests", "migrations")
+                }
+
+                /**
+                 * [KeystoneAuth] is a library that provides authentication handling for OpenStack
+                 * Keystone, the identity service.
+                 */
+                module("keystoneauth") {
+                    directory = "toe/libraries/keystoneauth"
+                    include("keystoneauth1")
+                    exclude("tests")
                 }
             }
         }
@@ -154,8 +191,7 @@ project {
                 requirement {
                     name = "Delete Temporary Files After Use"
 
-                    // This query checks if restrictive file permissions are applied when writing
-                    // files. But only if the file is written from a secret.
+                    // This query checks that temporary files are always deleted after use (i.e.m.
                     fulfilledBy { temporaryFilesAreAlwaysDeleted() }
                 }
 
@@ -209,15 +245,18 @@ project {
                     name = "Key for Disk Encryption is Kept Secure"
 
                     fulfilledBy {
-                        val notLeakedAndReachable =
+                        val notLeaked =
                             keyNotLeakedThroughOutput(
                                 isLeakyOutput = Node::dataLeavesOpenStackComponent
-                            ) and
-                                keyOnlyReachableThroughSecureKeyProvider(
-                                    isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
-                                )
+                            )
+                        val keyReachable =
+                            encryptionKeyOriginatesFromSecureKeyProvider(
+                                isSecureKeyProvider = HttpEndpoint::isSecureOpenStackKeyProvider
+                            )
+                        val notLeakedAndReachable = notLeaked and keyReachable
+                        val q2 = keyIsDeletedFromMemoryAfterUse()
 
-                        notLeakedAndReachable and keyIsDeletedFromMemoryAfterUse()
+                        notLeakedAndReachable and q2
                     }
                 }
 
@@ -225,7 +264,7 @@ project {
                 requirement {
                     name = "Transport Encryption of Key"
 
-                    fulfilledBy { transportEncryptionForKeys() }
+                    fulfilledBy(::transportEncryptionForKeys)
                 }
 
                 /**
@@ -235,7 +274,7 @@ project {
                 requirement {
                     name = "Key Accessible Only By Valid User"
 
-                    fulfilledBy { keyOnyAccessibleByAuthenticatedEndpoint() }
+                    fulfilledBy(::keyOnyAccessibleByAuthenticatedEndpoint)
                 }
             }
 
@@ -246,28 +285,41 @@ project {
             category("Multi-Tenancy") {
                 name = "Multi-Tenancy"
 
-                /** All authentication operations must use Keystone as the identity service. */
+                /** All services need to use Keystone as their authentication strategy. */
                 requirement {
-                    name = "Use Keystone for authentication"
+                    name = "Use Keystone for Authentication"
 
-                    fulfilledBy { keystoneAuthStrategyConfigured() }
+                    fulfilledBy(::keystoneAuthStrategyConfigured)
                 }
 
-                /** All private endpoints must only be accessible after authentication. */
+                /**
+                 * All endpoints for [Cinder] and [Barbican] must only be accessible after
+                 * authentication.
+                 */
                 requirement {
                     name = "All Endpoints Must Have Authentication Enabled"
 
-                    fulfilledBy { endpointsAreAuthenticated() }
+                    fulfilledBy {
+                        endpointsAreAuthenticated(
+                            shouldHaveAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI
+                        )
+                    }
                 }
 
-                /** All endpoints have token-based authentication. */
+                /**
+                 * All endpoints must use access tokens from a valid [tokenProvider]. The access
+                 * tokens used for authentication are validated by the token-based authentication,
+                 * and they must come from the request context. Finally, the user/domain/project
+                 * information in the token must be used in the authentication process.
+                 */
                 requirement {
                     name = "Token-based Authentication"
 
-                    // Checks if all access tokens used for authentication are validated by the
-                    // token-based authentication and if they come from the request context.
                     fulfilledBy {
-                        tokenBasedAuthenticationWhenRequired() and
+                        tokenBasedAuthenticationWhenRequired(
+                            requiresAuthentication = HttpEndpoint::isCurrentBarbicanOrCinderAPI,
+                            validTokenProvider = tokenProvider,
+                        ) and
                             usesSameTokenAsCredential() and
                             hasDataFlowToToken() and
                             useKeystoneForAuthentication()
@@ -283,8 +335,12 @@ project {
                     name = "Domain/Project used in Authorization Checks"
 
                     fulfilledBy {
-                        endpointAuthorizationBasedOnDomainOrProject() and
-                            databaseAccessBasedOnDomainOrProject()
+                        val q1 = endpointAuthorizationBasedOnDomainOrProject()
+                        val q2 =
+                            databaseAccessBasedOnDomainOrProject(
+                                hasCheckForDomain = Node::hasCheckForDomain
+                            )
+                        q1 and q2
                     }
                 }
 
@@ -294,7 +350,7 @@ project {
                  * answered.
                  */
                 requirement {
-                    name = "No Data Flows to Globals"
+                    name = "No Data Flows to Globals in User-Scoped Requests"
 
                     fulfilledBy { noDataFlowsToGlobals<HttpRequest>() }
                 }
@@ -305,12 +361,14 @@ project {
                  * found” or “already exists” happen.
                  */
                 requirement {
-                    name = "Not Unauthorized Access for Other Domains"
+                    name = "Respond with Unauthorized Access for Other Domains"
 
                     fulfilledBy {
-                        unauthorizedResponseFromAnotherDomainQuery(
-                            policy = UnauthorizedResponsePolicy()
-                        )
+                        val q1 =
+                            unauthorizedResponseFromAnotherDomainQuery(
+                                policy = UnauthorizedResponsePolicy()
+                            )
+                        q1
                     }
                 }
             }

@@ -4,6 +4,7 @@
 package de.fraunhofer.aisec.codyze
 
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
+import de.fraunhofer.aisec.cpg.helpers.printMarkdown
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
@@ -29,9 +30,28 @@ fun evaluateWithCodyze(
     result.translationResult.benchmarkResults.print()
 
     println("# Analysis Results")
+    println()
 
-    for (requirement in result.requirementsResults) {
-        println("## Requirement ${requirement.key}: ${requirement.value}")
+    for (categoryEntry in project.requirementCategories) {
+        val category = categoryEntry.value
+        println("## Category ${category.id}: ${category.name}")
+
+        val entries = mutableListOf<List<Any>>()
+        for (requirements in category.requirements) {
+            entries.add(
+                listOf(
+                    requirements.key,
+                    requirements.value.name ?: "N/A",
+                    result.requirementsResults[requirements.key]?.value ?: "N/A",
+                    result.requirementsResults[requirements.key]?.confidence ?: "N/A",
+                )
+            )
+        }
+
+        printMarkdown(
+            entries,
+            listOf("Requirement ID", "Requirement Name", "Fulfillment", "Confidence"),
+        )
     }
 
     return result
