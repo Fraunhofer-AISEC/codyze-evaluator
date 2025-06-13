@@ -12,7 +12,6 @@ import de.fraunhofer.aisec.codyze.queries.file.*
 import de.fraunhofer.aisec.codyze.queries.isolation.*
 import de.fraunhofer.aisec.codyze.queries.keymanagement.*
 import de.fraunhofer.aisec.cpg.graph.concepts.http.*
-import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 import example.queries.keystoneAuthStrategyConfigured
 import kotlin.uuid.ExperimentalUuidApi
 
