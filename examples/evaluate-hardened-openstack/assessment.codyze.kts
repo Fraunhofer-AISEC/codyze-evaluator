@@ -355,7 +355,7 @@ project {
 
         of("Sec-Targets-Defined") {
             // I had an initial look but am not really sure yet.
-            NotYetEvaluated()
+            NotYetEvaluated
         }
 
         of("Other-KPIs") { (2 gt 1).assume(AssumptionType.SoundnessAssumption, "Math is sound") }
