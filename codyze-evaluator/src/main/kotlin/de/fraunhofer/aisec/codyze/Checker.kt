@@ -5,6 +5,7 @@ package de.fraunhofer.aisec.codyze
 
 import de.fraunhofer.aisec.codyze.dsl.requirement
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
+import de.fraunhofer.aisec.cpg.helpers.printMarkdown
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext
 import de.fraunhofer.aisec.cpg.passes.concepts.tag
@@ -30,21 +31,27 @@ fun evaluateWithCodyze(
     result.translationResult.benchmarkResults.print()
 
     println("# Analysis Results")
+    println()
 
     for (categoryEntry in project.requirementCategories) {
         val category = categoryEntry.value
-        println("## Category ${category.id}: ${category.name}\n")
+        println("## Category ${category.id}: ${category.name}")
 
-        /*for (requirements in category.requirements) {
-            println("- Issue: ${issue.name} (${issue.severity})")
-            println("  - Description: ${issue.description}")
-            println("  - Confidence: ${issue.confidence}")
-        }*/
-    }
+        val entries = mutableListOf<List<Any>>()
+        for (requirements in category.requirements) {
+            entries.add(
+                listOf(
+                    requirements.key,
+                    requirements.value.name ?: "N/A",
+                    result.requirementsResults[requirements.key]?.value ?: "N/A",
+                    result.requirementsResults[requirements.key]?.confidence ?: "N/A",
+                )
+            )
+        }
 
-    for (requirement in result.requirementsResults) {
-        println(
-            "## Requirement ${requirement.key}: ${requirement.value.value} with confidence ${requirement.value.confidence}"
+        printMarkdown(
+            entries,
+            listOf("Requirement ID", "Requirement Name", "Fulfillment", "Confidence"),
         )
     }
 
