@@ -75,15 +75,17 @@ project {
                  * [Nova] is the OpenStack compute service that provides virtual machines and
                  * manages compute resources. It is responsible for launching and managing
                  * instances.
-                 *
-                 * However, in our scenario, [Cinder] is directly interacting with "libvirt" to
-                 * encrypt disk images. [Nova] is not used in this context. Therefore, we only
-                 * include [Nova] in the Ecosystem analysis, but not in the source code analysis.
                  */
                 module("nova") {
                     directory = "toe/modules/nova"
-                    include("nova")
-                    exclude("tests")
+
+                    /**
+                     * However, in our scenario, [Cinder] is directly interacting with "libvirt" to
+                     * encrypt disk images. [Nova] is not used in this context. Therefore, we only
+                     * include [Nova] in the Ecosystem analysis, but not in the source code
+                     * analysis.
+                     */
+                    exclude("nova")
                 }
 
                 /**
