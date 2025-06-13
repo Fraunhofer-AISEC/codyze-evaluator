@@ -3,7 +3,6 @@
  */
 package de.fraunhofer.aisec.codyze
 
-import de.fraunhofer.aisec.codyze.dsl.requirement
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.helpers.printMarkdown
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass

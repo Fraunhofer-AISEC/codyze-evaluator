@@ -364,9 +364,11 @@ project {
                     name = "Respond with Unauthorized Access for Other Domains"
 
                     fulfilledBy {
-                        unauthorizedResponseFromAnotherDomainQuery(
-                            policy = UnauthorizedResponsePolicy()
-                        )
+                        val q1 =
+                            unauthorizedResponseFromAnotherDomainQuery(
+                                policy = UnauthorizedResponsePolicy()
+                            )
+                        q1
                     }
                 }
 
