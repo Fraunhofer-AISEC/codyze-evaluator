@@ -14,25 +14,25 @@ project {
             undecided("00000000-0000-0000-ffff-ffff88d01ccd")
             undecided("00000000-0000-0000-0000-0000126c56a4")
 
-            /** We accept that the inference starts in a record, namespace or translation unit. */
-            accept("00000000-0000-0000-ffff-ffffa1fa084e")
-            accept("00000000-0000-0000-ffff-ffffa1fa084e")
-            accept("00000000-0000-0000-0000-00005bae5c76")
-            accept("00000000-0000-0000-0000-00003c6caf0e")
-            accept("00000000-0000-0000-0000-000077a7e176")
-            accept("00000000-0000-0000-ffff-ffffd1ea8851")
-            accept("00000000-0000-0000-ffff-ffffd1ea8851")
-            accept("00000000-0000-0000-ffff-ffffd1ea8851")
-            accept("00000000-0000-0000-ffff-ffffd1ea8851")
-            accept("00000000-0000-0000-0000-000040c768d1")
-            accept("00000000-0000-0000-0000-00007b51a185")
-            accept("00000000-0000-0000-0000-000071e611a7")
-            accept("00000000-0000-0000-0000-00001e1131a2")
-            accept("00000000-0000-0000-ffff-ffff8342a072")
+            /** We ignore that the inference starts in a record, namespace or translation unit. */
+            ignore("00000000-0000-0000-ffff-ffffa1fa084e")
+            ignore("00000000-0000-0000-ffff-ffffa1fa084e")
+            ignore("00000000-0000-0000-0000-00005bae5c76")
+            ignore("00000000-0000-0000-0000-00003c6caf0e")
+            ignore("00000000-0000-0000-0000-000077a7e176")
+            ignore("00000000-0000-0000-ffff-ffffd1ea8851")
+            ignore("00000000-0000-0000-ffff-ffffd1ea8851")
+            ignore("00000000-0000-0000-ffff-ffffd1ea8851")
+            ignore("00000000-0000-0000-ffff-ffffd1ea8851")
+            ignore("00000000-0000-0000-0000-000040c768d1")
+            ignore("00000000-0000-0000-0000-00007b51a185")
+            ignore("00000000-0000-0000-0000-000071e611a7")
+            ignore("00000000-0000-0000-0000-00001e1131a2")
+            ignore("00000000-0000-0000-ffff-ffff8342a072")
 
-            /** We accept that ambiguous information may not be perfectly resolved. */
-            accept("00000000-0000-0000-ffff-ffffa2a5e9d0")
-            accept("00000000-0000-0000-0000-000062ff20fb")
+            /** We ignore that ambiguous information may not be perfectly resolved. */
+            ignore("00000000-0000-0000-ffff-ffffa2a5e9d0")
+            ignore("00000000-0000-0000-0000-000062ff20fb")
 
             /**
              * We assume that the list of endpoints that do not require authentication is exhaustive
@@ -51,6 +51,12 @@ project {
              * To verify this assumption, it is necessary to check the data flow.
              */
             undecided("00000000-0000-0000-0000-00005c26e6ab")
+
+            /**
+             * We assume that the `earlyTermination` is correct and that no more exception will be
+             * thrown outside the function where the domain scope check is performed.
+             */
+            accept("00000000-0000-0000-ffff-ffffe3ff4474")
         }
     }
 }
