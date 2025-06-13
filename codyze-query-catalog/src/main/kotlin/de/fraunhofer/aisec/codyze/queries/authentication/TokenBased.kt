@@ -40,9 +40,9 @@ fun HttpEndpoint.doesNotNeedAuthentication(
             stringRepresentation =
                 if (doesNotNeedAuth) "The endpoint $this does not need authentication"
                 else "The endpoint $this does not need authentication",
-            children = mutableListOf(QueryTree(this, operator = QueryOperators.EVALUATE)),
+            children = mutableListOf(QueryTree(this, operator = GenericQueryOperators.EVALUATE)),
             node = this,
-            operator = QueryOperators.EVALUATE,
+            operator = GenericQueryOperators.EVALUATE,
         )
         .assume(
             AssumptionType.ExhaustiveEnumerationAssumption,
@@ -82,10 +82,10 @@ fun isTokenProviderConfigured(
                     else "The config does not configure token-based authentication",
                 children =
                     mutableListOf(
-                        QueryTree(config, operator = QueryOperators.EVALUATE),
-                        QueryTree(providerGroups, operator = QueryOperators.EVALUATE),
+                        QueryTree(config, operator = GenericQueryOperators.EVALUATE),
+                        QueryTree(providerGroups, operator = GenericQueryOperators.EVALUATE),
                     ),
-                operator = QueryOperators.EVALUATE,
+                operator = GenericQueryOperators.EVALUATE,
             )
         },
     )
@@ -106,9 +106,11 @@ fun HttpEndpoint.hasTokenBasedAuth(): QueryTree<Boolean> {
                 "The endpoint $this does not require token-based authentication"
             },
         children =
-            mutableListOf(QueryTree(this.authentication, operator = QueryOperators.EVALUATE)),
+            mutableListOf(
+                QueryTree(this.authentication, operator = GenericQueryOperators.EVALUATE)
+            ),
         node = this,
-        operator = QueryOperators.EVALUATE,
+        operator = GenericQueryOperators.EVALUATE,
     )
 }
 
@@ -148,7 +150,7 @@ fun usesSameTokenAsCredential(): QueryTree<Boolean> {
         mustSatisfy = { token ->
             val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
             val isSameToken = tokens.all { it.token == token.credential }
-            QueryTree(value = isSameToken, node = token, operator = QueryOperators.EVALUATE)
+            QueryTree(value = isSameToken, node = token, operator = GenericQueryOperators.EVALUATE)
         }
     )
 }

@@ -27,7 +27,7 @@ fun hasDataFlowToToken(): QueryTree<Boolean> {
                     false,
                     node = ctx,
                     stringRepresentation = "Invalid Request context",
-                    operator = QueryOperators.EVALUATE,
+                    operator = GenericQueryOperators.EVALUATE,
                 )
             } else {
                 dataFlow(

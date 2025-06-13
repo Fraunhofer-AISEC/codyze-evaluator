@@ -35,14 +35,18 @@ project {
             accept("00000000-0000-0000-0000-000062ff20fb")
 
             /**
-             * We assume that the list of endpoints that do not require authentication is exhaustive and does not contain too many elements.
+             * We assume that the list of endpoints that do not require authentication is exhaustive
+             * and does not contain too many elements.
              *
-             * To validate this assumption, it is necessary to check if this list is in accordance with the documentation provided.
+             * To validate this assumption, it is necessary to check if this list is in accordance
+             * with the documentation provided.
              */
             undecided("00000000-0000-0000-ffff-ffff82ebc975")
 
             /**
-             * We assume that there exists a data flow from a method that performs a database access (e.g., within an HTTP endpoint) to the `model_query` call expression represented by this node.
+             * We assume that there exists a data flow from a method that performs a database access
+             * (e.g., within an HTTP endpoint) to the `model_query` call expression represented by
+             * this node.
              *
              * To verify this assumption, it is necessary to check the data flow.
              */

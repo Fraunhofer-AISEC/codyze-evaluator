@@ -5,7 +5,7 @@ package de.fraunhofer.aisec.codyze.queries.authentication
 
 import de.fraunhofer.aisec.cpg.TranslationResult
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpEndpoint
-import de.fraunhofer.aisec.cpg.query.QueryOperators
+import de.fraunhofer.aisec.cpg.query.GenericQueryOperators
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 
@@ -27,8 +27,9 @@ fun endpointsAreAuthenticated(
         mustSatisfy = { endpoint ->
             QueryTree(
                 value = endpoint.authentication != null,
-                children = mutableListOf(QueryTree(endpoint, operator = QueryOperators.EVALUATE)),
-                operator = QueryOperators.EVALUATE,
+                children =
+                    mutableListOf(QueryTree(endpoint, operator = GenericQueryOperators.EVALUATE)),
+                operator = GenericQueryOperators.EVALUATE,
             )
         },
     )

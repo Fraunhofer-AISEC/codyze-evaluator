@@ -21,7 +21,7 @@ fun keystoneAuthStrategyConfigured(): QueryTree<Boolean> {
             QueryTree(
                 value = it.evaluate().toString() == "keystone",
                 stringRepresentation = "Component config: ${it.location?.artifactLocation}",
-                operator = QueryOperators.EVALUATE,
+                operator = GenericQueryOperators.EVALUATE,
             )
         },
     )
