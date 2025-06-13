@@ -7,7 +7,7 @@ import de.fraunhofer.aisec.cpg.query.NotYetEvaluated
 
 project {
     manualAssessment {
-        ofBoolean("Ecosystem-G1-Checking-Known-Vulnerabilities") {
+        of("Ecosystem-G1-Checking-Known-Vulnerabilities") {
             /** The expected fulfillment for known vulnerabilities in the Nova project. */
             val expectedValue = true
 
@@ -26,7 +26,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Dependency-Update-Tool") {
+        of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Dependency-Update-Tool") {
             /** The expected fulfillment for the dependency update tool in the Nova project. */
             val expectedValue = true
 
@@ -37,7 +37,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Security-Policy") {
+        of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Security-Policy") {
             /** The expected fulfillment for the security policy in the Nova project. */
             val expectedValue = true
 
@@ -51,7 +51,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-License") {
+        of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-License") {
             /** The expected fulfillment for the license in the Nova project. */
             val expectedValue = true
 
@@ -62,7 +62,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G3-Checking-CII-Best-Practices") {
+        of("Ecosystem-G3-Checking-CII-Best-Practices") {
             /** The expected fulfillment for the basic CII best practices in the Nova project. */
             val expectedValue = true
 
@@ -80,7 +80,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G4-Checking-Continuous-Testing-KPI-CI-Tests") {
+        of("Ecosystem-G4-Checking-Continuous-Testing-KPI-CI-Tests") {
             /** The expected fulfillment for CI tests in the Nova project. */
             val expectedValue = true
 
@@ -95,7 +95,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G4-Checking-Continuous-Testing-KPI-Fuzzing") {
+        of("Ecosystem-G4-Checking-Continuous-Testing-KPI-Fuzzing") {
             /** The expected fulfillment for fuzzing in the Nova project. */
             val expectedValue = true
 
@@ -110,7 +110,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G4-Checking-Continuous-Testing-KPI-SAST") {
+        of("Ecosystem-G4-Checking-Continuous-Testing-KPI-SAST") {
             /** The expected fulfillment for SAST in the Nova project. */
             val expectedValue = true
 
@@ -122,7 +122,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G5-Checking-CI/CD-Security-KPI-Gerrit-Settings") {
+        of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Gerrit-Settings") {
             /** The expected fulfillment for Gerrit settings in the Nova project. */
             val expectedValue = true
 
@@ -137,7 +137,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G5-Checking-CI/CD-Security-KPI-Branch-Protection") {
+        of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Branch-Protection") {
             /** The expected fulfillment for branch protection in the Nova project. */
             val expectedValue = true
 
@@ -151,7 +151,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G5-Checking-CI/CD-Security-KPI-Dangerous-Workflows") {
+        of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Dangerous-Workflows") {
             /** The expected fulfillment for dangerous workflows in the Nova project. */
             val expectedValue = true
 
@@ -162,7 +162,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G5-Checking-CI/CD-Security-KPI-Token-Permissions") {
+        of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Token-Permissions") {
             /** The expected fulfillment for token permissions in the Nova project. */
             val expectedValue = true
 
@@ -173,7 +173,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Code-Review") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Code-Review") {
             /** The expected fulfillment for code review in the Nova project. */
             val expectedValue = true
 
@@ -184,7 +184,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributors") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributors") {
             /** The expected fulfillment for the number of contributors in the Nova project. */
             val expectedValue = 2
 
@@ -198,9 +198,7 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean(
-            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity"
-        ) {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity") {
             /** The expected fulfillment for the contributor diversity in the Nova project. */
             val expectedValue = 2
 
@@ -214,7 +212,7 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-Not-Merge-Votings") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-Not-Merge-Votings") {
             /** The expected fulfillment for Do-not-merge votings in the Nova project. */
             val expectedValue = 5
 
@@ -228,7 +226,7 @@ project {
             actualValue <= expectedValue
         }
 
-        ofBoolean(
+        of(
             "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Filed-To-Resolved-Bugs-Ratio"
         ) {
             /**
@@ -244,9 +242,7 @@ project {
             actualValue < expectedValue
         }
 
-        ofBoolean(
-            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests"
-        ) {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests") {
             /** The expected fulfillment for abandoned change requests in the Nova project. */
             val expectedValue = 10
 
@@ -258,7 +254,7 @@ project {
             actualValue <= expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewers") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewers") {
             /** The expected fulfillment for number of reviewers in the Nova project. */
             val expectedValue = 10
 
@@ -270,7 +266,7 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewer-Diversity") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewer-Diversity") {
             /** The expected fulfillment for number of reviewer affiliations in the Nova project. */
             val expectedValue = 2
 
@@ -282,9 +278,7 @@ project {
             actualValue >= expectedValue
         }
 
-        ofBoolean(
-            "Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency"
-        ) {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency") {
             /** The expected fulfillment for contribution frequency in the Nova project. */
             val expectedValue = true
 
@@ -296,7 +290,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Review-Activity") {
+        of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Review-Activity") {
             /** The expected fulfillment for review activity in the Nova project. */
             val expectedValue = 100
 
@@ -308,7 +302,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G7-Checking-Build-Risks-KPI-Binary-Artifacts") {
+        of("Ecosystem-G7-Checking-Build-Risks-KPI-Binary-Artifacts") {
             /** The expected fulfillment for binary artifacts in the Nova project. */
             val expectedValue = false
 
@@ -320,7 +314,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G7-Checking-Build-Risks-KPI-Pinned-Dependencies") {
+        of("Ecosystem-G7-Checking-Build-Risks-KPI-Pinned-Dependencies") {
             /** The expected fulfillment for pinned dependencies in the Nova project. */
             val expectedValue = true
 
@@ -332,7 +326,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G7-Checking-Build-Risks-KPI-Packaging") {
+        of("Ecosystem-G7-Checking-Build-Risks-KPI-Packaging") {
             /** The expected fulfillment for packaging in the Nova project. */
             val expectedValue = true
 
@@ -344,7 +338,7 @@ project {
             actualValue == expectedValue
         }
 
-        ofBoolean("Ecosystem-G7-Checking-Build-Risks-KPI-Signed-Releases") {
+        of("Ecosystem-G7-Checking-Build-Risks-KPI-Signed-Releases") {
             /** The expected fulfillment for signed releases in the Nova project. */
             val expectedValue = true
 

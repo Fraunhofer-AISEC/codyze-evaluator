@@ -3,6 +3,7 @@
  */
 package de.fraunhofer.aisec.codyze
 
+import de.fraunhofer.aisec.codyze.dsl.requirement
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext
@@ -29,6 +30,17 @@ fun evaluateWithCodyze(
     result.translationResult.benchmarkResults.print()
 
     println("# Analysis Results")
+
+    for (categoryEntry in project.requirementCategories) {
+        val category = categoryEntry.value
+        println("## Category ${category.id}: ${category.name}\n")
+
+        /*for (requirements in category.requirements) {
+            println("- Issue: ${issue.name} (${issue.severity})")
+            println("  - Description: ${issue.description}")
+            println("  - Confidence: ${issue.confidence}")
+        }*/
+    }
 
     for (requirement in result.requirementsResults) {
         println(
