@@ -94,7 +94,7 @@ class OpenStackTest {
                 val processInput =
                     (it.underlyingNode as? CallExpression)?.argumentEdges?.get("process_input")?.end
                 if (processInput == null) {
-                    QueryTree(value = true, operator = QueryOperators.EVALUATE)
+                    QueryTree(value = true, operator = GenericQueryOperators.EVALUATE)
                 } else {
                     executionPath(it) { to ->
                         to is DeAllocate &&
