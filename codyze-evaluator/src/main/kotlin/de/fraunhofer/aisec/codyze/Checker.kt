@@ -3,6 +3,8 @@
  */
 package de.fraunhofer.aisec.codyze
 
+import de.fraunhofer.aisec.codyze.console.ConsoleService
+import de.fraunhofer.aisec.codyze.console.startConsole
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.helpers.printMarkdown
 import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
@@ -53,6 +55,8 @@ fun evaluateWithCodyze(
             listOf("Requirement ID", "Requirement Name", "Fulfillment", "Confidence"),
         )
     }
+
+    ConsoleService.fromAnalysisResult(result).startConsole()
 
     return result
 }
