@@ -17,7 +17,6 @@ import de.fraunhofer.aisec.codyze.passes.concepts.flows.python.PythonEntryPointP
 import de.fraunhofer.aisec.codyze.passes.concepts.http.openstack.SecureKeyRetrievalPass
 import de.fraunhofer.aisec.codyze.passes.concepts.http.python.*
 import de.fraunhofer.aisec.codyze.passes.concepts.memory.openstack.StevedoreDynamicLoadingPass
-import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.cpg.TranslationConfiguration
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
@@ -25,9 +24,12 @@ import de.fraunhofer.aisec.cpg.graph.OverlayNode
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authenticate
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.Authorization
 import de.fraunhofer.aisec.cpg.graph.concepts.auth.TokenBasedAuth
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.GetSecret
+import de.fraunhofer.aisec.cpg.graph.concepts.crypto.encryption.Secret
 import de.fraunhofer.aisec.cpg.graph.declarations.ConstructorDeclaration
 import de.fraunhofer.aisec.cpg.graph.followDFGEdgesUntilHit
 import de.fraunhofer.aisec.cpg.graph.get
+import de.fraunhofer.aisec.cpg.graph.invoke
 import de.fraunhofer.aisec.cpg.graph.methods
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.CallExpression
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
@@ -64,9 +66,6 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
     it.registerPass<IniFileConfigurationSourcePass>()
     it.registerPass<PythonEntryPointPass>()
     it.registerPass<StevedoreDynamicLoadingPass>()
-
-    // TODO(oxisto): Remove and replace with tagging API
-    it.registerPass<MakeThingsWorkPrototypicallyPass>()
 }
 
 /**
@@ -144,4 +143,39 @@ fun TaggingContext.tagDomainScope() {
         // Authorization concept is already set in the `AuthorizationPass`
         CheckDomainScope(underlyingNode = node, concept = Authorization(), rule = node.arguments[1])
     }
+}
+
+/**
+ * Identifies the call to retrieve_plugin.get_secret() in barbican because this is where the key is
+ * read e.g. from an HSM or something else (depending on the configuration).
+ */
+fun TaggingContext.decryptedCertToSecret() {
+    each<MemberCallExpression>(
+            predicate = {
+                it.name.localName == "get_decrypted_private_key" &&
+                    it.base?.name?.localName == "magnum_cert"
+            }
+        )
+        .withMultiple {
+            val secret = Secret()
+            val getSecret = GetSecret(concept = secret).apply { this.nextDFG += node }
+            listOf(secret, getSecret)
+        }
+}
+
+/**
+ * Identifies the call to retrieve_plugin.get_secret() in barbican because this is where the key is
+ * read e.g. from an HSM or something else (depending on the configuration).
+ */
+fun TaggingContext.getSecretPluginCall() {
+    each<MemberCallExpression>(
+            predicate = {
+                it.name.localName == "get_secret" && it.base?.name?.localName == "retrieve_plugin"
+            }
+        )
+        .withMultiple {
+            val secret = Secret()
+            val getSecret = GetSecret(concept = secret).apply { this.nextDFG += node }
+            listOf(secret, getSecret)
+        }
 }

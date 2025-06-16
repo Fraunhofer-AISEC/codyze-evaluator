@@ -5,13 +5,14 @@ package de.fraunhofer.aisec.codyze.queries.file
 
 import de.fraunhofer.aisec.codyze.analyze
 import de.fraunhofer.aisec.codyze.passes.concepts.config.openstack.OsloConfigPass
-import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.codyze.profiles.openstack.*
 import de.fraunhofer.aisec.cpg.frontends.ini.IniFileLanguage
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ProvideConfigPass
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import kotlin.io.path.Path
 import kotlin.test.*
 
@@ -33,7 +34,16 @@ class RestrictFilePermissionsTest {
                 it.registerPass<IniFileConfigurationSourcePass>()
                 it.registerPass<ProvideConfigPass>()
                 it.registerPass<PythonFileConceptPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag {
+                            // Use a predefined tagging profile for secret definitions in OpenStack.
+                            decryptedCertToSecret()
+                            getSecretPluginCall()
+                        }
+                    )
+                )
                 it.exclusionPatterns("tests")
                 it.softwareComponents(
                     mutableMapOf("magnum" to listOf(topLevel.resolve("magnum").toFile()))
@@ -66,7 +76,16 @@ class RestrictFilePermissionsTest {
                 it.registerPass<IniFileConfigurationSourcePass>()
                 it.registerPass<ProvideConfigPass>()
                 it.registerPass<PythonFileConceptPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag {
+                            // Use a predefined tagging profile for secret definitions in OpenStack.
+                            decryptedCertToSecret()
+                            getSecretPluginCall()
+                        }
+                    )
+                )
                 it.exclusionPatterns("tests")
                 it.softwareComponents(
                     mutableMapOf("magnum" to listOf(topLevel.resolve("magnum").toFile()))
