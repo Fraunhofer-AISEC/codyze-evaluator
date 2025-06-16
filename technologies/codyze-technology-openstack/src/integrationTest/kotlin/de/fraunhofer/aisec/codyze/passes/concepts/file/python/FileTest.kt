@@ -45,14 +45,14 @@ class FileTest {
                 it.exclusionPatterns("tests")
                 it.registerPass<TagOverlaysPass>()
                 it.configurePass<TagOverlaysPass>(
-                            TagOverlaysPass.Configuration(
-                                tag {
-                                    // Use a predefined tagging profile for secret definitions in OpenStack.
-                                    decryptedCertToSecret()
-                                    getSecretPluginCall()
-                                }
-                            )
-                        )
+                    TagOverlaysPass.Configuration(
+                        tag {
+                            // Use a predefined tagging profile for secret definitions in OpenStack.
+                            decryptedCertToSecret()
+                            getSecretPluginCall()
+                        }
+                    )
+                )
                 it.softwareComponents(
                     mutableMapOf("magnum" to listOf(topLevel.resolve("magnum").toFile()))
                 )
