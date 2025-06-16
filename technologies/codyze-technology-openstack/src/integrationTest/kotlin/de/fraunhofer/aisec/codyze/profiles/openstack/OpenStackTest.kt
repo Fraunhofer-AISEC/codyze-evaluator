@@ -6,7 +6,6 @@ package de.fraunhofer.aisec.codyze.profiles.openstack
 import de.fraunhofer.aisec.codyze.*
 import de.fraunhofer.aisec.codyze.openstack.passes.PythonMemoryPass
 import de.fraunhofer.aisec.codyze.passes.concepts.crypto.encryption.openstack.CinderKeyManagerSecretPass
-import de.fraunhofer.aisec.codyze.passes.openstack.MakeThingsWorkPrototypicallyPass
 import de.fraunhofer.aisec.cpg.*
 import de.fraunhofer.aisec.cpg.frontends.python.PythonLanguage
 import de.fraunhofer.aisec.cpg.graph.*
@@ -16,6 +15,8 @@ import de.fraunhofer.aisec.cpg.graph.concepts.memory.*
 import de.fraunhofer.aisec.cpg.graph.edges.get
 import de.fraunhofer.aisec.cpg.graph.get
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.*
+import de.fraunhofer.aisec.cpg.passes.concepts.TagOverlaysPass
+import de.fraunhofer.aisec.cpg.passes.concepts.tag
 import de.fraunhofer.aisec.cpg.query.*
 import java.io.File
 import kotlin.io.path.Path
@@ -67,7 +68,16 @@ class OpenStackTest {
                 it.registerLanguage<PythonLanguage>()
                 it.registerPass<PythonMemoryPass>()
                 it.registerPass<CinderKeyManagerSecretPass>()
-                it.registerPass<MakeThingsWorkPrototypicallyPass>()
+                it.registerPass<TagOverlaysPass>()
+                it.configurePass<TagOverlaysPass>(
+                    TagOverlaysPass.Configuration(
+                        tag {
+                            // Use a predefined tagging profile for secret definitions in OpenStack.
+                            decryptedCertToSecret()
+                            getSecretPluginCall()
+                        }
+                    )
+                )
                 it.exclusionPatterns("tests", "drivers")
                 it.softwareComponents(
                     mutableMapOf(

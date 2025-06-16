@@ -30,6 +30,10 @@ project {
 
             // Use a predefined tagging profile for database access.
             tagDatabaseAccess()
+
+            // Use a predefined tagging profile for secret definitions in OpenStack.
+            decryptedCertToSecret()
+            getSecretPluginCall()
         }
     }
 }
