@@ -3,6 +3,7 @@
  */
 package example
 
+import de.fraunhofer.aisec.cpg.concepts.http.HttpRequest
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 
 project {
@@ -79,6 +80,22 @@ project {
          * this one invalidates all the rest. The CPG models the rest as alternative paths, which is
          * not what we want here as it is not correct.
          */
+        queryTree(
+            { qt: QueryTree<Boolean> ->
+                ((qt.children.singleOrNull()?.value as? List<*>)?.any {
+                    it is Node &&
+                        it !is HttpRequest &&
+                        it.location
+                            ?.artifactLocation
+                            ?.uri
+                            ?.path
+                            ?.endsWith(
+                                "/examples/evaluate-hardened-openstack/toe/modules/cinder/cinder/volume/flows/manager/create_volume.py"
+                            ) == true &&
+                        (it.location?.region?.startLine == 515)
+                } == true)
+            } to true
+        )
         queryTreeById("00000000-5629-d9c1-ffff-ffffce05e786" to true)
         queryTreeById("00000000-5629-d9c1-ffff-ffffdfe7c2c4" to true)
         queryTreeById("00000000-5629-d9c1-ffff-ffffb3260174" to true)
