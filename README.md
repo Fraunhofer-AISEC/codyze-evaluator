@@ -31,3 +31,10 @@ cd documentation
 docker build -t mkdocs-material .
 docker run --rm -it -p 8000:8000 -v ${PWD}:/docs mkdocs-material
 ```
+
+## Initializing the git submodules
+
+We are using git submodules to include OpenStack repositories. To clone the submodules, use the following command:
+```bash
+git submodule update --init --remote
+```
