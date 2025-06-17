@@ -23,7 +23,7 @@ project {
 
             // The fulfillment for known vulnerabilities is met, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Dependency-Update-Tool") {
@@ -34,7 +34,7 @@ project {
             val actualValue = true
 
             // The dependency update tool is active, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-Security-Policy") {
@@ -48,7 +48,7 @@ project {
             val actualValue = true
 
             // The security policy is defined, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G2-Checking-Continuous-Maintenance-KPI-License") {
@@ -59,7 +59,7 @@ project {
             val actualValue = true
 
             // The license is defined, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G3-Checking-CII-Best-Practices") {
@@ -77,7 +77,7 @@ project {
                 false // true for the basic level, but some gold level criteria are not fulfilled
             // and should be accepted as such
 
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G4-Checking-Continuous-Testing-KPI-CI-Tests") {
@@ -92,7 +92,7 @@ project {
             val actualValue = true
 
             // The CI tests are successful, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G4-Checking-Continuous-Testing-KPI-Fuzzing") {
@@ -107,7 +107,7 @@ project {
 
             // Fuzzing is not used, therefore the KPI
             // is not fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G4-Checking-Continuous-Testing-KPI-SAST") {
@@ -119,7 +119,7 @@ project {
 
             // SAST is not used, therefore the KPI
             // is not fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Gerrit-Settings") {
@@ -134,7 +134,7 @@ project {
 
             // The Gerrit settings are correct, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Branch-Protection") {
@@ -148,7 +148,7 @@ project {
              */
             val actualValue = false // set to false because not all criteria are fully met
 
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Dangerous-Workflows") {
@@ -159,7 +159,7 @@ project {
             val actualValue = true
 
             // Dangerous workflows are correctly configured, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G5-Checking-CI/CD-Security-KPI-Token-Permissions") {
@@ -170,7 +170,7 @@ project {
             val actualValue = true
 
             // The token permissions are correctly configured, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Code-Review") {
@@ -181,7 +181,7 @@ project {
             val actualValue = true
 
             // The code review is fulfilled, therefore the KPI is fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributors") {
@@ -193,9 +193,9 @@ project {
              */
             val actualValue = 12
 
-            // The number of contributors is >= 2, therefore the KPI
+            // The number of contributors is gt 2, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue >= expectedValue
+            actualValue gt expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contributor-Diversity") {
@@ -207,9 +207,9 @@ project {
              */
             val actualValue = 6
 
-            // The number of contributor affiliations is >= 2, therefore the KPI
+            // The number of contributor affiliations is gt 2, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue >= expectedValue
+            actualValue gt expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Do-Not-Merge-Votings") {
@@ -221,9 +221,9 @@ project {
              */
             val actualValue = 6
 
-            // The number of Do-not-merge votings is >=5, therefore the KPI
+            // The number of Do-not-merge votings is gt5, therefore the KPI
             // is not fulfilled for the Nova 2024.2 release
-            actualValue <= expectedValue
+            actualValue le expectedValue
         }
 
         of(
@@ -237,9 +237,9 @@ project {
             /** There were 132 filed bugs and 50 resolved bugs in the Nova project. */
             val actualValue = 132 / 50
 
-            // The value of the Filed-to-resolved bugs ratio is <3, therefore the KPI
+            // The value of the Filed-to-resolved bugs ratio is lt3, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue < expectedValue
+            actualValue lt expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Abandoned-Change-Requests") {
@@ -249,9 +249,9 @@ project {
             /** There were 5 abandoned change requests in the Nova project. */
             val actualValue = 5
 
-            // The number of abandoned change requests is <=10, therefore the KPI
+            // The number of abandoned change requests is le10, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue <= expectedValue
+            actualValue le expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewers") {
@@ -261,9 +261,9 @@ project {
             /** There were 45 reviewers in the Nova project. */
             val actualValue = 45
 
-            // The number of reviewers is >=10, therefore the KPI
+            // The number of reviewers is gt10, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue >= expectedValue
+            actualValue gt expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Reviewer-Diversity") {
@@ -273,9 +273,9 @@ project {
             /** There were 18 reviewer affiliations in the Nova project. */
             val actualValue = 18
 
-            // The number of reviewer affiliations is >=2, therefore the KPI
+            // The number of reviewer affiliations is >2, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue >= expectedValue
+            actualValue gt expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Contribution-Frequency") {
@@ -287,7 +287,7 @@ project {
 
             // The expected contributor activity was not as expected, therefore the KPI
             // is not fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G6-Checking-Code-Contributions-and-Reviews-KPI-Review-Activity") {
@@ -299,7 +299,7 @@ project {
 
             // The expected review activity value was as expected, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G7-Checking-Build-Risks-KPI-Binary-Artifacts") {
@@ -311,7 +311,7 @@ project {
 
             // No binary artifacts were found, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G7-Checking-Build-Risks-KPI-Pinned-Dependencies") {
@@ -323,7 +323,7 @@ project {
 
             // Only minimum version numbers are defined, therefore the KPI
             // is partially fulfilled
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G7-Checking-Build-Risks-KPI-Packaging") {
@@ -335,7 +335,7 @@ project {
 
             // The project is available on PyPi, therefore the KPI
             // is fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Ecosystem-G7-Checking-Build-Risks-KPI-Signed-Releases") {
@@ -350,7 +350,7 @@ project {
 
             // The releases are signed, but the signatures do not seem to be visible,
             // therefore the KPI is partially fulfilled for the Nova 2024.2 release
-            actualValue == expectedValue
+            actualValue eq expectedValue
         }
 
         of("Sec-Targets-Defined") {
