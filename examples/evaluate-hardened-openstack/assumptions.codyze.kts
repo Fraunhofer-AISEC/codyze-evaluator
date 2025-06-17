@@ -34,21 +34,6 @@ project {
             ignore("00000000-0000-0000-ffff-ffffa2a5e9d0")
             ignore("00000000-0000-0000-0000-000062ff20fb")
 
-            ignore("00000000-0000-0000-ffff-ffffdb1bac22")
-            // We assume that the last VariableDeclaration in the statement kept in "variable" is
-            // the variable we care about in the ForEachStatement if there is no
-            // DeclarationStatement related to ffffffff-bc1f-6f40-ffff-ffffe99e3aad.
-            //
-            // To verify this assumption, we need to check if the last VariableDeclaration of the
-            // variable is indeed the one where we assign the iterable's elements to.
-            ignore("00000000-0000-0000-0000-0000112daa4c")
-            // We assume that the last VariableDeclaration in the statement kept in "variable" is
-            // the variable we care about in the ForEachStatement if there is no
-            // DeclarationStatement related to ffffffff-bc1f-6f40-0000-000021ee9f9d.
-            //
-            // To verify this assumption, we need to check if the last VariableDeclaration of the
-            // variable is indeed the one where we assign the iterable's elements to.
-
             /**
              * We assume that the list of endpoints that do not require authentication is exhaustive
              * and does not contain too many elements.
