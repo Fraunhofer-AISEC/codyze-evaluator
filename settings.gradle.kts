@@ -25,6 +25,5 @@ include("codyze-technology-openstack")
 project(":codyze-technology-openstack").projectDir = file("technologies/codyze-technology-openstack")
 
 // Example Projects
-include("evaluate-hardened-openstack")
-project(":evaluate-hardened-openstack").projectDir = file("examples/evaluate-hardened-openstack")
-
+include("examples:evaluate-hardened-openstack")
+project(":examples:evaluate-hardened-openstack").projectDir = file("examples/evaluate-hardened-openstack")

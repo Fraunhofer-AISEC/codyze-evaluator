@@ -200,7 +200,7 @@ project {
                     name = "Delete Secrets after Usage"
 
                     // We can use method references when we do not need to pass any parameters.
-                    fulfilledBy(::secretsAreDeletedAfterUsage)
+                    fulfilledBy { secretsAreDeletedAfterUsage() }
                 }
 
                 /**
@@ -210,7 +210,7 @@ project {
                 requirement {
                     name = "Secrets Must not be Logged"
 
-                    fulfilledBy(::noLoggingOfSecrets)
+                    fulfilledBy { noLoggingOfSecrets() }
                 }
             }
 
@@ -264,7 +264,7 @@ project {
                 requirement {
                     name = "Transport Encryption of Key"
 
-                    fulfilledBy(::transportEncryptionForKeys)
+                    fulfilledBy { transportEncryptionForKeys() }
                 }
 
                 /**
@@ -274,7 +274,7 @@ project {
                 requirement {
                     name = "Key Accessible Only By Valid User"
 
-                    fulfilledBy(::keyOnyAccessibleByAuthenticatedEndpoint)
+                    fulfilledBy { keyOnyAccessibleByAuthenticatedEndpoint() }
                 }
             }
 
@@ -289,7 +289,7 @@ project {
                 requirement {
                     name = "Use Keystone for Authentication"
 
-                    fulfilledBy(::keystoneAuthStrategyConfigured)
+                    fulfilledBy { keystoneAuthStrategyConfigured() }
                 }
 
                 /**
