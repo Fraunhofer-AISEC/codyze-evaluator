@@ -38,7 +38,11 @@ import de.fraunhofer.aisec.cpg.passes.ProgramDependenceGraphPass
 import de.fraunhofer.aisec.cpg.passes.concepts.TaggingContext
 import de.fraunhofer.aisec.cpg.passes.concepts.config.ini.IniFileConfigurationSourcePass
 import de.fraunhofer.aisec.cpg.passes.concepts.each
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileConceptPass
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonFileJoinPass
+import de.fraunhofer.aisec.cpg.passes.concepts.file.python.PythonTempFilePass
 import de.fraunhofer.aisec.cpg.passes.concepts.getOverlaysByPrevDFG
+import de.fraunhofer.aisec.cpg.passes.concepts.logging.python.PythonLoggingConceptPass
 import de.fraunhofer.aisec.cpg.passes.concepts.with
 import de.fraunhofer.aisec.cpg.passes.concepts.withMultiple
 
@@ -58,6 +62,10 @@ val OpenStackProfile = { it: TranslationConfiguration.Builder ->
     it.registerPass<CinderKeyManagerSecretPass>()
     it.registerPass<CinderDiskEncryptionPass>()
     it.registerPass<PythonMemoryPass>()
+    it.registerPass<PythonLoggingConceptPass>()
+    it.registerPass<PythonFileConceptPass>()
+    it.registerPass<PythonFileJoinPass>()
+    it.registerPass<PythonTempFilePass>()
     it.registerPass<HttpPecanLibPass>()
     it.registerPass<HttpWsgiPass>()
     it.registerPass<AuthenticationPass>()
