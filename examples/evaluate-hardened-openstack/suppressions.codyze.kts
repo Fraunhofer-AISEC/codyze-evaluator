@@ -3,7 +3,10 @@
  */
 package example
 
+import de.fraunhofer.aisec.cpg.graph.concepts.file.OpenFile
 import de.fraunhofer.aisec.cpg.graph.concepts.http.HttpRequest
+import de.fraunhofer.aisec.cpg.graph.declarations.FunctionDeclaration
+import de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement
 import de.fraunhofer.aisec.cpg.graph.statements.expressions.MemberCallExpression
 
 project {
@@ -96,6 +99,67 @@ project {
                         "encryptionKeyOriginatesFromSecureKeyProvider" in
                             (qt.callerInfo?.methodName ?: "")
                 } == true
+            } to true
+        )
+
+        /**
+         * There are several paths which return temporary file in the method `create_client_files`.
+         * This method is called only by the constructor of the class `KubernetesAPI`
+         * (`magnum/conductor/k8s_api.py`). This class has a destructor method (`__del__`) which
+         * closes the files and thus deletes the temporary files. This method is called by the VM
+         * whenever the object is no longer reachable. This guarantees that the temporary files are
+         * always deleted.
+         *
+         * The suppression accounts for these false positives and suppresses them.
+         */
+        queryTree(
+            { qt: QueryTree<Boolean> ->
+                val path = (qt.children.singleOrNull()?.value as? List<*>)
+                // The files are returned by this function and deleted on all paths outside.
+                val functionDeclaration =
+                    (path?.firstOrNull() as? OpenFile)?.underlyingNode?.firstParentOrNull<
+                        FunctionDeclaration
+                    > {
+                        it.name.localName == "create_client_files" &&
+                            it.location
+                                ?.artifactLocation
+                                ?.uri
+                                ?.path
+                                ?.endsWith("magnum/conductor/handlers/common/cert_manager.py") ==
+                                true &&
+                            it.location?.region?.startLine == 157
+                    }
+
+                functionDeclaration != null &&
+                    path.any {
+                        it is ReturnStatement &&
+                            it.location
+                                ?.artifactLocation
+                                ?.uri
+                                ?.path
+                                ?.endsWith("magnum/conductor/handlers/common/cert_manager.py") ==
+                                true &&
+                            it.location?.region?.startLine == 212 &&
+                            it.location?.region?.endLine == 212
+                    } &&
+                    "temporaryFilesAreAlwaysDeleted" in (qt.callerInfo?.methodName ?: "")
+            } to true
+        )
+        /**
+         * The temporary file created in `cinder/utils.py` at line 410 is always closed and thus
+         * deleted, either by the `with`-block or inside (line 417).
+         *
+         * The suppression accounts for these false positives and suppresses them.
+         */
+        queryTree(
+            { qt: QueryTree<Boolean> ->
+                val openFile =
+                    (qt.children.singleOrNull()?.value as? List<*>)?.firstOrNull() as? OpenFile
+                // The files are returned by this function and deleted on all paths outside.
+                openFile?.location?.artifactLocation?.uri?.path?.endsWith("/cinder/utils.py") ==
+                    true &&
+                    openFile.location?.region?.startLine == 410 &&
+                    "temporaryFilesAreAlwaysDeleted" in (qt.callerInfo?.methodName ?: "")
             } to true
         )
     }
