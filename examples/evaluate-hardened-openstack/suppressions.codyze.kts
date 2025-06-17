@@ -93,7 +93,8 @@ project {
                                 "/examples/evaluate-hardened-openstack/toe/modules/cinder/cinder/volume/flows/manager/create_volume.py"
                             ) == true &&
                         (it.location?.region?.startLine == 515) &&
-                        "encryptionKeyOriginatesFromSecureKeyProvider" in qt.callerInfo?.methodName
+                        "encryptionKeyOriginatesFromSecureKeyProvider" in
+                            (qt.callerInfo?.methodName ?: "")
                 } == true
             } to true
         )
