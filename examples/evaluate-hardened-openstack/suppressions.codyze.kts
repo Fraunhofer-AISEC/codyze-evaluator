@@ -34,6 +34,17 @@ project {
             } to true
         )
 
+        /**
+         * Keys, which are also secret data, flow into data-leaking functions.
+         *
+         * This affects three cases which are expected behavior and not malicious:
+         * - The `execute` method used for the disk encryption (create_volume.py line 605 and 585).
+         *   This also affects (util.py line 172).
+         * - The keys are written to temporary cache-files in cert_manager.py lines 169 and 197.
+         *   This seems to be used to share the keys with Kubernetes.
+         *
+         *   These cases are suppressed as they seem to be expected behavior and not malicious.
+         */
         queryTree(
             { qt: QueryTree<Boolean> ->
                 val lastNode = (qt.children.singleOrNull()?.value as? List<*>)?.lastOrNull()
