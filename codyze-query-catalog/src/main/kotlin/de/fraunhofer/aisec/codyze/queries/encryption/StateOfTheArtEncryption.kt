@@ -42,7 +42,7 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
     val allowedCiphers = listOf("aes-xts-plain64", "aes-cbc-essiv")
 
     // The predicate must hold for all DiskEncryption concepts.
-    return tr.allExtended<DiskEncryption>() {
+    return tr.allExtended<DiskEncryption> {
         // The cipher's name must be in the list of allowed ciphers.
         // We use the Query-API's infix function `IN` for the check.
         // Since this function requires a QueryTree object as input,
@@ -54,8 +54,7 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
             ?: QueryTree(value = false, node = it, operator = GenericQueryOperators.EVALUATE)
                 .assume(
                     AssumptionType.InputAssumptions,
-                    "We assume that the cipher may not have been configured in a good way by the user.\n\n" +
-                        "To validate this assumption, it is necessary to check all possible options but we do not have access to the information.",
+                    "We assume that the cipher may not have been configured in a good way by the user because the query returned an empty result.\n\n",
                 )
     }
 }
@@ -86,8 +85,7 @@ fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
                 ?: QueryTree(value = false, node = it, operator = GenericQueryOperators.EVALUATE)
                     .assume(
                         AssumptionType.InputAssumptions,
-                        "We assume that the key size may not have been configured in a good way by the user.\n\n" +
-                            "To validate this assumption, it is necessary to check all possible options but we do not have access to the information.",
+                        "We assume that the key size may not have been configured in a good way by the user because the query returned an empty result.\n\n",
                     )
         }
 
