@@ -11,8 +11,8 @@ project {
              * specified in a database. Changes of the database entries may possible through various
              * means. We also cannot compute the values
              */
-            reject("00000000-0000-0000-ffff-ffff88d01ccd")
-            reject("00000000-0000-0000-0000-0000126c56a4")
+            reject("00000000-0000-0000-0000-0000448d1757")
+            reject("00000000-0000-0000-ffff-ffffef8aba8e")
 
             /** We accept that the inference starts in a record, namespace or translation unit. */
             accept("00000000-0000-0000-ffff-ffffa1fa084e")

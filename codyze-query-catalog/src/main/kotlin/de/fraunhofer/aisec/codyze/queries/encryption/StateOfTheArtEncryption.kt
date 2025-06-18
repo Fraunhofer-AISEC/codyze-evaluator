@@ -13,6 +13,7 @@ import de.fraunhofer.aisec.cpg.query.IN
 import de.fraunhofer.aisec.cpg.query.QueryTree
 import de.fraunhofer.aisec.cpg.query.allExtended
 import de.fraunhofer.aisec.cpg.query.ge
+import de.fraunhofer.aisec.cpg.query.mergeWithAll
 
 /**
  * The minimum key length for symmetric encryption algorithms. According to BSI TR-02102-1, this
@@ -43,19 +44,50 @@ fun stateOfTheArtEncryptionIsUsed(): QueryTree<Boolean> {
 
     // The predicate must hold for all DiskEncryption concepts.
     return tr.allExtended<DiskEncryption> {
-        // The cipher's name must be in the list of allowed ciphers.
-        // We use the Query-API's infix function `IN` for the check.
-        // Since this function requires a QueryTree object as input,
-        // we use manually create one based on the cipher's name.
-        it.cipher?.cipherName?.let { cipherName ->
-            (QueryTree(value = cipherName, node = it, operator = GenericQueryOperators.EVALUATE)
-                .addAssumptionDependence(it.cipher) IN allowedCiphers)
-        }
-            ?: QueryTree(value = false, node = it, operator = GenericQueryOperators.EVALUATE)
+        // Note, this is intentionally using a more complex structure because otherwise we had a
+        // problem that this query tree and the one with key size had the same ID.
+        if (it.cipher == null) {
+            // If the cipher is null, we assume that the user may not have configured it correctly.
+            // We return a QueryTree with a false value and an assumption.
+            QueryTree(
+                    value = false,
+                    node = it,
+                    operator = GenericQueryOperators.EVALUATE,
+                    stringRepresentation = "Key cipher is null",
+                )
                 .assume(
                     AssumptionType.InputAssumptions,
                     "We assume that the cipher may not have been configured in a good way by the user because the query returned an empty result.\n\n",
                 )
+        } else {
+            listOfNotNull(it.cipher)
+                .map { cipher ->
+                    if (cipher.cipherName != null) {
+                        // If the cipher's name is not null, we check if cipher is in the list of
+                        // allowed ciphers.
+                        // We use the Query-API's infix function `IN` for the check.
+                        // Since this function requires a QueryTree object as input,
+                        // we use manually create one based on the cipher's name.
+                        QueryTree(
+                            value = cipher.cipherName,
+                            node = cipher,
+                            operator = GenericQueryOperators.EVALUATE,
+                        ) IN allowedCiphers
+                    } else {
+                        QueryTree(
+                                value = false,
+                                node = cipher,
+                                operator = GenericQueryOperators.EVALUATE,
+                                stringRepresentation = "Key cipher is null",
+                            )
+                            .assume(
+                                AssumptionType.InputAssumptions,
+                                "We assume that the cipher may not have been configured in a good way by the user because the query returned an empty result.\n\n",
+                            )
+                    }
+                }
+                .mergeWithAll()
+        }
     }
 }
 
@@ -79,10 +111,19 @@ fun minimalKeyLengthIsEnforced(): QueryTree<Boolean> {
             // Since this function requires a QueryTree object as input,
             // we use create with the Query-API's `const` function.
             it.key?.keySize?.let { keySize ->
-                QueryTree(value = keySize, operator = GenericQueryOperators.EVALUATE)
+                QueryTree(
+                        value = keySize,
+                        node = it.key ?: it,
+                        operator = GenericQueryOperators.EVALUATE,
+                    )
                     .addAssumptionDependence(it.key) ge SYM_KEYLENGTH
             }
-                ?: QueryTree(value = false, node = it, operator = GenericQueryOperators.EVALUATE)
+                ?: QueryTree(
+                        value = false,
+                        node = it.key ?: it,
+                        operator = GenericQueryOperators.EVALUATE,
+                        stringRepresentation = "Key size is null",
+                    )
                     .assume(
                         AssumptionType.InputAssumptions,
                         "We assume that the key size may not have been configured in a good way by the user because the query returned an empty result.\n\n",
