@@ -42,6 +42,7 @@ project {
             /** We accept that ambiguous information may not be perfectly resolved. */
             accept("00000000-0000-0000-ffff-ffffa2a5e9d0")
             accept("00000000-0000-0000-0000-000062ff20fb")
+            accept("00000000-0000-0000-0000-00005c26e6ab")
 
             /**
              * We assume that the list of endpoints that do not require authentication is exhaustive
