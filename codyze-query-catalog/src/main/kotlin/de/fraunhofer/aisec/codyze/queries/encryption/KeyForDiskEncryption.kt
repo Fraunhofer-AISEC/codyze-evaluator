@@ -114,8 +114,10 @@ fun keyIsDeletedFromMemoryAfterUse(): QueryTree<Boolean> {
             // We start with the disk encryption operation and check if the key is present.
             // For this key, we get all `GetSecret` operations, i.e., all operations which
             // may be used to generate the secret key.
-            val subQueries =
-                diskEncryption.key?.ops?.filterIsInstance<GetSecret>()?.map { secret ->
+            diskEncryption.key
+                ?.ops
+                ?.filterIsInstance<GetSecret>()
+                ?.map { secret ->
                     // For each secret, we check if it is de-allocated.
                     // The function `alwaysFlowsTo` checks if there's a data flow to a node
                     // fulfilling
@@ -131,22 +133,14 @@ fun keyIsDeletedFromMemoryAfterUse(): QueryTree<Boolean> {
                         predicate = { it is DeAllocate },
                     )
                 }
-            // Since there might be multiple `GetSecret` operations, we need to check if all of them
-            // are de-allocated.
-            // We do so by creating a single QueryTree object with value `true` if the query above
-            // is fulfilled for all
-            // `GetSecret` operations. If the key was `null`, the result will be `false`.
-            QueryTree(
-                value = subQueries?.all { it.value } ?: false,
-                // Store the sub-queries into the list of children.
-                children =
-                    subQueries
-                        ?.map { QueryTree(it, operator = GenericQueryOperators.EVALUATE) }
-                        ?.toMutableList() ?: mutableListOf(),
-                stringRepresentation = "All keys must be deleted",
-                node = diskEncryption,
-                operator = GenericQueryOperators.EVALUATE,
-            )
+                ?.mergeWithAll() // Since there might be multiple `GetSecret` operations, we need to
+                // check if all of them are de-allocated.
+                ?: QueryTree(
+                    value = false,
+                    stringRepresentation = "All keys must be deleted but there is nothing",
+                    node = diskEncryption,
+                    operator = GenericQueryOperators.EVALUATE,
+                )
         }
     return tree
 }
