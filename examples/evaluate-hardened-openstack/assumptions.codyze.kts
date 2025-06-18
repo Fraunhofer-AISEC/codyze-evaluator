@@ -36,6 +36,8 @@ project {
             ignore("00000000-0000-0000-ffff-ffff858bb3d4")
             ignore("00000000-0000-0000-ffff-ffffb6e331e9")
             ignore("00000000-0000-0000-0000-00003dea3c3c")
+            ignore("00000000-0000-0000-ffff-ffffe35c3b77")
+            ignore("00000000-0000-0000-0000-00002a6a541f")
 
             /** We ignore that ambiguous information may not be perfectly resolved. */
             ignore("00000000-0000-0000-ffff-ffffa2a5e9d0")
@@ -69,7 +71,10 @@ project {
              * We assume that the last variable in the list of variables is the one that is
              * important.
              */
-            accept("00000000-0000-0000-0000-00002b268618")
+            accept {
+                it.assumptionType == AssumptionType.AmbiguityAssumption &&
+                    it.message.startsWith("We assume that the last VariableDeclaration")
+            }
         }
     }
 }
