@@ -20,7 +20,7 @@ project {
             { qt: QueryTree<Boolean> ->
                 val returnStmtLocation =
                     ((qt.children.singleOrNull()?.value as? List<*>)?.lastOrNull()
-                            as? de.fraunhofer.aisec.cpg.graph.statements.ReturnStatement)
+                            as? ReturnStatement)
                         ?.location
                 returnStmtLocation
                     ?.artifactLocation
@@ -88,14 +88,11 @@ project {
                 (qt.children.singleOrNull()?.value as? List<*>)?.any {
                     it is Node &&
                         it !is HttpRequest &&
-                        it.location
-                            ?.artifactLocation
-                            ?.uri
-                            ?.path
-                            ?.endsWith(
-                                "/examples/evaluate-hardened-openstack/toe/modules/cinder/cinder/volume/flows/manager/create_volume.py"
-                            ) == true &&
-                        (it.location?.region?.startLine == 515) &&
+                        it.hasLocation(
+                            "/examples/evaluate-hardened-openstack/toe/modules/cinder/cinder/volume/flows/manager/create_volume.py",
+                            startLine = 515,
+                            endLine = null,
+                        ) &&
                         "encryptionKeyOriginatesFromSecureKeyProvider" in
                             (qt.callerInfo?.methodName ?: "")
                 } == true
@@ -121,44 +118,22 @@ project {
                         FunctionDeclaration
                     > {
                         it.name.localName == "create_client_files" &&
-                            it.location
-                                ?.artifactLocation
-                                ?.uri
-                                ?.path
-                                ?.endsWith("magnum/conductor/handlers/common/cert_manager.py") ==
-                                true &&
-                            it.location?.region?.startLine == 157
+                            it.hasLocation(
+                                "magnum/conductor/handlers/common/cert_manager.py",
+                                startLine = 157,
+                                endLine = null,
+                            )
                     }
 
                 functionDeclaration != null &&
                     path.any {
                         it is ReturnStatement &&
-                            it.location
-                                ?.artifactLocation
-                                ?.uri
-                                ?.path
-                                ?.endsWith("magnum/conductor/handlers/common/cert_manager.py") ==
-                                true &&
-                            it.location?.region?.startLine == 212 &&
-                            it.location?.region?.endLine == 212
+                            it.hasLocation(
+                                "magnum/conductor/handlers/common/cert_manager.py",
+                                startLine = 212,
+                                endLine = 212,
+                            )
                     } &&
-                    "temporaryFilesAreAlwaysDeleted" in (qt.callerInfo?.methodName ?: "")
-            } to true
-        )
-        /**
-         * The temporary file created in `cinder/utils.py` at line 410 is always closed and thus
-         * deleted, either by the `with`-block or inside (line 417).
-         *
-         * The suppression accounts for these false positives and suppresses them.
-         */
-        queryTree(
-            { qt: QueryTree<Boolean> ->
-                val openFile =
-                    (qt.children.singleOrNull()?.value as? List<*>)?.firstOrNull() as? OpenFile
-                // The files are returned by this function and deleted on all paths outside.
-                openFile?.location?.artifactLocation?.uri?.path?.endsWith("/cinder/utils.py") ==
-                    true &&
-                    openFile.location?.region?.startLine == 410 &&
                     "temporaryFilesAreAlwaysDeleted" in (qt.callerInfo?.methodName ?: "")
             } to true
         )
