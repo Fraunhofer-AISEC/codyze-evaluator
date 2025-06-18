@@ -29,6 +29,13 @@ project {
             ignore("00000000-0000-0000-0000-000071e611a7")
             ignore("00000000-0000-0000-0000-00001e1131a2")
             ignore("00000000-0000-0000-ffff-ffff8342a072")
+            ignore("00000000-0000-0000-0000-00000704441f")
+            ignore("00000000-0000-0000-ffff-ffff8a0075e1")
+            ignore("00000000-0000-0000-0000-00003b218728")
+            ignore("00000000-0000-0000-ffff-ffffc57fd8aa")
+            ignore("00000000-0000-0000-ffff-ffff858bb3d4")
+            ignore("00000000-0000-0000-ffff-ffffb6e331e9")
+            ignore("00000000-0000-0000-0000-00003dea3c3c")
 
             /** We ignore that ambiguous information may not be perfectly resolved. */
             ignore("00000000-0000-0000-ffff-ffffa2a5e9d0")
@@ -57,6 +64,12 @@ project {
              * thrown outside the function where the domain scope check is performed.
              */
             accept("00000000-0000-0000-ffff-ffffe3ff4474")
+
+            /**
+             * We assume that the last variable in the list of variables is the one that is
+             * important.
+             */
+            accept("00000000-0000-0000-0000-00002b268618")
         }
     }
 }
