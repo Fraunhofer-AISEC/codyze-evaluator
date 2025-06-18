@@ -149,7 +149,7 @@ fun usesSameTokenAsCredential(): QueryTree<Boolean> {
     return tr.allExtended<Authenticate>(
         mustSatisfy = { token ->
             val tokens = token.credential.overlays.filterIsInstance<TokenBasedAuth>()
-            val isSameToken = tokens.all { it.token == token.credential }
+            val isSameToken = tokens.isNotEmpty() && tokens.all { it.token == token.credential }
             QueryTree(value = isSameToken, node = token, operator = GenericQueryOperators.EVALUATE)
         }
     )
