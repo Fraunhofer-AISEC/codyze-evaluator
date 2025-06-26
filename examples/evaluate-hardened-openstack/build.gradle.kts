@@ -5,3 +5,5 @@ dependencies {
     api(project(":codyze-query-catalog"))
     api(project(":codyze-technology-openstack"))
 }
+
+application { mainClass = "example.MainKt" }
