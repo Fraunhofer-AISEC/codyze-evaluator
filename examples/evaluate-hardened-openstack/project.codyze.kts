@@ -51,7 +51,15 @@ project {
                 module("cinder") {
                     directory = "toe/modules/cinder"
                     include("cinder")
-                    exclude("tests", "drivers", "libvirt")
+                    exclude(
+                        "tests",
+                        "drivers",
+                        "libvirt",
+                        "migrations",
+                        "scheduler",
+                        "zonemanager",
+                        "privsep",
+                    )
                 }
 
                 /**
@@ -61,7 +69,7 @@ project {
                 module("barbican") {
                     directory = "toe/modules/barbican"
                     include("barbican")
-                    exclude("tests")
+                    exclude("tests", "hacking")
                 }
 
                 /**
@@ -71,7 +79,7 @@ project {
                 module("magnum") {
                     directory = "toe/modules/magnum"
                     include("magnum")
-                    exclude("tests", "drivers")
+                    exclude("tests", "drivers", "hacking")
                 }
 
                 /**
@@ -81,6 +89,7 @@ project {
                  */
                 module("nova") {
                     directory = "toe/modules/nova"
+                    include("nova")
 
                     /**
                      * However, in our scenario, [Cinder] is directly interacting with "libvirt" to
@@ -138,7 +147,7 @@ project {
                 module("keystonemiddleware") {
                     directory = "toe/libraries/keystonemiddleware"
                     include("keystonemiddleware")
-                    exclude("tests", "migrations")
+                    exclude("tests")
                 }
 
                 /**
@@ -148,7 +157,7 @@ project {
                 module("keystoneauth") {
                     directory = "toe/libraries/keystoneauth"
                     include("keystoneauth1")
-                    exclude("tests")
+                    exclude("tests", "hacking", "fixture")
                 }
             }
         }
