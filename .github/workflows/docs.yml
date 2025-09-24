@@ -33,7 +33,7 @@ jobs:
           pip install mkdocs-material pillow cairosvg
           pip install -r dos/mkdocs-material-plugins.txt
       - name: Build
-        run: cd docs && mkdocs build --clean --config-file mkdocs.yaml -d site -v
+        run: cd documentation && mkdocs build --clean --config-file mkdocs.yaml -d site -v
       - name: Publish main
         if: github.ref == 'refs/heads/main'
         uses: JamesIves/github-pages-deploy-action@v4
